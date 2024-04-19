@@ -1,5 +1,5 @@
-from APIFuncs import MariaDBapi as api
-from APIFuncs import JSONHandler as jsonhandler
+import MariaDBapi as api
+import JSONHandler as jsonhandler
 import sqlalchemy
 import uuid
 from datetime import datetime
