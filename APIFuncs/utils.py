@@ -66,7 +66,7 @@ def NewAttendanceEvent(UserID):
 
 
 
-def NewAttendee():
+def NewAttendee(JSONFilePath):
     Error = 0
     ValidID = 0
     ValidIDFailCount = 0
@@ -85,25 +85,25 @@ def NewAttendee():
         if(ValidID == 400):
             print("Found Valid ID")
             print("Now Reading JSON")
-            AttendeeJSON = jsonhandler.ReadJSON('NewAttendee.json')
+            AttendeeJSON = jsonhandler.ReadJSON(JSONFilePath)
             #AttendeeInfo = jsonhandler.ParseJSON(AttendeeJSON)
             print("Now Parsing JSON")
-            AttendeeJSON['AttendeeDetails'][0]['Client']
+            #AttendeeJSON['AttendeeDetails'][0]['Client']
             print("Now Creating Attendee Object")
             NewAttendee = api.Attendee(
                                        ID = newUserID,
-                                       Client = AttendeeJSON['AttendeeDetails'][0]['Client'], 
-                                       Employee = AttendeeJSON['AttendeeDetails'][0]['Employee'],
-                                       ABA_Earlychildhood = AttendeeJSON['AttendeeDetails'][0]['ABA_Earlychildhood'],
-                                       ABA_Teen = AttendeeJSON['AttendeeDetails'][0]['ABA_Teen'],
-                                       Occupational_Therapy = AttendeeJSON['AttendeeDetails'][0]['Occupational_Therapy'],
-                                       Speech_Therapy = AttendeeJSON['AttendeeDetails'][0]['Speech_Therapy'],
-                                       Administrator = AttendeeJSON['AttendeeDetails'][0]['Administrator'],
-                                       Employee_SPOT = AttendeeJSON['AttendeeDetails'][0]['Employee_SPOT'], 
-                                       Employee_BCBA = AttendeeJSON['AttendeeDetails'][0]['Employee_BCBA'],
-                                       Employee_RBT = AttendeeJSON['AttendeeDetails'][0]['Employee_RBT'],
-                                       Employee_Other = AttendeeJSON['AttendeeDetails'][0]['Employee_Other'],
-                                       AttendeeInitials = AttendeeJSON['AttendeeDetails'][0]['AttendeeInitials']
+                                       Client = AttendeeJSON['Client'], 
+                                       Employee = AttendeeJSON['Employee'],
+                                       ABA_Earlychildhood = AttendeeJSON['ABA_Earlychildhood'],
+                                       ABA_Teen = AttendeeJSON['ABA_Teen'],
+                                       Occupational_Therapy = AttendeeJSON['Occupational_Therapy'],
+                                       Speech_Therapy = AttendeeJSON['Speech_Therapy'],
+                                       Administrator = AttendeeJSON['Administrator'],
+                                       Employee_SPOT = AttendeeJSON['Employee_SPOT'], 
+                                       Employee_BCBA = AttendeeJSON['Employee_BCBA'],
+                                       Employee_RBT = AttendeeJSON['Employee_RBT'],
+                                       Employee_Other = AttendeeJSON['Employee_Other'],
+                                       AttendeeInitials = AttendeeJSON['AttendeeInitials']
                                        )
             
             print("Now Sending Attendee Object to Database")
