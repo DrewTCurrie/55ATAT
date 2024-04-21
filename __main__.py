@@ -12,7 +12,7 @@ def main():
         action = int(input("Press 1 for NewAttendee, 2 for NewAttandanceEvent. Press 0 for close."))
         if(action == 2):
             print("Action Selected: New Attendance Event")
-            UserID = int(input("Enter User ID: "))
+            UserID = input("Enter User ID: ")
             Result = utils.NewAttendanceEvent(UserID)
             if(Result == 400):
                 print("Could not write to database.")
@@ -30,4 +30,5 @@ def main():
 
         
 if __name__ == '__main__':
+
         sys.exit(main())

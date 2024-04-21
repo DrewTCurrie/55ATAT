@@ -1,7 +1,7 @@
 {
-    "Client": false,
-    "Employee": true,
-    "ABA_Earlychildhood": false,
+    "Client": true,
+    "Employee": false,
+    "ABA_Earlychildhood": true,
     "ABA_Teen": false,
     "Occupational_Therapy": false,
     "Speech_Therapy": false,
@@ -10,5 +10,5 @@
     "Employee_BCBA": false,
     "Employee_RBT": false,
     "Employee_Other": false,
-    "AttendeeInitials": "igsq1"
+    "AttendeeInitials": "vclz7"
 }

@@ -1,11 +1,16 @@
+import sqlalchemy.cyextension
 import MariaDBapi as api
 import JSONHandler as jsonhandler
 import sqlalchemy
+from sqlalchemy import delete
 import uuid
 from datetime import datetime
 import random
 from sqlalchemy.ext.declarative import declarative_base
+import sys
+from datetime import datetime
 
+from tqdm import tqdm
 
 def GetUserInitials(UserID, Session):
     # Check the "Attendee" table for the UserID passed in (ID) and then get the Attendee's initials
@@ -52,17 +57,20 @@ def NewAttendanceEvent(UserID):
     UserInitials = GetUserInitials(UserID, NAESession)
 
     # Create an Object of type Attendance Event with all the parameters. Timestamp is automatically populated
-    NewAttendanceEvent = api.AttendanceEvent(EventUUID=str(EventID), ID=str(UserID), AttendeeInitials=UserInitials)
+    NewAttendanceEvent = api.AttendanceEvent(EventUUID=str(EventID), ID=UserID, AttendeeInitials=UserInitials, Timestamp = datetime.now(), Absent = False, TIL_Violation = 0, AdminInitials = "N/A", Comment = "N/A")
     # Try to add the attendance event to the database, if it fails, return error code 400, close session
     # If it suceeds, close the session and return 200 for success. 
-    try:
-        NAESession.add(NewAttendanceEvent)
-        NAESession.commit()
-    except:
-        return(400)
-    finally:
-        NAESession.close()
-    return(200)
+    NAESession.add(NewAttendanceEvent)
+    NAESession.commit()
+
+    #try:
+     #   NAESession.add(NewAttendanceEvent)
+      #  NAESession.commit()
+    #except:
+    #    return(400)
+    #finally:
+    #    NAESession.close()
+    #return(200)
 
 
 
@@ -126,3 +134,31 @@ def NewAttendee(JSONFilePath):
         #Error code 400 means data not found, this is a success in this case because it means there is no matching ID
         else:
             return(Error)
+
+
+def ClearAttendeeRecords():
+        #CTSession = Clear Table Session
+        api.Base.metadata.create_all(api.engine)
+        CTSession = sqlalchemy.orm.sessionmaker()
+        CTSession.configure(bind=api.engine)
+        CTSession = CTSession()
+        for ID in tqdm(CTSession.query(api.Attendee.ID).distinct()):
+            Record = CTSession.query(api.Attendee).get(ID)
+            CTSession.delete(Record)
+        CTSession.commit()
+        CTSession.close()
+
+def ClearAttendanceRecords():
+        #CTSession = Clear Table Session
+        api.Base.metadata.create_all(api.engine)
+        CTSession = sqlalchemy.orm.sessionmaker()
+        CTSession.configure(bind=api.engine)
+        CTSession = CTSession()
+        for ID in tqdm(CTSession.query(api.AttendanceEvent.EventUUID)).distinct():
+            Record = CTSession.query(api.AttendanceEvent).get(ID)
+            CTSession.delete(Record)
+        CTSession.commit()
+        CTSession.close()
+
+if __name__ == '__main__':
+    sys.exit(NewAttendanceEvent("PTCBZN-11029103246"))

@@ -1,14 +1,14 @@
 {
-    "Client": false,
-    "Employee": true,
+    "Client": true,
+    "Employee": false,
     "ABA_Earlychildhood": false,
     "ABA_Teen": false,
-    "Occupational_Therapy": false,
+    "Occupational_Therapy": true,
     "Speech_Therapy": false,
-    "Administrator": true,
+    "Administrator": false,
     "Employee_SPOT": false,
     "Employee_BCBA": false,
     "Employee_RBT": false,
     "Employee_Other": false,
-    "AttendeeInitials": "ajpr4"
+    "AttendeeInitials": "rhgi5"
 }

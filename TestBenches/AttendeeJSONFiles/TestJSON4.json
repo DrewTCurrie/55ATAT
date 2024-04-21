@@ -2,7 +2,7 @@
     "Client": true,
     "Employee": false,
     "ABA_Earlychildhood": false,
-    "ABA_Teen": false,
+    "ABA_Teen": true,
     "Occupational_Therapy": false,
     "Speech_Therapy": true,
     "Administrator": false,
@@ -10,5 +10,5 @@
     "Employee_BCBA": false,
     "Employee_RBT": false,
     "Employee_Other": false,
-    "AttendeeInitials": "scet4"
+    "AttendeeInitials": "xynw2"
 }

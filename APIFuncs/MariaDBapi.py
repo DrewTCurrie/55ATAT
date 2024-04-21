@@ -7,7 +7,7 @@ Base = declarative_base()
 
 class Attendee(Base):
     __tablename__ = 'Attendees'
-    ID = sqlalchemy.Column(sqlalchemy.Integer, primary_key =True)
+    ID = sqlalchemy.Column(sqlalchemy.String(length=24), primary_key =True)
     Client = sqlalchemy.Column(sqlalchemy.Boolean, default =False)
     Employee = sqlalchemy.Column(sqlalchemy.Boolean, default =False)
     ABA_Earlychildhood = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
@@ -32,6 +32,10 @@ class Admininstrator(Base):
 class AttendanceEvent(Base):
       __tablename__ = 'CurrentAttendanceEvents'
       EventUUID = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-      ID = sqlalchemy.Column(sqlalchemy.Integer)
+      ID = sqlalchemy.Column(sqlalchemy.String(length = 24))
       AttendeeInitials = sqlalchemy.Column(sqlalchemy.String(length=6))
       Timestamp = sqlalchemy.Column(sqlalchemy.TIMESTAMP, default=datetime.now())
+      Absent = sqlalchemy.Column(sqlalchemy.Boolean, default = False)
+      TIL_Violation = sqlalchemy.Column(sqlalchemy.Integer, default = 0)
+      AdminInitials = sqlalchemy.Column(sqlalchemy.String(length=6))
+      Comment = sqlalchemy.Column(sqlalchemy.String(length=256))

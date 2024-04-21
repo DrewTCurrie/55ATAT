@@ -1,14 +1,14 @@
 {
-    "Client": false,
-    "Employee": true,
-    "ABA_Earlychildhood": false,
+    "Client": true,
+    "Employee": false,
+    "ABA_Earlychildhood": true,
     "ABA_Teen": false,
-    "Occupational_Therapy": false,
+    "Occupational_Therapy": true,
     "Speech_Therapy": false,
     "Administrator": false,
     "Employee_SPOT": false,
     "Employee_BCBA": false,
-    "Employee_RBT": true,
+    "Employee_RBT": false,
     "Employee_Other": false,
-    "AttendeeInitials": "booc7"
+    "AttendeeInitials": "bguj5"
 }
