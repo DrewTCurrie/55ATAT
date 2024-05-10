@@ -1,14 +1,14 @@
 {
-    "Client": true,
-    "Employee": false,
+    "Client": false,
+    "Employee": true,
     "ABA_Earlychildhood": false,
     "ABA_Teen": false,
-    "Occupational_Therapy": true,
+    "Occupational_Therapy": false,
     "Speech_Therapy": false,
     "Administrator": false,
     "Employee_SPOT": false,
-    "Employee_BCBA": false,
+    "Employee_BCBA": true,
     "Employee_RBT": false,
-    "Employee_Other": false,
-    "AttendeeInitials": "llqt5"
+    "Employee_Other": true,
+    "AttendeeInitials": "jhmp2"
 }

@@ -1,14 +1,14 @@
 {
-    "Client": false,
-    "Employee": true,
+    "Client": true,
+    "Employee": false,
     "ABA_Earlychildhood": false,
     "ABA_Teen": false,
     "Occupational_Therapy": false,
-    "Speech_Therapy": false,
+    "Speech_Therapy": true,
     "Administrator": false,
     "Employee_SPOT": false,
     "Employee_BCBA": false,
-    "Employee_RBT": true,
+    "Employee_RBT": false,
     "Employee_Other": false,
-    "AttendeeInitials": "hsmz9"
+    "AttendeeInitials": "psso1"
 }

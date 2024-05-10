@@ -4,11 +4,11 @@
     "ABA_Earlychildhood": true,
     "ABA_Teen": false,
     "Occupational_Therapy": true,
-    "Speech_Therapy": true,
+    "Speech_Therapy": false,
     "Administrator": false,
     "Employee_SPOT": false,
     "Employee_BCBA": false,
     "Employee_RBT": false,
     "Employee_Other": false,
-    "AttendeeInitials": "necs4"
+    "AttendeeInitials": "bsdz4"
 }

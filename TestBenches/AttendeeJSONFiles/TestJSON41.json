@@ -2,13 +2,13 @@
     "Client": true,
     "Employee": false,
     "ABA_Earlychildhood": false,
-    "ABA_Teen": false,
-    "Occupational_Therapy": false,
+    "ABA_Teen": true,
+    "Occupational_Therapy": true,
     "Speech_Therapy": false,
     "Administrator": false,
     "Employee_SPOT": false,
     "Employee_BCBA": false,
     "Employee_RBT": false,
     "Employee_Other": false,
-    "AttendeeInitials": "fxua4"
+    "AttendeeInitials": "rxkh2"
 }

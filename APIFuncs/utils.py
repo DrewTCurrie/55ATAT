@@ -2,15 +2,13 @@ import sqlalchemy.cyextension
 import MariaDBapi as api
 import JSONHandler as jsonhandler
 import sqlalchemy
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 import uuid
 from datetime import datetime
 import random
 from sqlalchemy.ext.declarative import declarative_base
 import sys
-from datetime import datetime
-
-from tqdm import tqdm
+import os
 
 def GetUserInitials(UserID, Session):
     # Check the "Attendee" table for the UserID passed in (ID) and then get the Attendee's initials
@@ -91,13 +89,13 @@ def NewAttendee(JSONFilePath):
         #Query Database for a match to the ID
         ValidID = GetUserInitials(newUserID, NASession)
         if(ValidID == 400):
-            print("Found Valid ID")
-            print("Now Reading JSON")
+            #print("Found Valid ID")
+            #print("Now Reading JSON")
             AttendeeJSON = jsonhandler.ReadJSON(JSONFilePath)
             #AttendeeInfo = jsonhandler.ParseJSON(AttendeeJSON)
-            print("Now Parsing JSON")
+            #print("Now Parsing JSON")
             #AttendeeJSON['AttendeeDetails'][0]['Client']
-            print("Now Creating Attendee Object")
+            #print("Now Creating Attendee Object")
             NewAttendee = api.Attendee(
                                        ID = newUserID,
                                        Client = AttendeeJSON['Client'], 
@@ -114,7 +112,7 @@ def NewAttendee(JSONFilePath):
                                        AttendeeInitials = AttendeeJSON['AttendeeInitials']
                                        )
             
-            print("Now Sending Attendee Object to Database")
+            #print("Now Sending Attendee Object to Database")
             try:
                 NASession.add(NewAttendee)      
             except:
@@ -122,7 +120,7 @@ def NewAttendee(JSONFilePath):
                 Error = 400
             else:
                 NASession.commit()
-                print("Successfully added attendee to database.")
+                #print("Successfully added attendee to database.")
                 Error = 200
             finally:
                 NASession.close()
@@ -135,6 +133,22 @@ def NewAttendee(JSONFilePath):
         else:
             return(Error)
 
+def GetAttendanceEvents(Initials):
+    #Get all the attendance events within a specified date & time range
+    SelectedRecords = select(api.AttendanceEvent).where(api.AttendanceEvent.AttendeeInitials == Initials)
+    with api.engine.connect() as RTSession:
+        for Record in RTSession.execute(SelectedRecords):
+            print(Record)
+
+
+def GetAttendanceReport(StartTimestamp, FILEPATH):
+    SelectedRecords = select(api.AttendanceEvent).where(api.AttendanceEvent.Timestamp > StartTimestamp)
+      
+    with api.engine.connect() as RTSession:
+        for Record in RTSession.execute(SelectedRecords):
+            #print(Record)
+            jsonhandler.PopulateJSONReport(FILEPATH, Record)
+
 
 def ClearAttendeeRecords():
         #CTSession = Clear Table Session
@@ -142,7 +156,7 @@ def ClearAttendeeRecords():
         CTSession = sqlalchemy.orm.sessionmaker()
         CTSession.configure(bind=api.engine)
         CTSession = CTSession()
-        for ID in tqdm(CTSession.query(api.Attendee.ID).distinct()):
+        for ID in CTSession.query(api.Attendee.ID).distinct():
             Record = CTSession.query(api.Attendee).get(ID)
             CTSession.delete(Record)
         CTSession.commit()
@@ -154,11 +168,11 @@ def ClearAttendanceRecords():
         CTSession = sqlalchemy.orm.sessionmaker()
         CTSession.configure(bind=api.engine)
         CTSession = CTSession()
-        for ID in tqdm(CTSession.query(api.AttendanceEvent.EventUUID)).distinct():
+        for ID in CTSession.query(api.AttendanceEvent.EventUUID).distinct():
             Record = CTSession.query(api.AttendanceEvent).get(ID)
             CTSession.delete(Record)
         CTSession.commit()
         CTSession.close()
 
 if __name__ == '__main__':
-    sys.exit(NewAttendanceEvent("PTCBZN-11029103246"))
+    sys.exit(GetAttendanceEvents())

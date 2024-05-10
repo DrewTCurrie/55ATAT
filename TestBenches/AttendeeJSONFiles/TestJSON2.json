@@ -6,9 +6,9 @@
     "Occupational_Therapy": false,
     "Speech_Therapy": false,
     "Administrator": false,
-    "Employee_SPOT": true,
-    "Employee_BCBA": false,
+    "Employee_SPOT": false,
+    "Employee_BCBA": true,
     "Employee_RBT": false,
-    "Employee_Other": false,
-    "AttendeeInitials": "komf3"
+    "Employee_Other": true,
+    "AttendeeInitials": "hqop2"
 }

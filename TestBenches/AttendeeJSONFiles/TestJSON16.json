@@ -1,8 +1,8 @@
 {
     "Client": true,
     "Employee": false,
-    "ABA_Earlychildhood": true,
-    "ABA_Teen": false,
+    "ABA_Earlychildhood": false,
+    "ABA_Teen": true,
     "Occupational_Therapy": true,
     "Speech_Therapy": true,
     "Administrator": false,
@@ -10,5 +10,5 @@
     "Employee_BCBA": false,
     "Employee_RBT": false,
     "Employee_Other": false,
-    "AttendeeInitials": "fiif3"
+    "AttendeeInitials": "gpzh3"
 }

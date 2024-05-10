@@ -5,10 +5,10 @@
     "ABA_Teen": false,
     "Occupational_Therapy": false,
     "Speech_Therapy": false,
-    "Administrator": false,
+    "Administrator": true,
     "Employee_SPOT": false,
-    "Employee_BCBA": true,
+    "Employee_BCBA": false,
     "Employee_RBT": false,
-    "Employee_Other": true,
-    "AttendeeInitials": "seio8"
+    "Employee_Other": false,
+    "AttendeeInitials": "twui6"
 }

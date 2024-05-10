@@ -8,8 +8,6 @@ import random
 import string
 import json
 
-from tqdm import tqdm
-
 #Creating a test system to create new attendees randomly and populate them into a CSV to be read in
 #to the databse for testing 
 
@@ -27,7 +25,7 @@ def CreateFakeAttendees(numberOfAttendees, Confirm):
         else:
             print("Created new AttendeeJSONFiles Folder")
 
-        for ii in tqdm(range(numberOfAttendees)):
+        for ii in range(numberOfAttendees):
 
 
             #Create python dictionary to hold all the randomly generated details for the imaginary attendee
@@ -80,7 +78,7 @@ def CreateFakeAttendees(numberOfAttendees, Confirm):
             JSONDumpFilePath =  os.path.join(sys.path[0], "AttendeeJSONFiles/TestJSON"+str(AttendeeNumber)+".json")
             with open(JSONDumpFilePath, "w") as outfile:
                 outfile.write(jsonObject)
-            print("Attendee Num: " +str(AttendeeNumber) + "Created.")
+            #print("Attendee Num: " +str(AttendeeNumber) + "Created.")
     else:
           print("Not Confirmed. Aborting...")
           return(1)

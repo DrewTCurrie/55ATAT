@@ -1,0 +1,7 @@
+
+Execution time for 200 Events with 50 Attendees in the database: 0.0017077922821044922 [Seconds]
+Execution time for 200 Events with 50 Attendees in the database: 0.0011904239654541016 [Seconds]
+Execution time for 200 Events with 50 Attendees in the database: 0.0012159347534179688 [Seconds]
+Execution time for 200 Events with 50 Attendees in the database: 0.001270294189453125 [Seconds]
+Execution time for 200 Events with 50 Attendees in the database: 0.001346588134765625 [Seconds]
+Execution time for 200 Events with 50 Attendees in the database: 0.0012698173522949219 [Seconds]
