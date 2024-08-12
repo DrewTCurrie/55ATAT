@@ -68,9 +68,9 @@ def main():
  
     for events in range(numberOfEvents):
 
-        timeDelay = random.randint(1,3)
+        #timeDelay = random.randint(1,3)
         print("Delaying for: " + str(timeDelay) + " seconds")
-        time.sleep(timeDelay)
+        #time.sleep(timeDelay)
 
         AttendeeID = AttendeeList[random.randint(0, (len(AttendeeList)-1))]
         Result = utils.NewAttendanceEvent(AttendeeID)
@@ -80,7 +80,7 @@ def main():
             print("successfully written to database")
          
 
-    #Now Reading selected records back from the database:
+    #Now Reading selected rec ords back from the database:
 
     OperatingMode = '1'
     while(OperatingMode != '0'):
