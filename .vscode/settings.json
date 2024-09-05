@@ -1,7 +1,0 @@
-{
-    "python.REPL.enableREPLSmartSend": false,
-    "git.ignoreLimitWarning": true,
-    "python.analysis.extraPaths": [
-        "./APIFuncs"
-    ]
-}
