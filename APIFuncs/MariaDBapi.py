@@ -2,7 +2,7 @@ import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
-engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:lovering@127.0.0.1/swagdatabase")
+engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:lovering@127.0.0.1/ptctest")
 Base = declarative_base()
 
 class Attendee(Base):
