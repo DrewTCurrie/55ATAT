@@ -6,7 +6,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-@app.route('/api/generateReport', methods=['GET'])
+@app.route('/api/generateReport', methods=['GET', 'POST'])
 def generate_report():
     fileName = generateReport.generate_spreadsheet()
     return fileName
