@@ -9,3 +9,6 @@ venv
 .vscode/*
 __pycache__
 __pycache__/*
+
+#for the xlsx generation spam
+.xlsx
