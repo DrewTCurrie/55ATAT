@@ -1,16 +1,13 @@
 from flask import Flask, Blueprint, render_template, send_from_directory, request, jsonify, make_response
 from flask_cors import CORS
 from reports import generateReport
-
 app = Flask(__name__)
 CORS(app)
 
 
 @app.route('/api/generateReport', methods=['GET', 'POST'])
 def generate_report():
-    print(request.data)
-    fileName = generateReport.generate_spreadsheet()
-    #return fileName
+    print(request.json)
     return make_response(jsonify(success=True), 201)
 
 @app.route('/api/download/<path:filename>', methods=['GET', 'POST'])
