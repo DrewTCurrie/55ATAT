@@ -24,6 +24,7 @@ from sqlalchemy.orm import declarative_base
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'APIFuncs')))
 from APIFuncs import MariaDBapi as api
 
+
 class report_params:
     def __init__(self, name=None, start_date=None, end_date=None):
         self.name = name
@@ -40,18 +41,21 @@ class report_params:
             date_list.append(current_date)
             current_date += datetime.timedelta(days=1)
         return date_list
+
     def parse_query(self):
         for event in self.query_data:
             self.attendance_data[event.ID].append(event)
 
+
 def create_spreadsheet():
     #Initialize Spreadsheet
     #Create Excel file with meta data
-    fileName = ('attendanceReport.xlsx') #Temp, TODO replace with metadata.
+    fileName = ('attendanceReport.xlsx')  #Temp, TODO replace with metadata.
     print("Creating Symbolic Spreadsheet")
     workbook = xlsxwriter.Workbook(fileName)
     worksheet = workbook.add_worksheet()
 
+    #WORKBOOK FORMATS
     # Header format TODO: make different formatting for days, types and clients columns
     header_format = workbook.add_format({
         'bold': True,
@@ -114,7 +118,7 @@ def create_spreadsheet():
     key_descriptions = ['Present', 'Approved Cancellation', 'Tardy (by Unit)', 'Unapp. Cancel. (by day)',
                         'Incomp. Session (by Unit)', 'Late Pickup (by Unit)', 'Reduced by PTC (by hour)', 'PTC Holiday',
                         'Not Scheduled']
-    colors = ['#F4CCCC', '#D9EAD3', '#F9CB9C', '#E06666', '#C9DAF8', '#FCE5CD', '#FFF2CC', '#D9D2E9', '#EAD1DC']
+    colors = ['#fdebd7', '#6db260', '#f6ab58', '#c00000', '#f6ab58', '#f6ab58', '#ffd966', '#99bcc9', '#d9d9d9']
 
     for i, (key, desc, color) in enumerate(zip(keys, key_descriptions, colors)):
         #Formatting for Key (Singular Letter)
@@ -135,11 +139,11 @@ def create_spreadsheet():
             'rotation': 90
         })
         #Write starting from C, populating every other.
-        worksheet.write(1, (i*2) + 2, key, format_key)
-        worksheet.write(2, (i*2) + 2, desc, format_desc)
+        worksheet.write(1, (i * 2) + 2, key, format_key)
+        worksheet.write(2, (i * 2) + 2, desc, format_desc)
 
     # Note section
-    worksheet.merge_range('X2:AA4',
+    worksheet.merge_range('X2:AA3',
                           'Note: \nIf a client’s attendance is close to lower limit, and they have been called off many times, their actual attendance ratio should be calculated manually',
                           note_format)
 
@@ -164,11 +168,12 @@ def create_spreadsheet():
     worksheet.set_column('B:B', 15)
     worksheet.set_column('C:W', 5)
 
-    #Populate with Database Data.
+    #Populate with Database Data. #TODO add other TAIL
     for index, (attendeeID, events) in enumerate(params.attendance_data.items()):
         #Write Client Information
-        worksheet.write(index+5, 0, "TOBEIMPLEMENTED")
-        worksheet.write(index+5, 1, events[0].AttendeeInitials)
+        worksheet.write(index + 5, 0,
+                        "TOBEIMPLEMENTED")  #TODO Add roles to spreadsheet (requires linkage with Attendees Table)
+        worksheet.write(index + 5, 1, events[0].AttendeeInitials)
         #Write Attendance Data
         for event in events:
             #Convert DB Timestamp into Datetime Object
@@ -176,41 +181,15 @@ def create_spreadsheet():
             #Iterate and add to worksheet. TODO: Need expanded for TAIL, also prevent deletion
             for colIndex, date in enumerate(date_list):
                 if event_date.date() == date.date():
-                    worksheet.write(index+5, colIndex+2, "P", present_format)
+                    if event.Absent == True:
+                        worksheet.write(index + 5, colIndex + 2, "A", unapproved_cancel_format)
+                        worksheet.write_comment(index + 5, colIndex + 2, f"{event.AdminInitials}\n{event.Comment}", {'author': event.AdminInitials})
+
+                    else:
+                        worksheet.write(index + 5, colIndex + 2, "P", present_format)
 
     # Close the workbook
     workbook.close()
-
-    # #Turn Timestamp into a "P", create note of timestamp
-    # designation_format = workbook.add_format({'bold': True, 'bg_color': '#D47554', 'align': 'center'})
-    #
-    # #Create Header for file
-    # colIterator = 1  #Temp colIterator
-    # headerKeys = jsonDict[0].keys()
-    # for key in headerKeys:
-    #     worksheet.write(0, colIterator, key)
-    #     colIterator += 1
-    #
-    # #Start Iterators at 0 (Temp, rework with yields)
-    # rowIterator = 1
-    # colIterator = 1
-    # #Write Data to spreadsheet
-    # for i in jsonDict:
-    #     worksheet.write(rowIterator, 0, int(jsonDict.index(i)))
-    #     for bodyKey, bodyVal in i.items():
-    #         if bodyKey == 'Timestamp':
-    #             worksheet.write(rowIterator, colIterator, 'P', designation_format)
-    #             worksheet.write_comment(rowIterator, colIterator, str(bodyVal))
-    #         else:
-    #             worksheet.write(rowIterator, colIterator, str(bodyVal))
-    #         colIterator += 1
-    #     rowIterator += 1
-    #     colIterator = 1
-    # worksheet.autofit()
-    # worksheet.set_column_pixels('E:E', 100)
-    # workbook.close()
-    #
-    # return fileName
 
 
 #This function parses TestJSON into readable data for spreadsheet.
@@ -231,6 +210,7 @@ def generate_spreadsheet():
     fileName = create_spreadsheet(parse_attendance_events())
     return json.dumps(fileName)
 
+
 # This function creates a database query based on optional params passed by reportModal web component.
 def filter_events(name=None, role=None, start_date=None, end_date=None):
     #Create Session (TODO: move this to a singular session for the codebase)
@@ -246,7 +226,7 @@ def filter_events(name=None, role=None, start_date=None, end_date=None):
     filters = []
     if name:
         filters.append(api.AttendanceEvent.AttendeeInitials == name)
-    if role: #TODO I forgot about how the db handles roles, I gotta revise this section.
+    if role:  #TODO I forgot about how the db handles roles, I gotta revise this section.
         query = Session.query(api.AttendanceEvent, api.Attendee)
     if start_date is not None:
         filters.append(api.AttendanceEvent.Timestamp >= start_date)
@@ -265,7 +245,8 @@ def filter_events(name=None, role=None, start_date=None, end_date=None):
 
 if __name__ == "__main__":
     print("generateReport called with __main__")
-    params = report_params(end_date=datetime.datetime.now(),start_date=(datetime.datetime.now() - datetime.timedelta(days=7)))
-    params.query_data = filter_events(end_date=params.end_date,start_date=params.start_date)
+    params = report_params(end_date=datetime.datetime.now(),
+                           start_date=(datetime.datetime.now() - datetime.timedelta(days=7)))
+    params.query_data = filter_events(end_date=params.end_date, start_date=params.start_date)
     params.parse_query()
     create_spreadsheet()
