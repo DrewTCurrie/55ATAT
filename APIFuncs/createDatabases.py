@@ -50,7 +50,7 @@ def main():
     Session = Session()
 
     EventID = 0
-    NewEvent = AttendanceEvent(EventUUID=str(EventID), ID="9121272", AttendeeInitials="DrCu1")
+    NewEvent = AttendanceEvent(EventUUID=str(EventID), ID="11111", AttendeeInitials="SaLo1",Timestamp=datetime(2024, 9, 10, 9, 30, 0),Absent=True,AdminInitials="SaLo1",Comment="TestCommnet")
     Session.add(NewEvent)
     Session.commit()
 

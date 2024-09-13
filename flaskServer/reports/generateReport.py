@@ -9,6 +9,7 @@
 # 1. Create Aggregate information like in original
 # 2. Make iteration not delete from behind
 # 3. implement types.
+# 4. IMPLEMENT ROLES
 import datetime
 import os
 import collections
@@ -28,8 +29,15 @@ from APIFuncs import MariaDBapi as api
 class report_params:
     def __init__(self, name=None, start_date=None, end_date=None):
         self.name = name
-        self.start_date = start_date
-        self.end_date = end_date
+        #None checking for dates.
+        if start_date is None:
+            self.start_date = (datetime.datetime.now() - datetime.timedelta(days=7))
+        else:
+            self.start_date = datetime.datetime.strptime(start_date,"%Y-%m-%dT%H:%M:%S.%fZ")
+        if end_date is None:
+            self.end_date = datetime.datetime.now()
+        else:
+            self.end_date = datetime.datetime.strptime(end_date,"%Y-%m-%dT%H:%M:%S.%fZ")
         self.query_data = ((),)
         self.attendance_data = collections.defaultdict(list)
 
@@ -47,12 +55,11 @@ class report_params:
             self.attendance_data[event.ID].append(event)
 
 
-def create_spreadsheet():
+def create_spreadsheet(params):
     #Initialize Spreadsheet
     #Create Excel file with meta data
     fileName = ('attendanceReport.xlsx')  #Temp, TODO replace with metadata.
-    print("Creating Symbolic Spreadsheet")
-    workbook = xlsxwriter.Workbook(fileName)
+    workbook = xlsxwriter.Workbook('xlsx/' + fileName)
     worksheet = workbook.add_worksheet()
 
     #WORKBOOK FORMATS
@@ -110,7 +117,8 @@ def create_spreadsheet():
     # Absence Type Key section
     worksheet.write('A2', 'Absence Type Key:', workbook.add_format({'bold': True}))
     worksheet.write('A3', 'Warning: Do not insert rows!', workbook.add_format({'font_color': 'red', 'bold': True}))
-    # Merge and write the month dynamically based on the start date (you can customize this further)
+
+    # Merge and write the month dynamically based on the start date
     worksheet.merge_range('A4:B4', 'Month: {}'.format(params.start_date.strftime('%B %Y')), header_format)
 
     # Define the absence types and formats
@@ -190,6 +198,9 @@ def create_spreadsheet():
 
     # Close the workbook
     workbook.close()
+    #Clear report_params class
+    params = params
+    return fileName
 
 
 #This function parses TestJSON into readable data for spreadsheet.
@@ -204,13 +215,6 @@ def parse_attendance_events():
     print(data)
     return data
 
-
-#This function does JSON handling for create_spreadsheet
-def generate_spreadsheet():
-    fileName = create_spreadsheet(parse_attendance_events())
-    return json.dumps(fileName)
-
-
 # This function creates a database query based on optional params passed by reportModal web component.
 def filter_events(name=None, role=None, start_date=None, end_date=None):
     #Create Session (TODO: move this to a singular session for the codebase)
@@ -224,7 +228,7 @@ def filter_events(name=None, role=None, start_date=None, end_date=None):
 
     #Create Filters
     filters = []
-    if name:
+    if name is not None:
         filters.append(api.AttendanceEvent.AttendeeInitials == name)
     if role:  #TODO I forgot about how the db handles roles, I gotta revise this section.
         query = Session.query(api.AttendanceEvent, api.Attendee)
@@ -239,14 +243,19 @@ def filter_events(name=None, role=None, start_date=None, end_date=None):
         filters.append(api.AttendanceEvent.Timestamp <= datetime.datetime.now())
     #Write filters to query
     query = query.filter(and_(*filters))
-
     return query.all()
+
+#This function does generates a report when it is called outside of the main function
+def generate_spreadsheet(name=None, role=None, start_date=None, end_date=None):
+    print("generateReport called with generate_spreadsheet()")
+    params = report_params(name, start_date, end_date)
+    params.query_data = filter_events(name=name, role=role, start_date=start_date, end_date=end_date)
+    params.parse_query()
+    fileName = create_spreadsheet(params)
+    return json.dumps(fileName)
+
 
 
 if __name__ == "__main__":
     print("generateReport called with __main__")
-    params = report_params(end_date=datetime.datetime.now(),
-                           start_date=(datetime.datetime.now() - datetime.timedelta(days=7)))
-    params.query_data = filter_events(end_date=params.end_date, start_date=params.start_date)
-    params.parse_query()
-    create_spreadsheet()
+    generate_spreadsheet(name='test')

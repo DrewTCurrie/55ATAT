@@ -7,8 +7,14 @@ CORS(app)
 
 @app.route('/api/generateReport', methods=['GET', 'POST'])
 def generate_report():
-    print(request.json)
-    return make_response(jsonify(success=True), 201)
+    data = request.json
+    name = data.get('name')
+    role = data.get('role')
+    start_date = data.get('startDate')
+    end_date = data.get('endDate')
+    print(end_date)
+    fileName = generateReport.generate_spreadsheet(name, role, start_date, end_date)
+    return make_response(jsonify(fileName, success=True), 201)
 
 @app.route('/api/download/<path:filename>', methods=['GET', 'POST'])
 def download_file(filename):
