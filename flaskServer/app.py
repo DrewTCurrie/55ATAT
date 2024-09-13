@@ -13,7 +13,7 @@ def generate_report():
     role = data.get('role')
     start_date = data.get('startDate')
     end_date = data.get('endDate')
-    print(end_date)
+    print(role)
     fileName = generateReport.generate_spreadsheet(name, role, start_date, end_date)
     return make_response(jsonify(fileName, success=True), 200)
 

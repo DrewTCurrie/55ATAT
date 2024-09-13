@@ -24,7 +24,7 @@ from sqlalchemy.orm import declarative_base
 #This was some chatgpt thing, TODO replace with something more clear.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'APIFuncs')))
 from APIFuncs import MariaDBapi as api
-
+from APIFuncs import utils
 
 class report_params:
     def __init__(self, name=None, start_date=None, end_date=None):
@@ -51,8 +51,28 @@ class report_params:
         return date_list
 
     def parse_query(self):
+        #Get Roles
+        roles = utils.getRoles()
+        #Initialize DB Session
+        Session = sqlalchemy.orm.sessionmaker()
+        Session.configure(bind=api.engine)
+        Session = Session()
         for event in self.query_data:
+            #Add Event data to attendance data
             self.attendance_data[event.ID].append(event)
+            #Query for attendee data by ID
+            filters = []
+            query = Session.query(api.Attendee)
+            filters.append(api.Attendee.ID == event.ID)
+            query = query.filter(and_(*filters))
+            for _ in query:
+                attendeeRoles = []
+                for role in roles:
+                    print(role)
+                    if getattr(api.Attendee, role) == 1:
+                        attendeeRoles.append(role)
+                        print("appended role: " + role)
+                self.attendance_data[event.ID].append(attendeeRoles)
 
 
 def create_spreadsheet(params):
@@ -217,8 +237,7 @@ def parse_attendance_events():
 
 # This function creates a database query based on optional params passed by reportModal web component.
 def filter_events(name=None, role=None, start_date=None, end_date=None):
-    #Create Session (TODO: move this to a singular session for the codebase)
-    #api.Base.metadata.create_all(api.engine)
+    #Create Session
     Session = sqlalchemy.orm.sessionmaker()
     Session.configure(bind=api.engine)
     Session = Session()
@@ -229,17 +248,27 @@ def filter_events(name=None, role=None, start_date=None, end_date=None):
     #Create Filters
     filters = []
     if name is not None:
+        #Search database for attendance events with same AttendeeInitials
         filters.append(api.AttendanceEvent.AttendeeInitials == name)
-    if role:  #TODO I forgot about how the db handles roles, I gotta revise this section.
-        query = Session.query(api.AttendanceEvent, api.Attendee)
+    if role is not None:
+        if hasattr(api.Attendee, role):
+            roleFilter = []
+            roleFilter.append(getattr(api.Attendee, role) == 1)
+            roleNameQuery = Session.query(api.Attendee).filter(and_(*roleFilter))
+            roleNameQuery.all()
+            for roleName in roleNameQuery:
+                filters.append(api.AttendanceEvent.AttendeeInitials == roleName.AttendeeInitials)
     if start_date is not None:
+        #Search database for attendance events that are after start_date
         filters.append(api.AttendanceEvent.Timestamp >= start_date)
     else:
+        #if no start_date, create one for one week ago
         filters.append(api.AttendanceEvent.Timestamp >= (datetime.datetime.now() - datetime.timedelta(days=7)))
-
     if end_date is not None:
+        # Search database for attendance events that are before end date
         filters.append(api.AttendanceEvent.Timestamp <= end_date)
     else:
+        #if no end_date create one for now.
         filters.append(api.AttendanceEvent.Timestamp <= datetime.datetime.now())
     #Write filters to query
     query = query.filter(and_(*filters))
@@ -251,11 +280,12 @@ def generate_spreadsheet(name=None, role=None, start_date=None, end_date=None):
     params = report_params(name, start_date, end_date)
     params.query_data = filter_events(name=name, role=role, start_date=start_date, end_date=end_date)
     params.parse_query()
-    fileName = create_spreadsheet(params)
-    return json.dumps(fileName)
+    #fileName = create_spreadsheet(params)
+    #return json.dumps(fileName)
 
 
 
 if __name__ == "__main__":
     print("generateReport called with __main__")
-    generate_spreadsheet(name='test')
+
+    generate_spreadsheet()
