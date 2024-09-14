@@ -17,14 +17,13 @@ import sqlalchemy
 import xlsxwriter
 import json
 import sys
-
 from sqlalchemy import and_
 from sqlalchemy.orm import declarative_base
 
-#This was some chatgpt thing, TODO replace with something more clear.
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'APIFuncs')))
+sys.path.append(os.path.join(sys.path[0], '../../APIFuncs'))
 from APIFuncs import MariaDBapi as api
 from APIFuncs import utils
+
 
 class report_params:
     def __init__(self, name=None, start_date=None, end_date=None):
@@ -33,11 +32,12 @@ class report_params:
         if start_date is None:
             self.start_date = (datetime.datetime.now() - datetime.timedelta(days=7))
         else:
-            self.start_date = datetime.datetime.strptime(start_date,"%Y-%m-%dT%H:%M:%S.%fZ")
+            self.start_date = datetime.datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S.%fZ")
         if end_date is None:
             self.end_date = datetime.datetime.now()
         else:
-            self.end_date = datetime.datetime.strptime(end_date,"%Y-%m-%dT%H:%M:%S.%fZ")
+            self.end_date = datetime.datetime.strptime(end_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        self.roles = collections.defaultdict(list)
         self.query_data = ((),)
         self.attendance_data = collections.defaultdict(list)
 
@@ -48,38 +48,34 @@ class report_params:
         while current_date <= self.end_date:
             date_list.append(current_date)
             current_date += datetime.timedelta(days=1)
-        return date_list
+        return [date for date in date_list if date.weekday() < 5]
 
+    #This parses the query, and creates a bunch of attendance data class objects.
     def parse_query(self):
         #Get Roles
         roles = utils.getRoles()
+
         #Initialize DB Session
         Session = sqlalchemy.orm.sessionmaker()
         Session.configure(bind=api.engine)
         Session = Session()
         for event in self.query_data:
             #Add Event data to attendance data
-            self.attendance_data[event.ID].append(event)
-            #Query for attendee data by ID
-            filters = []
-            query = Session.query(api.Attendee)
-            filters.append(api.Attendee.ID == event.ID)
-            query = query.filter(and_(*filters))
-            for _ in query:
-                attendeeRoles = []
-                for role in roles:
-                    print(role)
-                    if getattr(api.Attendee, role) == 1:
-                        attendeeRoles.append(role)
-                        print("appended role: " + role)
-                self.attendance_data[event.ID].append(attendeeRoles)
+            self.attendance_data[event.AttendeeInitials].append(event)
+            #Query for Roles by ID
+            user_row = Session.query(api.Attendee).filter(
+                api.Attendee.AttendeeInitials == event.AttendeeInitials).one_or_none()
+            #Checks to see if boolean columns in user_row are true, appends to user roles.
+            if user_row is not None:
+                userRoles = [col for col in roles if getattr(user_row, col) == 1]
+                self.roles[event.AttendeeInitials] = userRoles
 
 
 def create_spreadsheet(params):
     #Initialize Spreadsheet
     #Create Excel file with meta data
-    fileName = ('attendanceReport.xlsx')  #Temp, TODO replace with metadata.
-    workbook = xlsxwriter.Workbook('xlsx/' + fileName)
+    fileName = ('attendanceReport'+datetime.datetime.now().strftime("%m%d%H%M%S")+'.xlsx')
+    workbook = xlsxwriter.Workbook('../xlsx/' + fileName)
     worksheet = workbook.add_worksheet()
 
     #WORKBOOK FORMATS
@@ -121,19 +117,9 @@ def create_spreadsheet(params):
         'align': 'center',
         'valign': 'vcenter'
     })
-    incomplete_format = workbook.add_format({
-        'bg_color': '#f6ab58',
-        'align': 'center',
-        'valign': 'vcenter'
-    })
-    late_pickup_format = workbook.add_format({
-        'bg_color': '#f6ab58',
-        'align': 'center',
-        'valign': 'vcenter'
-    })
 
     # Merge and format the main title
-    worksheet.merge_range('C1:R1', 'Peach Tree Client Attendance Tracker', header_format)
+    worksheet.merge_range('C1:S1', 'Peach Tree Client Attendance Tracker', header_format)
     # Absence Type Key section
     worksheet.write('A2', 'Absence Type Key:', workbook.add_format({'bold': True}))
     worksheet.write('A3', 'Warning: Do not insert rows!', workbook.add_format({'font_color': 'red', 'bold': True}))
@@ -177,7 +163,6 @@ def create_spreadsheet(params):
 
     #Get Date List from Class
     date_list = params.generate_date_range()
-    #TODO: remove weekends.
 
     # Write days of the week (e.g., Thur, Fri, etc.)
     days_of_week = [date.strftime('%a') for date in date_list]
@@ -185,7 +170,7 @@ def create_spreadsheet(params):
 
     # Write the dates (e.g., 1, 2, 3, etc.)
     dates = [date.strftime('%d') for date in date_list]
-    worksheet.write_row('C5', dates, header_format)
+    worksheet.write_row('C5', str(dates), header_format)
 
     #Add Column Headers for "type" and "client"
     worksheet.write('A5', "Type", header_format)
@@ -194,16 +179,42 @@ def create_spreadsheet(params):
     # Adjust column widths
     worksheet.set_column('A:A', 10)
     worksheet.set_column('B:B', 15)
-    worksheet.set_column('C:W', 5)
+    worksheet.set_column(2, len(date_list) if len(dates) > 18 else 18, 5)
 
     #Populate with Database Data. #TODO add other TAIL
-    for index, (attendeeID, events) in enumerate(params.attendance_data.items()):
+    for index, events in enumerate(params.attendance_data.items()):
         #Write Client Information
-        worksheet.write(index + 5, 0,
-                        "TOBEIMPLEMENTED")  #TODO Add roles to spreadsheet (requires linkage with Attendees Table)
-        worksheet.write(index + 5, 1, events[0].AttendeeInitials)
+        #Assign roles based on if they are appended to the events
+        roles = params.roles[events[0]]
+        roleString = ''
+        if roles[0] == 'Employee':
+            roleString = roleString + 'E/'
+            if 'Employee_BCBA' in roles:
+                roleString = roleString + 'BCBA'
+            if 'Employee_SPOT' in roles:
+                roleString = roleString + 'SPOT'
+            if 'Administrator' in roles:
+                roleString = roleString + 'Admin'
+        elif roles[0] == 'Client':
+            roleString = roleString + 'C/'
+            if len(roles) > 2:
+                roleString = roleString + 'Multiple'
+            else:
+                if 'ABA_Teen' in roles:
+                    roleString = roleString + 'ABA Teen'
+                if 'ABA_Earlychildhood' in roles:
+                    roleString = roleString + 'ABA Early'
+                if 'Speech_Therapy' in roles:
+                    roleString = roleString + 'Speech'
+                if 'Occupational_Therapy' in roles:
+                    roleString = roleString + 'OT'
+        worksheet.write(index + 5, 0, roleString)
+
+        #Write Attendee Initials
+        worksheet.write(index + 5, 1, events[0])
+
         #Write Attendance Data
-        for event in events:
+        for event in events[1]:
             #Convert DB Timestamp into Datetime Object
             event_date = event.Timestamp
             #Iterate and add to worksheet. TODO: Need expanded for TAIL, also prevent deletion
@@ -211,15 +222,17 @@ def create_spreadsheet(params):
                 if event_date.date() == date.date():
                     if event.Absent == True:
                         worksheet.write(index + 5, colIndex + 2, "A", unapproved_cancel_format)
-                        worksheet.write_comment(index + 5, colIndex + 2, f"{event.AdminInitials}\n{event.Comment}", {'author': event.AdminInitials})
-
+                        worksheet.write_comment(index + 5, colIndex + 2, f"{event.AdminInitials}\n{event.Timestamp}",
+                                                {'author': event.AdminInitials})
+                    elif event.TIL_Violation == True:
+                        worksheet.write(index + 5, colIndex + 2, "T", tardy_format)
+                        worksheet.write_comment(index + 5, colIndex + 2, f"{event.AdminInitials}\n{event.Timestamp}",
+                                                {'author': event.AdminInitials})
                     else:
                         worksheet.write(index + 5, colIndex + 2, "P", present_format)
 
     # Close the workbook
     workbook.close()
-    #Clear report_params class
-    params = params
     return fileName
 
 
@@ -234,6 +247,7 @@ def parse_attendance_events():
     data = json.loads(events)
     print(data)
     return data
+
 
 # This function creates a database query based on optional params passed by reportModal web component.
 def filter_events(name=None, role=None, start_date=None, end_date=None):
@@ -252,12 +266,8 @@ def filter_events(name=None, role=None, start_date=None, end_date=None):
         filters.append(api.AttendanceEvent.AttendeeInitials == name)
     if role is not None:
         if hasattr(api.Attendee, role):
-            roleFilter = []
-            roleFilter.append(getattr(api.Attendee, role) == 1)
-            roleNameQuery = Session.query(api.Attendee).filter(and_(*roleFilter))
-            roleNameQuery.all()
-            for roleName in roleNameQuery:
-                filters.append(api.AttendanceEvent.AttendeeInitials == roleName.AttendeeInitials)
+            roleFilter = (getattr(api.Attendee, role) == 1)
+            query = query.join(api.Attendee, api.AttendanceEvent.ID == api.Attendee.ID).filter(roleFilter)
     if start_date is not None:
         #Search database for attendance events that are after start_date
         filters.append(api.AttendanceEvent.Timestamp >= start_date)
@@ -270,9 +280,11 @@ def filter_events(name=None, role=None, start_date=None, end_date=None):
     else:
         #if no end_date create one for now.
         filters.append(api.AttendanceEvent.Timestamp <= datetime.datetime.now())
+
     #Write filters to query
     query = query.filter(and_(*filters))
     return query.all()
+
 
 #This function does generates a report when it is called outside of the main function
 def generate_spreadsheet(name=None, role=None, start_date=None, end_date=None):
@@ -280,12 +292,10 @@ def generate_spreadsheet(name=None, role=None, start_date=None, end_date=None):
     params = report_params(name, start_date, end_date)
     params.query_data = filter_events(name=name, role=role, start_date=start_date, end_date=end_date)
     params.parse_query()
-    #fileName = create_spreadsheet(params)
-    #return json.dumps(fileName)
-
+    fileName = create_spreadsheet(params)
+    return json.dumps(fileName)
 
 
 if __name__ == "__main__":
     print("generateReport called with __main__")
-
     generate_spreadsheet()
