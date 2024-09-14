@@ -5,9 +5,11 @@ from APIFuncs import utils
 from APIFuncs import MariaDBapi
 import sys
 import os
+import time
 app = Flask(__name__)
 CORS(app)
 
+sys.path.append(os.path.join(sys.path[0], '/xlsx'))
 
 @app.route('/api/generateReport', methods=['GET', 'POST'])
 def generate_report():
@@ -17,10 +19,21 @@ def generate_report():
     start_date = data.get('startDate')
     end_date = data.get('endDate')
     fileName = generateReport.generate_spreadsheet(name, role, start_date, end_date)
-    return make_response(jsonify(fileName, 200))
+    #Checking if file exists for a minute before throwing an error.
+    start_time = time.time()
+    dir = 'flaskServer/xlsx/'
+    print(dir+fileName)
+    while time.time() - start_time < 60:
+        if os.path.isfile('flaskServer/xlsx/'+fileName):
+            print('found file')
+            return make_response(jsonify(fileName), 200)
+        time.sleep(1)
+    return make_response("Error: File not found", 404)
+
 
 @app.route('/api/download/<path:filename>', methods=['GET', 'POST'])
 def download_file(filename):
+    print(filename)
     return send_from_directory(directory='xlsx', path=filename, as_attachment=True)
 
 @app.route('/api/attendeeInitials',methods=['GET'])

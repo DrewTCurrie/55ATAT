@@ -24,7 +24,6 @@ sys.path.append(os.path.join(sys.path[0], '../APIFuncs'))
 from APIFuncs import MariaDBapi as api
 from APIFuncs import utils
 
-
 class report_params:
     def __init__(self, name=None, start_date=None, end_date=None):
         self.name = name
@@ -80,7 +79,7 @@ def create_spreadsheet(params):
     worksheet = workbook.add_worksheet()
 
     #WORKBOOK FORMATS
-    # Header format TODO: make different formatting for days, types and clients columns
+    # Header format
     header_format = workbook.add_format({
         'bold': True,
         'font_color': 'black',
@@ -97,7 +96,7 @@ def create_spreadsheet(params):
         'valign': 'top',
         'text_wrap': True
     })
-    #Formatting for Individual Dates (TODO Look into Reduced Hrs, Holiday and Not Scheulded?)
+    #Formatting for Individual Dates
     present_format = workbook.add_format({
         'bg_color': '#fdebd7',
         'align': 'center',
@@ -182,7 +181,7 @@ def create_spreadsheet(params):
     worksheet.set_column('B:B', 15)
     worksheet.set_column(2, len(date_list) if len(dates) > 18 else 18, 5)
 
-    #Populate with Database Data. #TODO add other TAIL
+    #Populate with Database Data.
     for index, events in enumerate(params.attendance_data.items()):
         #Write Client Information
         #Assign roles based on if they are appended to the events
@@ -218,7 +217,7 @@ def create_spreadsheet(params):
         for event in events[1]:
             #Convert DB Timestamp into Datetime Object
             event_date = event.Timestamp
-            #Iterate and add to worksheet. TODO: Need expanded for TAIL, also prevent deletion
+            #Iterate and add to worksheet.
             for colIndex, date in enumerate(date_list):
                 if event_date.date() == date.date():
                     if event.Absent == True:
@@ -294,7 +293,7 @@ def generate_spreadsheet(name=None, role=None, start_date=None, end_date=None):
     params.query_data = filter_events(name=name, role=role, start_date=start_date, end_date=end_date)
     params.parse_query()
     fileName = create_spreadsheet(params)
-    return json.dumps(fileName)
+    return fileName
 
 
 if __name__ == "__main__":
