@@ -20,7 +20,7 @@ import sys
 from sqlalchemy import and_
 from sqlalchemy.orm import declarative_base
 
-sys.path.append(os.path.join(sys.path[0], '../../APIFuncs'))
+sys.path.append(os.path.join(sys.path[0], '../APIFuncs'))
 from APIFuncs import MariaDBapi as api
 from APIFuncs import utils
 
@@ -48,7 +48,8 @@ class report_params:
         while current_date <= self.end_date:
             date_list.append(current_date)
             current_date += datetime.timedelta(days=1)
-        return [date for date in date_list if date.weekday() < 5]
+        date_list = [date for date in date_list if date.weekday() < 5]
+        return date_list
 
     #This parses the query, and creates a bunch of attendance data class objects.
     def parse_query(self):
@@ -74,8 +75,8 @@ class report_params:
 def create_spreadsheet(params):
     #Initialize Spreadsheet
     #Create Excel file with meta data
-    fileName = ('attendanceReport'+datetime.datetime.now().strftime("%m%d%H%M%S")+'.xlsx')
-    workbook = xlsxwriter.Workbook('../xlsx/' + fileName)
+    fileName = ('attendanceReport'+datetime.datetime.now().strftime("%m%d%H%M")+'.xlsx')
+    workbook = xlsxwriter.Workbook('flaskServer/xlsx/'+fileName)
     worksheet = workbook.add_worksheet()
 
     #WORKBOOK FORMATS
@@ -170,7 +171,7 @@ def create_spreadsheet(params):
 
     # Write the dates (e.g., 1, 2, 3, etc.)
     dates = [date.strftime('%d') for date in date_list]
-    worksheet.write_row('C5', str(dates), header_format)
+    worksheet.write_row('C5', dates, header_format)
 
     #Add Column Headers for "type" and "client"
     worksheet.write('A5', "Type", header_format)

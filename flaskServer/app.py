@@ -2,6 +2,9 @@ from flask import Flask, Blueprint, render_template, send_from_directory, reques
 from flask_cors import CORS
 from reports import generateReport
 from APIFuncs import utils
+from APIFuncs import MariaDBapi
+import sys
+import os
 app = Flask(__name__)
 CORS(app)
 
@@ -13,9 +16,8 @@ def generate_report():
     role = data.get('role')
     start_date = data.get('startDate')
     end_date = data.get('endDate')
-    print(role)
     fileName = generateReport.generate_spreadsheet(name, role, start_date, end_date)
-    return make_response(jsonify(fileName, success=True), 200)
+    return make_response(jsonify(fileName, 200))
 
 @app.route('/api/download/<path:filename>', methods=['GET', 'POST'])
 def download_file(filename):
