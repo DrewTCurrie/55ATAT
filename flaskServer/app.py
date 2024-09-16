@@ -21,8 +21,6 @@ def generate_report():
     fileName = generateReport.generate_spreadsheet(name, role, start_date, end_date)
     #Checking if file exists for a minute before throwing an error.
     start_time = time.time()
-    dir = 'flaskServer/xlsx/'
-    print(dir+fileName)
     while time.time() - start_time < 60:
         if os.path.isfile('flaskServer/xlsx/'+fileName):
             print('found file')
