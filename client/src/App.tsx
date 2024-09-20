@@ -6,12 +6,12 @@ function App() {
 
 
   const generateReport = () => {
-    fetch("http://127.0.0.1:5000/api/generateReport").then(
+    fetch("http://192.168.1.12:5000/api/generateReport").then(
       res => res.json()
     ).then(
         data => {
           console.log(data)
-          axios.get(`http://127.0.0.1:5000/api/download/${data}`,{responseType: 'blob'}
+          axios.get(`http://192.168.1.12:5000/api/download/${data}`,{responseType: 'blob'}
           ).then((response) => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
