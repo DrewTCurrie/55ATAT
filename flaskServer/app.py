@@ -24,17 +24,19 @@ def generate_report():
     dir = 'flaskServer/xlsx/'
     print(dir+fileName)
     while time.time() - start_time < 60:
-        if os.path.isfile('flaskServer/xlsx/'+fileName):
+        if os.path.isfile('/home/55ATAT/55ATAT/flaskServer/xlsx/'+fileName):
             print('found file')
-            return make_response(jsonify(fileName), 200)
+            return make_response(jsonify(dir + fileName), 200)
         time.sleep(1)
     return make_response("Error: File not found", 404)
 
 
 @app.route('/api/download/<path:filename>', methods=['GET', 'POST'])
 def download_file(filename):
-    print(filename)
-    return send_from_directory(directory='xlsx', path=filename, as_attachment=True)
+    print("filename received: " + filename)
+    modifiedPath = filename[17:]
+    print("ModifiedPath is: " + modifiedPath)
+    return send_from_directory(directory='xlsx', path = modifiedPath, as_attachment=True)
 
 @app.route('/api/attendeeInitials',methods=['GET'])
 def getAttendeeInitials():
