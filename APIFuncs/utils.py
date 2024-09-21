@@ -67,7 +67,7 @@ def NewAttendanceEvent(UserID):
     #Take user ID from QR code as function input
     #Generate UUID for the EventID
     EventID = uuid.uuid4()
-    
+
     #Query Database to get the Attendee Initials for the corresponding UserID
     # Open new session to the database.
     # NAESession = New Attendance Event Session 
@@ -96,9 +96,6 @@ def NewAttendanceEvent(UserID):
     #finally:
     #    NAESession.close()
     #return(200)
-
-
-
 def NewAttendee(JSONFilePath):
     Error = 0
     ValidID = 0
@@ -125,23 +122,23 @@ def NewAttendee(JSONFilePath):
             #print("Now Creating Attendee Object")
             NewAttendee = api.Attendee(
                                        ID = newUserID,
-                                       Client = AttendeeJSON['Client'], 
+                                       Client = AttendeeJSON['Client'],
                                        Employee = AttendeeJSON['Employee'],
                                        ABA_Earlychildhood = AttendeeJSON['ABA_Earlychildhood'],
                                        ABA_Teen = AttendeeJSON['ABA_Teen'],
                                        Occupational_Therapy = AttendeeJSON['Occupational_Therapy'],
                                        Speech_Therapy = AttendeeJSON['Speech_Therapy'],
                                        Administrator = AttendeeJSON['Administrator'],
-                                       Employee_SPOT = AttendeeJSON['Employee_SPOT'], 
+                                       Employee_SPOT = AttendeeJSON['Employee_SPOT'],
                                        Employee_BCBA = AttendeeJSON['Employee_BCBA'],
                                        Employee_RBT = AttendeeJSON['Employee_RBT'],
                                        Employee_Other = AttendeeJSON['Employee_Other'],
                                        AttendeeInitials = AttendeeJSON['AttendeeInitials']
                                        )
-            
+
             #print("Now Sending Attendee Object to Database")
             try:
-                NASession.add(NewAttendee)      
+                NASession.add(NewAttendee)
             except:
                 print("Unable to write to database. Error 400")
                 Error = 400
@@ -160,6 +157,71 @@ def NewAttendee(JSONFilePath):
         else:
             return(Error)
 
+#This function creates a NewAttendee when prompted from the webpage.
+def NewAttendeeFromWeb(AttendeeJSON):
+    Error = 0
+    ValidID = 0
+    ValidIDFailCount = 0
+    while (ValidID != 400):
+        # generate new userID and check if it already exists in the database. This should be basically a random string
+        RandomID = random.SystemRandom()
+        newUserID = "PTCBZN-" + str(RandomID.randint(10000000000, 99999999999))
+        # Start Database connection
+        # NASession = New Attendee Session
+        api.Base.metadata.create_all(api.engine)
+        NASession = sqlalchemy.orm.sessionmaker()
+        NASession.configure(bind=api.engine)
+        NASession = NASession()
+        # Query Database for a match to the ID
+        ValidID = GetUserInitials(newUserID, NASession)
+        if (ValidID == 400):
+            NewAttendee = api.Attendee(
+                ID=newUserID,
+                Client=AttendeeJSON['Client'],
+                Employee=AttendeeJSON['Employee'],
+                ABA_Earlychildhood=AttendeeJSON['ABA_Earlychildhood'],
+                ABA_Teen=AttendeeJSON['ABA_Teen'],
+                Occupational_Therapy=AttendeeJSON['Occupational_Therapy'],
+                Speech_Therapy=AttendeeJSON['Speech_Therapy'],
+                Administrator=AttendeeJSON['Administrator'],
+                Employee_SPOT=AttendeeJSON['Employee_SPOT'],
+                Employee_BCBA=AttendeeJSON['Employee_BCBA'],
+                Employee_RBT=AttendeeJSON['Employee_RBT'],
+                Employee_Other=AttendeeJSON['Employee_Other'],
+                AttendeeInitials=AttendeeJSON['AttendeeInitials']
+            )
+
+            # print("Now Sending Attendee Object to Database")
+            NASession.add(NewAttendee)
+            NASession.commit()
+            NASession.close()
+            return newUserID
+        else:
+            ValidIDFailCount += ValidIDFailCount
+        if (ValidIDFailCount > 3):
+            # If unable to create a valid ID in three tries, error out and return error code 1
+            return (1)
+        # Error code 400 means data not found, this is a success in this case because it means there is no matching ID
+        else:
+            return (Error)
+
+def createAdministrator(AdministratorJSON):
+    #Create SqlAlchemy Session
+    api.Base.metadata.create_all(api.engine)
+    NASession = sqlalchemy.orm.sessionmaker()
+    NASession.configure(bind=api.engine)
+    NASession = NASession()
+    #Create NewAdministrator entry from AdministratorJSON
+    NewAdministrator = api.Administrator(
+        ID = AdministratorJSON['ID'],
+        UserName = AdministratorJSON['username'],
+        Password = AdministratorJSON['password']            #TODO: Create a function that encrypts + salts this, outside of utils.py
+    )
+    #Add to DB
+    NASession.add(NewAdministrator)
+    NASession.commit()
+    NASession.close()
+
 def GetAttendanceEvents(Initials):
     #Get all the attendance events within a specified date & time range
     SelectedRecords = select(api.AttendanceEvent).where(api.AttendanceEvent.AttendeeInitials == Initials)
@@ -170,11 +232,35 @@ def GetAttendanceEvents(Initials):
 
 def GetAttendanceReport(StartTimestamp, FILEPATH):
     SelectedRecords = select(api.AttendanceEvent).where(api.AttendanceEvent.Timestamp > StartTimestamp)
-      
+
     with api.engine.connect() as RTSession:
         for Record in RTSession.execute(SelectedRecords):
             #print(Record)
             jsonhandler.PopulateJSONReport(FILEPATH, Record)
+
+#Returns an Attendee given an AttendeeID
+def getAttendee(AttendeeID):
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    query = Session.query(api.Attendee).filter_by(ID=AttendeeID).first()
+    return query
+
+def getAttendeeRole(AttendeeID):
+    #Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    # Query Database for Attendee
+    query = Session.query(api.Attendee).filter_by(ID=AttendeeID).first()
+    #Get A list of all roles in database
+    roles = getRoles()
+    #Compare query columns to roles list.
+    if query is not None:
+        userRoles = [col for col in roles if getattr(query, col) == 1]
+    return userRoles
 
 
 def ClearAttendeeRecords():
@@ -200,6 +286,20 @@ def ClearAttendanceRecords():
             CTSession.delete(Record)
         CTSession.commit()
         CTSession.close()
+
+def ClearAdministrators():
+    #Create Sql Alchemy Session
+    api.Base.metadata.create_all(api.engine)
+    CTSession = sqlalchemy.orm.sessionmaker()
+    CTSession.configure(bind=api.engine)
+    CTSession = CTSession()
+    #Query Database for all Administrators, Delete 1 by 1
+    for ID in CTSession.query(api.Administrator.ID).distinct():
+        Record = CTSession.query(api.Administrator).get(ID)
+        CTSession.delete(Record)
+    #Commit Changes and close session
+    CTSession.commit()
+    CTSession.close()
 
 if __name__ == '__main__':
     sys.exit(GetAttendanceEvents())
