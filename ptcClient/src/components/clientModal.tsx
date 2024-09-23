@@ -2,8 +2,11 @@ import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid, Stack, TextField 
 import { Fragment, useEffect, useState } from "react";
 import * as React from "react";
 
-//TODO: create some error handling for this modal and the events modal
 
+interface badgeRespone {
+  front: String,
+  back?: String
+}
 
 function ClientModal(){
   //handling the opening and closing of the modal.
@@ -16,7 +19,7 @@ function ClientModal(){
       setName('')
       setUsername('')
       setPwd('')
-      setBadgeURLs([])
+      setBadgeURLs(null)
       //Close modal
       setOpen(false);
       setDisplayBadge(false)
@@ -45,7 +48,7 @@ function ClientModal(){
 
     //Hook for displaying Badges after generation
     const [displayBadge, setDisplayBadge] = useState(false);
-    const [badgeURLs, setBadgeURLs] =  useState([]);
+    const [badgeURLs, setBadgeURLs] =  useState<badgeRespone | null>();
 
     //Hooks for name, username, pwd (if administrator). Usestate with string input.
     const [name, setName] = useState('')
@@ -176,9 +179,9 @@ function ClientModal(){
             </style>
             <body>
               <div class="page">
-                <img src="http://localhost:5000${badgeURLs.front}" alt="Output 1" />
+                <img src="http://localhost:5000${badgeURLs?.front}" alt="Output 1" />
               </div>
-              ${badgeURLs.back ? (`
+              ${badgeURLs?.back ? (`
               <div class="page">
                 <img src=http://localhost:5000${badgeURLs.back} alt="Output 2" />
               </div>
@@ -298,7 +301,7 @@ function ClientModal(){
             <Grid>
               <div //Image Content
               style={scrollableContentStyle}>
-                {badgeURLs.front ? (
+                {badgeURLs?.front ? (
                   <> 
                     <img src={`http://localhost:5000${badgeURLs.front}`} //Change to production evniroment name for flask server eventually
                     />
@@ -306,7 +309,7 @@ function ClientModal(){
                 ):(
                   <></>
                 )}
-                {badgeURLs.back ? (
+                {badgeURLs?.back ? (
                   <>
                     <img 
                     src={`http://localhost:5000${badgeURLs.back}`}  //Change to production evniroment name for flask server eventually 
