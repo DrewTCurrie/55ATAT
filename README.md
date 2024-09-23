@@ -21,6 +21,7 @@ Peachtree Pediatric Therapy Center (PTC) requires an automated attendance tracki
 - Self-triggering attendance events for Attendees.
 - Interface for check-in, allowing Attendees to check-in within 1 minute of entering the building.
 - Audible and visual notifications for successful and unsuccessful attendance events.
+- Tracking of Tarde, Absent, Incomplete, and Late (TAIL) violations. 
 
 ### Reporting
 - Export attendance records in PTC administrator accepted format.
@@ -39,7 +40,7 @@ Peachtree Pediatric Therapy Center (PTC) requires an automated attendance tracki
 
 ### Technologies Used
 - **Backend**: Python with Flask
-- **Frontend**: ReactJS
+- **Frontend**: ReactJS and NodeJS
 - **Database**: MariaDB
 
 ## Constraints
