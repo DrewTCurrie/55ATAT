@@ -1,8 +1,11 @@
+import sys
+import uuid
+
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
-engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:X%i7us7tCMg9bmKQp&9rD&@127.0.0.1/PTCBozeman")
+engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:lovering@127.0.0.1/ptctest")
 Base = declarative_base()
 
 class Attendee(Base):
@@ -39,3 +42,18 @@ class AttendanceEvent(Base):
       TIL_Violation = sqlalchemy.Column(sqlalchemy.Integer, default = 0)
       AdminInitials = sqlalchemy.Column(sqlalchemy.String(length=6))
       Comment = sqlalchemy.Column(sqlalchemy.String(length=256))
+
+def main():
+    Base.metadata.create_all(engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=engine)
+    Session = Session()
+
+    EventID = 0
+    NewEvent = AttendanceEvent(EventUUID=str(EventID), ID="11111", AttendeeInitials="SaLo1",Timestamp=datetime(2024, 9, 10, 9, 30, 0),Absent=True,AdminInitials="SaLo1",Comment="TestCommnet")
+    Session.add(NewEvent)
+    Session.commit()
+
+
+if __name__ == '__main__':
+    sys.exit(main())
