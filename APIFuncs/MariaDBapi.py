@@ -19,18 +19,29 @@ class Attendee(Base):
     Employee_BCBA = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     Employee_RBT = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     Employee_Other = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
-    AttendeeInitials = sqlalchemy.Column(sqlalchemy.String(length=6))
+    AttendeeInitials = sqlalchemy.Column(sqlalchemy.String(length=12))
 
 
-class Admininstrator(Base):
+class Administrator(Base):
         __tablename__ = 'Administrators'
-        ID = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+        ID = sqlalchemy.Column(sqlalchemy.String(length=24), primary_key =True)
         UserName = sqlalchemy.Column(sqlalchemy.String(length=32))
         Password = sqlalchemy.Column(sqlalchemy.String(length=32))
 
 
 class AttendanceEvent(Base):
       __tablename__ = 'CurrentAttendanceEvents'
+      EventUUID = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+      ID = sqlalchemy.Column(sqlalchemy.String(length = 24))
+      AttendeeInitials = sqlalchemy.Column(sqlalchemy.String(length=6))
+      Timestamp = sqlalchemy.Column(sqlalchemy.TIMESTAMP, default=datetime.now())
+      Absent = sqlalchemy.Column(sqlalchemy.Boolean, default = False)
+      TIL_Violation = sqlalchemy.Column(sqlalchemy.Integer, default = 0)
+      AdminInitials = sqlalchemy.Column(sqlalchemy.String(length=6))
+      Comment = sqlalchemy.Column(sqlalchemy.String(length=256))
+
+class ArchivalEvent(Base):
+      __tablename__ = 'ArchivalEvents'
       EventUUID = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
       ID = sqlalchemy.Column(sqlalchemy.String(length = 24))
       AttendeeInitials = sqlalchemy.Column(sqlalchemy.String(length=6))
