@@ -1,8 +1,20 @@
+#Utilities for accessing the database
+# Drew Currie
+# Last Updated 09/19/2024
+
+#This file provides a series of useful functions for accessing the MariaDB database
+#Each of the functions is documented in the declaration of the function
+
+
+
+import collections
+import json
+
 import sqlalchemy.cyextension
 import MariaDBapi as api
 import JSONHandler as jsonhandler
 import sqlalchemy
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, inspect
 import uuid
 from datetime import datetime
 import random
@@ -28,6 +40,30 @@ def GetUserInitials(UserID, Session):
         return(AttendeeInitials.AttendeeInitials)
 
 
+#This function pulls all of the user initals from the database.
+def getAllUserInitials():
+    #Create Sql Alchemy Session
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #Initialize Query for all Attendee Initials
+    query = Session.query(api.Attendee.AttendeeInitials).all()
+    #Creating results by parsing the first (only value) in the row from the query
+    results = json.dumps([r[0] for r in query])
+    return results
+
+def getRoles():
+    # Create Sql Alchemy Session
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #Get Column headers that are type boolean (Roles are uniquely this)
+    #Get all columns
+    columns = inspect(api.Attendee).columns
+    #Pasrse columns for columns with type boolean.
+    role_columns = [col.name for col in columns if isinstance(col.type, sqlalchemy.Boolean)]
+
+    return role_columns
 
 def NewAttendanceEvent(UserID):
     # Take User ID and create an attendance event in the "CurrentAttendanceEvents" table 
