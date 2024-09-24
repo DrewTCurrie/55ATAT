@@ -13,3 +13,7 @@ __pycache__/*
 #for the xlsx generation spam
 .xlsx
 flaskServer/xlsx/
+#for profile images
+flaskServer/profileImage
+flaskServer/__pycache__
+ptcClient/node_modules

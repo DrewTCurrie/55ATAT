@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append(os.path.join(sys.path[0], 'APIFuncs'))
+#sys.path.append(os.path.join(sys.path[0], 'APIFuncs'))
 #sys.path.insert(0, '/APIFuncs/')
 import utils
 import time
