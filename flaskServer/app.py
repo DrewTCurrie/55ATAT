@@ -1,16 +1,33 @@
 from flask import Flask, Blueprint, render_template, send_from_directory, request, jsonify, make_response
 from flask_cors import CORS
-from reports import generateReport
+from reports import generateReport, reportScheduler
 from APIFuncs import utils
 from APIFuncs import MariaDBapi
 import sys
 import os
 import time
+#Scheduling library
+from apscheduler.schedulers.background import BackgroundScheduler
+
 app = Flask(__name__)
 CORS(app)
 
 sys.path.append(os.path.join(sys.path[0], '/xlsx'))
 
+#Create scheduler background process
+scheduler = BackgroundScheduler()
+scheduler.start()
+
+
+#---------Scheduled Processes-----------------------------------------------------------------------------
+
+#scheduler.add_job(func=reportScheduler.weekly_reports, trigger="interval", seconds=60)
+scheduler.add_job(func=reportScheduler.monthly_reports, trigger="interval", seconds = 120)
+
+
+
+
+#----------Web Routes ------------------------------------------------------------------------------------
 @app.route('/api/generateReport', methods=['GET', 'POST'])
 def generate_report():
     data = request.json
@@ -53,4 +70,4 @@ def index():
 
 if __name__ == '__main__':
     print("Flask Server started from app.py")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
