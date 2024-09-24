@@ -1,3 +1,12 @@
+#Utilities for accessing the database
+# Drew Currie
+# Last Updated 09/19/2024
+
+#This file provides a series of useful functions for accessing the MariaDB database
+#Each of the functions is documented in the declaration of the function
+
+
+
 import collections
 import json
 

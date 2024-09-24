@@ -20,5 +20,5 @@ start_npm_server() {
     (npm run dev&)
 }
 
-start_flask_server &
+#start_flask_server &
 start_npm_server

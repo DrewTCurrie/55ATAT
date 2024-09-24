@@ -1,6 +1,6 @@
 # generateReport
 # Sam Lovering
-# Last Updated 9/11/2024
+# Last Updated 9/19/2024 - Drew Currie
 #
 # When query params are passed in this program will parse them, query the systems' database
 # then create an Excel spreadsheet based on the results.
@@ -10,6 +10,12 @@
 # 2. Make iteration not delete from behind
 # 3. implement types.
 # 4. IMPLEMENT ROLES
+
+
+#09/19/2024 Update: Updated system path to use absolute pathing instead of relative pathing. 
+# For some reason the relative pathing breaks the system links on the RaspberryPi but only on
+# the raspberryPi. 
+
 import datetime
 import os
 import collections
@@ -20,7 +26,12 @@ import sys
 from sqlalchemy import and_
 from sqlalchemy.orm import declarative_base
 
-sys.path.append(os.path.join(sys.path[0], '../APIFuncs'))
+#Using absolute pathing seems to work but relative pathing break. Not really sure why.
+#We'll have to figureo out why this is
+#TO-DO: Figure out why relative pathing breaks python includes only on the RaspberryPi
+sys.path.append(os.path.join(sys.path[0], '/home/55ATAT/55ATAT'))
+sys.path.append(os.path.join(sys.path[0], '/home/55ATAT/55ATAT/APIFuncs'))
+
 from APIFuncs import MariaDBapi as api
 from APIFuncs import utils
 
@@ -75,7 +86,7 @@ def create_spreadsheet(params):
     #Initialize Spreadsheet
     #Create Excel file with meta data
     fileName = ('attendanceReport'+datetime.datetime.now().strftime("%m%d%H%M")+'.xlsx')
-    workbook = xlsxwriter.Workbook('flaskServer/xlsx/'+fileName)
+    workbook = xlsxwriter.Workbook('/home/55ATAT/55ATAT/flaskServer/xlsx/'+fileName)
     worksheet = workbook.add_worksheet()
 
     #WORKBOOK FORMATS

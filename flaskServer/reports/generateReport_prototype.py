@@ -1,16 +1,24 @@
 # xlsxTest - EELE488 Prototype
 # Sam Lovering
-# Last Updated 5/12/2024
+# Last Updated 09/19/2024 -Drew Currie
 #
 # This program receives a JSON string from either initData.py or the DB, then converts
 # it into a spreadsheet.
+
+# 09/19/2024 Update: Updated from relative to absolute file pathing for the sys.path.insert. The relative pathing seems 
+# to break on the RaspberryPi. The cause is not known but the absolute pathing is a temporary fix. 
+
 
 import datetime
 import xlsxwriter
 import json
 import sys
-sys.path.insert(0, '../APIFuncs')
-import utils
+
+#For some reason the relative pathing break the pathing on the Pi. Absolute pathing works.
+sys.path.insert(0,'/home/55ATAT/55ATAT')
+sys.path.insert(0,'/home/55ATAT/55ATAT/APIFuncs')
+print(sys.path)
+from APIFuncs import utils
 
 def create_spreadsheet(jsonDict):
     #Initialize Spreadsheet
