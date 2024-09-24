@@ -9,46 +9,28 @@
 
 
 #Libraries used:
-import datetime, sys
-
+from datetime import datetime, timedelta
+import sys
+from reports import generateReport
 #Add to system path the directory of the API Functions to access the utilities functions
 sys.path.insert(0, '/home/drew/Documents/capstone/55ATAT/APIFuncs')
 import utils
-import generateReport
+
 
 
 
 
 def weekly_reports():
-    start_date = datetime.today()
-    end_date = start_day - timedelta(days=7)
-    print("Time Frame to generate report for: " + start_date + " Through " + end_date)
-    #fileName = generateReport.generate_spreadsheet(name, role, start_date, end_date)
-    #Checking if file exists for a minute before throwing an error.
-    #start_time = time.time()
-    #dir = 'flaskServer/xlsx/'
-    #print(dir+fileName)
-    #while time.time() - start_time < 60:
-    #    if os.path.isfile('/home/55ATAT/55ATAT/flaskServer/xlsx/'+fileName):
-    #        print('found file')
-    #    time.sleep(1)
+    print("Weekly report generation called.")
+    fileName = generateReport.generate_spreadsheet(start_date=(datetime.now() - timedelta(weeks= 1)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+    print(fileName)
+    #TODO: Link with flaskMail to send an email with the attachment. 
 
 
 
-
-#def monthly_reports():
-#    start_date = data.get('startDate')
-#    end_date = 
-#    fileName = generateReport.generate_spreadsheet(name, role, start_date, end_date)
-#    #Checking if file exists for a minute before throwing an error.
-#    start_time = time.time()
-#    dir = 'flaskServer/xlsx/'
-#    print(dir+fileName)
-#    while time.time() - start_time < 60:
-#        if os.path.isfile('/home/55ATAT/55ATAT/flaskServer/xlsx/'+fileName):
-#            print('found file')
-#        time.sleep(1)
-
-
+def monthly_reports():
+    print("Montly report generation called.")
 if __name__ == '__main__':
         sys.exit(weekly_reports())
+        fileName = generateReport.generate_spreadsheet(start_date=(datetime.now() - timedelta(weeks= 1)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+        print(fileName)
