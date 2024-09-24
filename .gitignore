@@ -13,3 +13,4 @@ __pycache__/*
 #for the xlsx generation spam
 .xlsx
 flaskServer/xlsx/
+node_modules/
