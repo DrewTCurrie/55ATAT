@@ -9,12 +9,31 @@
 
 
 #Libraries used:
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, calendar, date
 import sys
 from reports import generateReport
 #Add to system path the directory of the API Functions to access the utilities functions
 sys.path.insert(0, '/home/drew/Documents/capstone/55ATAT/APIFuncs')
 import utils
+
+
+
+def CheckReportsSchedule():
+    print("Checking if reports need generated today")
+    today = datetime.date.today()
+    #Check if today is the last day of the month
+    #Maps the days of the current month in the current year to an index, with 1 being the last day of the month
+    #If today is equal to the last day of the month create a report
+    if calendar.monthrange(today.year, today.month)[1] == today.day:
+         #If it is the last day of the month, generate monthly attendance report
+         monthly_reports()
+    #Check if today is friday
+    #Maps the days of the week on Monday = 0 through Sunday = 6
+
+    if date.today().weekday() == 4:
+         #If it is Friday create the weekly report
+         weekly_reports()
+    #If it is not the end of the month or friday do not create a report
 
 
 

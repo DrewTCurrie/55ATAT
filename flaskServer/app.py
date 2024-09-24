@@ -7,22 +7,15 @@ import sys
 import os
 import time
 #Scheduling library
-from apscheduler.schedulers.background import BackgroundScheduler
-
+import schedule
 app = Flask(__name__)
 CORS(app)
 
 sys.path.append(os.path.join(sys.path[0], '/xlsx'))
 
-#Create scheduler background process
-scheduler = BackgroundScheduler()
-scheduler.start()
-
-
 #---------Scheduled Processes-----------------------------------------------------------------------------
 
-#scheduler.add_job(func=reportScheduler.weekly_reports, trigger="interval", seconds=60)
-scheduler.add_job(func=reportScheduler.monthly_reports, trigger="interval", seconds = 120)
+schedule.every().day.at("17:00").do(reportScheduler.CheckReportsSchedule)
 
 
 
