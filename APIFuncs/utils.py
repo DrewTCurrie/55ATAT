@@ -215,9 +215,19 @@ def NewAttendeeFromWeb(AttendeeJSON):
             return (Error)
 
 
+
+# This funciton updates an attendee using information provided from the web.
 def editAttendeeFromWeb(editAttendeeJSON):
+    #Create SqlAlchemy Session
+    api.Base.metadata.create_all(api.engine)
+    NASession = sqlalchemy.orm.sessionmaker()
+    NASession.configure(bind=api.engine)
+    NASession = NASession()
+
     return 'test'
 
+# This function chains from the createAttendeeFromWeb funciton, if the attendee created is an administrator,
+# then this function will be called.
 def createAdministrator(AdministratorJSON):
     #Create SqlAlchemy Session
     api.Base.metadata.create_all(api.engine)
@@ -294,6 +304,19 @@ def getAttendeeRole(AttendeeID):
         userRoles = [col for col in roles if getattr(query, col) == 1]
     return userRoles
 
+def deleteAttendee(AttendeeID):
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #Query for attendee with input AttendeeID
+    query = Session.query(api.Attendee).filter_by(ID=AttendeeID).first()
+    #Delete query result
+    if query is not None:
+        Session.delete(query)
+    Session.commit()
+    Session.close()
 
 def ClearAttendeeRecords():
         #CTSession = Clear Table Session
@@ -334,4 +357,4 @@ def ClearAdministrators():
     CTSession.close()
 
 if __name__ == '__main__':
-    sys.exit(GetAttendanceEvents())
+    deleteAttendee("PTCBZN-10872623683")
