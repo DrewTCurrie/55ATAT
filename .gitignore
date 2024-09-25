@@ -17,3 +17,4 @@ flaskServer/xlsx/
 flaskServer/profileImage
 flaskServer/__pycache__
 ptcClient/node_modules
+node_modules/
