@@ -118,6 +118,12 @@ def createAdministrator():
     utils.createAdministrator(newAdministrator)
     return make_response(jsonify({"message": "Success"}), 200)
 
+@app.route('/api/deleteAccount',methods=['POST'])
+def deleteAccount():
+    #Parse JSON Data
+    data = request.json
+    utils.deleteAttendee(data.get('ID'))
+    return make_response(jsonify({"message": "Success"}), 200)
 
 @app.route('/')
 def index():

@@ -220,9 +220,9 @@ def NewAttendeeFromWeb(AttendeeJSON):
 def editAttendeeFromWeb(editAttendeeJSON):
     #Create SqlAlchemy Session
     api.Base.metadata.create_all(api.engine)
-    NASession = sqlalchemy.orm.sessionmaker()
-    NASession.configure(bind=api.engine)
-    NASession = NASession()
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
 
     return 'test'
 

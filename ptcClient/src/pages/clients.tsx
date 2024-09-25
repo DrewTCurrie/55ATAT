@@ -32,7 +32,8 @@ function Clients() {
   { field: "Delete",
     cellRenderer: (params: ICellRendererParams<IRow,number>) => {
       const ID = params.data?.ID ?? "";
-      return DeleteAttendee(ID)
+      const Initials = params.data?.Initials ?? "";
+      return DeleteAttendee(ID,Initials)
     }
   }
  ]);
