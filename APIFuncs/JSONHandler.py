@@ -18,6 +18,14 @@ def PopulateJSONReport(FILEPATH, ATTENDANCE_DATA):
 
         json.dump(Event.__dict__, Report, indent = 4)
 
+# This function converts a query into json generically.
+def queryToJSON(query):
+    #parses each row for column name, and their values.
+    def rowToDict(row):
+        return {column.name: getattr(row, column.name) for column in row.__table__.columns}
+
+    jsonQuery = [rowToDict(row) for row in query]
+    return json.dumps(jsonQuery)
 
 class AttendanceReport:
     def __init__(self, EventID, AttendeeID, AttendeeInitials, Timestamp, Absent, TIL_Violation, AdminInitials, Comment):

@@ -6,7 +6,7 @@ import qrcode
 from PIL import Image, ImageDraw, ImageFont
 from flask import render_template, jsonify, url_for
 
-import utils
+from APIFuncs import utils
 
 
 # Helper function to generate a QR code, generates QR code based on ID so that it remains the same if needing to be regenerated.

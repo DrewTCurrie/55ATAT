@@ -11,8 +11,8 @@ import collections
 import json
 
 import sqlalchemy.cyextension
-import MariaDBapi as api
-import JSONHandler as jsonhandler
+from APIFuncs import MariaDBapi as api
+from APIFuncs import JSONHandler as jsonhandler
 import sqlalchemy
 from sqlalchemy import delete, select, inspect
 import uuid
@@ -214,6 +214,10 @@ def NewAttendeeFromWeb(AttendeeJSON):
         else:
             return (Error)
 
+
+def editAttendeeFromWeb(editAttendeeJSON):
+    return 'test'
+
 def createAdministrator(AdministratorJSON):
     #Create SqlAlchemy Session
     api.Base.metadata.create_all(api.engine)
@@ -255,6 +259,25 @@ def getAttendee(AttendeeID):
     Session = Session()
     query = Session.query(api.Attendee).filter_by(ID=AttendeeID).first()
     return query
+
+#Returns all attendees and data from the database.
+def getAllAttendees():
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #query for all attendees in the attendee table
+    query = Session.query(api.Attendee).all()
+    # Creating results by parsing each entry into JSON
+    attendeeList = []
+    for row in query:
+        attendeeList.append({
+            'ID': row.ID,
+            'Initials': row.AttendeeInitials,
+            'Roles': getAttendeeRole(row.ID)
+        })
+    return attendeeList
 
 def getAttendeeRole(AttendeeID):
     #Create Sqlalchemy Session

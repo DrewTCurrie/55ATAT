@@ -1,8 +1,8 @@
-import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid, Stack, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Stack, TextField } from "@mui/material";
 import { Fragment, useEffect, useState } from "react";
 import * as React from "react";
 
-
+//Interface so modals know what to expect from the badgeURLs.
 interface badgeRespone {
   front: String,
   back?: String
@@ -43,7 +43,7 @@ function ClientModal(){
             console.error("Error fetching roles:", e);
           }
         };
-        fetchRoles();
+        fetchRoles(); 
     }})
 
     //Hook for displaying Badges after generation
@@ -208,8 +208,8 @@ function ClientModal(){
             onClose={handleClose}>
             <DialogTitle align="center">Create New Account</DialogTitle>
             {!displayBadge ? //CHeck if displayBadge is ready, then display badge.
-            <Grid>
-              <Grid
+            <Grid2>
+              <Grid2
                 display="flex" 
                 flexDirection="column" 
                 alignItems="center" 
@@ -275,7 +275,7 @@ function ClientModal(){
                   </Box>
                 </>
                 )}
-              </Grid>
+              </Grid2>
               <Stack 
                 direction="row"
                 display="flex" 
@@ -296,9 +296,9 @@ function ClientModal(){
                   Close
                 </Button>
               </Stack>
-            </Grid> 
+            </Grid2> 
             : // BEGIN OTHER TERNARY
-            <Grid>
+            <Grid2>
               <div //Image Content
               style={scrollableContentStyle}>
                 {badgeURLs?.front ? (
@@ -338,7 +338,7 @@ function ClientModal(){
                   Close
                 </Button>
               </Stack>
-            </Grid>
+            </Grid2>
             } 
 
         </Dialog>

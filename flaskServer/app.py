@@ -52,6 +52,10 @@ def getAttendeeInitials():
 def getRoles():
     return make_response(jsonify(utils.getRoles()), 200)
 
+@app.route('/api/getAllAttendees' , methods=['GET'])
+def getAllAttendees():
+   return make_response(jsonify(utils.getAllAttendees()), 200)
+
 
 #createAccount parses the formdata, creates an account, saves an image associated with the id for badge creation, and returns the id.
 @app.route('/api/createAccount', methods=['POST'])
