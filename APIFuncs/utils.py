@@ -268,6 +268,7 @@ def getAttendee(AttendeeID):
     Session.configure(bind=api.engine)
     Session = Session()
     query = Session.query(api.Attendee).filter_by(ID=AttendeeID).first()
+    Session.close()
     return query
 
 #Returns all attendees and data from the database.
@@ -287,6 +288,7 @@ def getAllAttendees():
             'Initials': row.AttendeeInitials,
             'Roles': getAttendeeRole(row.ID)
         })
+    Session.close()
     return attendeeList
 
 def getAttendeeRole(AttendeeID):
@@ -302,6 +304,7 @@ def getAttendeeRole(AttendeeID):
     #Compare query columns to roles list.
     if query is not None:
         userRoles = [col for col in roles if getattr(query, col) == 1]
+    Session.close()
     return userRoles
 
 def deleteAttendee(AttendeeID):

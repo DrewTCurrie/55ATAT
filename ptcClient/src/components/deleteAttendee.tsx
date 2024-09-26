@@ -12,7 +12,6 @@ export default function DeleteAttendee(ID: string, Initials: string){
       setOpen(true);
     };
     const handleClose = () => {
-        //TODO, add data cleanup
         setOpen(false);
     }
 
