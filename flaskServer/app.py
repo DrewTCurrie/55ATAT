@@ -118,6 +118,65 @@ def createAdministrator():
     utils.createAdministrator(newAdministrator)
     return make_response(jsonify({"message": "Success"}), 200)
 
+#editAccount recieves a formdata object from the front end, then updates the db data with it.
+@app.route('/api/editAccount',methods=['POST'])
+def editAccount():
+    accountDetails = {
+        "Client": False,
+        "Employee": False,
+        "ABA_Earlychildhood": False,
+        "ABA_Teen": False,
+        "Occupational_Therapy": False,
+        "Speech_Therapy": False,
+        "Administrator": False,
+        "Employee_SPOT": False,
+        "Employee_BCBA": False,
+        "Employee_RBT": False,
+        "Employee_Other": False,
+        "AttendeeInitials": ' ',
+        "ID": '',
+    }
+
+    #Assigning Roles to newAccount
+    for role in json.loads(request.form['roles']):
+        if role in accountDetails.keys():
+            accountDetails[role] = True
+
+    #Assigning initials to a new account
+    accountDetails['AttendeeInitials'] = request.form['name']
+    #Assigning ID to a new account
+    accountDetails['ID'] = request.form['id']
+
+    #Saving Image (For usage in creating QR Code)
+    if 'file' in request.files:
+        image = request.files['file']
+        # Create file name with UserID
+        file_extension = '.png'  # Get the file extension
+        new_filename = f"{request.form['id']}{file_extension}"
+        save_path = os.path.join(image_folder, new_filename)
+        with open(save_path, 'wb') as f:
+            f.write(image.read())
+
+    utils.editAttendeeFromWeb(accountDetails)
+    return make_response(jsonify({"message": "Success"}), 200)
+
+
+
+
+#If the account being edited is an admin and there is new content, edit the admin.
+@app.route('/api/editAdmin', methods=['POST'])
+def editAdmin():
+    # Parse JSON Data
+    data = request.json
+    newAdministrator = {
+        "ID": data.get('adminID'),
+        'UserName': data.get('username'),
+        'Password': data.get('password')
+    }
+    # call createAdministrator to add to DB
+    utils.editAdministrator(newAdministrator)
+    return make_response(jsonify({"message": "Success"}), 200)
+
 @app.route('/api/deleteAccount',methods=['POST'])
 def deleteAccount():
     #Parse JSON Data

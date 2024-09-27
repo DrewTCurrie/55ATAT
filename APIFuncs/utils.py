@@ -224,7 +224,16 @@ def editAttendeeFromWeb(editAttendeeJSON):
     Session.configure(bind=api.engine)
     Session = Session()
 
-    return 'test'
+    attendee = Session.query(api.Attendee).filter_by(ID=editAttendeeJSON['ID']).first()
+    if attendee:
+        for key, value in editAttendeeJSON.items():
+            setattr(attendee, key, value)
+    else:
+        # This shouldn't be happening, as the attendee has to exist in the database to be displayed, but create a new
+        # attendee if that is the case
+        Session.add(editAttendeeJSON)
+    Session.commit()
+    Session.close()
 
 # This function chains from the createAttendeeFromWeb funciton, if the attendee created is an administrator,
 # then this function will be called.
@@ -244,6 +253,24 @@ def createAdministrator(AdministratorJSON):
     NASession.add(NewAdministrator)
     NASession.commit()
     NASession.close()
+
+def editAdministrator(editAdministratorJSON):
+    #Create SqlAlchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+
+    admin = Session.query(api.Administrator).filter_by(ID=editAdministratorJSON['ID']).first()
+    if admin:
+        for key, value in editAdministratorJSON.items():
+            setattr(admin, key, value)
+    else:
+        #This shouldn't be happening, as the attendee has to exist in the database to be displayed, but create a new attendee if that is the case
+        Session.add(editAdministratorJSON)
+    Session.commit()
+    Session.close()
+
 
 def GetAttendanceEvents(Initials):
     #Get all the attendance events within a specified date & time range
