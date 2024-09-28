@@ -4,8 +4,13 @@ import { useState } from 'react';
 import { Box, Button, Dialog, DialogContentText, DialogTitle, Stack, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+interface modalProps {
+    onClose: () => void,
+    ID: string,
+    Initials: string
+  }
 
-export default function DeleteAttendee(ID: string, Initials: string){
+export default function DeleteAttendee({onClose,ID,Initials}: modalProps){
     //Handling the open and closing of edit modal
     const [open, setOpen] = useState(false);
     const handleClickOpen = () => {
@@ -82,7 +87,7 @@ export default function DeleteAttendee(ID: string, Initials: string){
                         </Button>}
                         <Button
                         variant='contained'
-                        onClick={handleClose}
+                        onClick={() =>{handleClose(); onClose()}}
                         disabled={loading}>
                         Close
                         </Button>

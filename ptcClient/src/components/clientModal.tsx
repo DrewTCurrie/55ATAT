@@ -8,7 +8,11 @@ interface badgeRespone {
   back?: String
 }
 
-function ClientModal(){
+interface modalProps {
+  onClose: () => void,
+}
+
+function ClientModal({onClose}: modalProps){
   //handling the opening and closing of the modal.
     const [open, setOpen] = useState(false);
     const handleClickOpen = () => {
@@ -291,7 +295,7 @@ function ClientModal(){
                 </Button>
                 <Button
                   variant='contained'
-                  onClick={handleClose}
+                  onClick={() => {handleClose(); onClose()}}
                   disabled={loading}>
                   Close
                 </Button>
@@ -333,7 +337,7 @@ function ClientModal(){
                 </Button>
                 <Button
                   variant='contained'
-                  onClick={handleClose}
+                  onClick={() => {handleClose(); onClose()}}
                   disabled={loading}>
                   Close
                 </Button>

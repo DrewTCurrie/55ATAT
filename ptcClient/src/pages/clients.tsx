@@ -1,4 +1,4 @@
-import { Container, Box, Typography, Button, ButtonGroup} from '@mui/material';
+import { Container, Box, Typography, ButtonGroup} from '@mui/material';
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -16,7 +16,6 @@ interface IRow {
     Roles: string | string[];
   }
 
-
 function Clients() {
   // Column Definitions: Defines the columns to be displayed.
   const [colDefs, setColDefs] = useState<ColDef[]>([
@@ -30,7 +29,7 @@ function Clients() {
       const ID = params.data?.ID ?? "";
       const Initials = params.data?.Initials ?? "";
       const Roles = params.data?.Roles ?? "";
-      return EditAttendee(ID,Initials,Roles);
+      return <EditAttendee onClose={handleModalClose} ID={ID} Initials={Initials} Roles={Roles}/>
     } 
   },
   { field: "Delete",
@@ -38,7 +37,7 @@ function Clients() {
     cellRenderer: (params: ICellRendererParams<IRow,number>) => {
       const ID = params.data?.ID ?? "";
       const Initials = params.data?.Initials ?? "";
-      return DeleteAttendee(ID,Initials)
+      return <DeleteAttendee onClose={handleModalClose} ID={ID} Initials={Initials}/>
     }
   }
  ]);
@@ -47,23 +46,27 @@ function Clients() {
   Fetch all attendees in database (maybe limit this if db gets huge)
  */
 const [rowData, setRowData] = useState<IRow[]>([])
-const [hasFetchedRowData, setHasFetchedRoleData] = useState(false)
+const [hasFetchedRowData, setHasFetchedRowData] = useState(false)
+const fetchRowData = async () => {
+  try{
+    const response = await fetch(`/api/getAllAttendees`)
+    const data = await response.json();
+    setRowData(data);
+    setHasFetchedRowData(true);
+  } catch(e){
+    console.error("Error fetching Attendees:", e);
+  }
+}
+
+//This use effect loads Row data on webpage load
 useEffect(()=> {
   if(!hasFetchedRowData){
-    const fetchRoleData = async () => {
-      try{
-        const response = await fetch(`/api/getAllAttendees`)
-        const data = await response.json();
-        setRowData(data);
-        setHasFetchedRoleData(true);
-      } catch(e){
-        console.error("Error fetching Attendees:", e);
-      }
+      fetchRowData();
     };
-    fetchRoleData(); //move to onload of table
   }
-})
+)
 
+//This function is used to set the size of the table to take as much room as possible, and adjust with window size
 const onGridSizeChanged = useCallback(
   (params: GridSizeChangedEvent) => {
     // get the current grids width
@@ -98,6 +101,11 @@ const onGridSizeChanged = useCallback(
   [window],
 );
 
+//When a modal closes, reload the table.
+const handleModalClose = useCallback(() => {
+  fetchRowData();
+},[]);
+
 //Render Page
 return (
 <Container sx={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%' }}>
@@ -108,7 +116,7 @@ return (
           Clients
         </Typography>
       <ButtonGroup orientation="vertical" variant='contained'>
-        <ClientModal/>
+        <ClientModal onClose={handleModalClose}/>
       </ButtonGroup>
       </Box>
     </Box>

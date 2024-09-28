@@ -3,13 +3,19 @@ import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import { useEffect, useState } from 'react';
 import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Stack, TextField } from '@mui/material';
-
 interface badgeRespone {
     front: String,
     back?: String
   }
 
-export default function EditAttendee(ID: string, Initials: string, Roles: string | string[]){
+interface modalProps{
+  onClose: () => void;
+  ID: string,
+  Initials: string,
+  Roles: string | string[]
+}
+
+ export default function EditAttendee({onClose,ID,Initials,Roles}: modalProps){
     //Handling the open and closing of edit modal
     const [open, setOpen] = useState(false);
     const handleClickOpen = () => {
@@ -19,6 +25,8 @@ export default function EditAttendee(ID: string, Initials: string, Roles: string
       setOpen(true);
     };
     const handleClose = () => {
+      //Refresh Table
+      onClose()
       //Clear all values in form
       setName('')
       setUsername('')
@@ -326,7 +334,7 @@ export default function EditAttendee(ID: string, Initials: string, Roles: string
                     </Button>
                     <Button
                     variant='contained'
-                    onClick={handleClose}
+                    onClick={() => {handleClose(); onClose()}}
                     disabled={loading}>
                         Close
                     </Button>
@@ -375,7 +383,7 @@ export default function EditAttendee(ID: string, Initials: string, Roles: string
                 <Button
                 variant='contained'
                 color='error'
-                onClick={handleClose}
+                onClick={() => {handleClose(); onClose()}}
                 disabled={loading}>
                   Close
                 </Button>
