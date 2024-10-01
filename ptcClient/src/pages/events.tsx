@@ -2,11 +2,12 @@ import { Container, Box, Typography, Button, ButtonGroup} from '@mui/material';
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ColDef } from 'ag-grid-community';
 import ReportModal from '../components/reportModal';
 import * as React from 'react';
 import axios from 'axios';
+import NewEvent from '../components/newEventModal';
 
 //TODO: Make this table useable for Event Listings
 interface IRow {
@@ -17,16 +18,6 @@ interface IRow {
 }
 
 function Events() {
-    // Row Data: The data to be displayed.
-    const [rowData, setRowData] = useState<IRow[]>([
-      { make: "Tesla", model: "Model Y", price: 64950, electric: true },
-      { make: "Ford", model: "F-Series", price: 33850, electric: false },
-      { make: "Toyota", model: "Corolla", price: 29600, electric: false },
-      { make: "Mercedes", model: "EQA", price: 48890, electric: true },
-      { make: "Fiat", model: "500", price: 15774, electric: false },
-      { make: "Nissan", model: "Juke", price: 20675, electric: false },
-    ]);
-
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState<ColDef<IRow>[]>([
       { field: "make" },
@@ -35,7 +26,29 @@ function Events() {
       { field: "electric" },
     ]);
 
-    
+    /* TABLE BUILDING
+    Fetch all attendees in database (maybe limit this if db gets huge)
+    */
+    const [rowData, setRowData] = useState<IRow[]>([])
+    const [hasFetchedRowData, setHasFetchedRowData] = useState(false)
+    const fetchRowData = async () => {
+      try{
+        const response = await fetch(`/api/getRecentEvents`)
+        const data = await response.json();
+        setRowData(data);
+        setHasFetchedRowData(true);
+      } catch(e){
+        console.error("Error fetching Attendees:", e);
+      }
+    }
+
+    //This use effect loads Row data on webpage load
+    useEffect(()=> {
+      if(!hasFetchedRowData){
+          fetchRowData();
+        };
+      }
+    )
 
     const generateQuickReport = async () => {
       //JSON for a quick report, (7 days back), Python will autofill information.
@@ -73,7 +86,10 @@ function Events() {
       }
     };
 
-
+    //When a modal closes, reload the table.
+    const handleModalClose = useCallback(() => {
+      fetchRowData();
+    },[]);
     return (
       <Container sx={{display: 'block', height: '100vh', width: '85vh'}}>
           <Box sx={{ display: 'flex', p: 1 }}>
@@ -103,7 +119,7 @@ function Events() {
                     columnDefs={colDefs}
               />
               </div>
-              <Button variant='contained' sx={{display: 'flex'}}>New</Button>
+              <NewEvent onClose={handleModalClose}></NewEvent>
           </Box>
         </Container>
       );

@@ -1,4 +1,6 @@
+import datetime
 import json
+import uuid
 
 from flask import Flask, Blueprint, render_template, send_from_directory, request, jsonify, make_response, send_file
 from flask_cors import CORS
@@ -55,6 +57,11 @@ def getRoles():
 @app.route('/api/getAllAttendees' , methods=['GET'])
 def getAllAttendees():
    return make_response(jsonify(utils.getAllAttendees()), 200)
+
+#This endpoint returns the 50 most recent attendance events for usage in the webpage table. This can be expanded based on testing.
+@app.route('/api/getRecentEvents', methods=['GET'])
+def getRecentEvents():
+    return make_response(jsonify(utils.getEvents(50)), 200)
 
 
 #createAccount parses the formdata, creates an account, saves an image associated with the id for badge creation, and returns the id.
@@ -117,6 +124,17 @@ def createAdministrator():
     # call createAdministrator to add to DB
     utils.createAdministrator(newAdministrator)
     return make_response(jsonify({"message": "Success"}), 200)
+
+#createEvent will be called if an Attendance Event is create from the webpage.
+@app.route('/api/createEvent', methods=['POST'])
+def createEvent():
+    # Parse JSON Data
+    data = request.json
+    #A lot of null checks happen with this feature, so data is passed directly to the utils
+    utils.createEventFromWeb(data)
+    return make_response(jsonify({"message": "Success"}), 200)
+
+
 
 #editAccount recieves a formdata object from the front end, then updates the db data with it.
 @app.route('/api/editAccount',methods=['POST'])

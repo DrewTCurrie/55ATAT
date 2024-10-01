@@ -2,7 +2,7 @@ import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
-engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:X%i7us7tCMg9bmKQp&9rD&@127.0.0.1/PTCBozeman")
+engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:lovering@127.0.0.1/ptctest")
 Base = declarative_base()
 
 class Attendee(Base):
@@ -33,7 +33,7 @@ class AttendanceEvent(Base):
       __tablename__ = 'CurrentAttendanceEvents'
       EventUUID = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
       ID = sqlalchemy.Column(sqlalchemy.String(length = 24))
-      AttendeeInitials = sqlalchemy.Column(sqlalchemy.String(length=6))
+      AttendeeInitials = sqlalchemy.Column(sqlalchemy.String(length=12))
       Timestamp = sqlalchemy.Column(sqlalchemy.TIMESTAMP, default=datetime.now())
       Absent = sqlalchemy.Column(sqlalchemy.Boolean, default = False)
       TIL_Violation = sqlalchemy.Column(sqlalchemy.Integer, default = 0)
