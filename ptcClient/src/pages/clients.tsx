@@ -18,7 +18,7 @@ interface IRow {
 
 function Clients() {
   // Column Definitions: Defines the columns to be displayed.
-  const [colDefs, setColDefs] = useState<ColDef[]>([
+  const [colDefs] = useState<ColDef[]>([
   { field: "ID" },
   { field: "Initials" },
   { field: "Roles" },

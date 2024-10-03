@@ -3,7 +3,7 @@ import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useCallback, useEffect, useState } from 'react'
-import { ColDef } from 'ag-grid-community';
+import { ColDef, ICellRendererParams } from 'ag-grid-community';
 import ReportModal from '../components/reportModal';
 import * as React from 'react';
 import axios from 'axios';
@@ -11,19 +11,65 @@ import NewEvent from '../components/newEventModal';
 
 //TODO: Make this table useable for Event Listings
 interface IRow {
-  make: string;
-  model: string;
-  price: number;
-  electric: boolean;
+  EventID: string,
+  ID: string,
+  Initials: string,
+  Timestamp: string,
+  Absent: boolean,
+  TIL_Violation: boolean,
+  AdminInitials: string,
+  Comment: string
 }
 
 function Events() {
     // Column Definitions: Defines the columns to be displayed.
-    const [colDefs, setColDefs] = useState<ColDef<IRow>[]>([
-      { field: "make" },
-      { field: "model" },
-      { field: "price" },
-      { field: "electric" },
+    const [colDefs] = useState<ColDef[]>([
+      { field: "EventID",
+        hide: true
+       },
+      { field: "ID",
+        hide: true
+       },
+      { field: "Initials",
+        flex: 1
+       },
+      { field: "Timestamp",
+        flex: 4,
+        cellRenderer: (params: ICellRendererParams<IRow,number>) => {
+          const date = new Date(params.data?.Timestamp ?? "")
+          return date.toLocaleString();
+        }
+       },
+      { field: "Absent",
+        flex: 1,
+      },
+      { field: "TIL_Violation",
+        headerName: 'TIL',
+        flex: 1,
+      },
+      { field: "Edit",
+        headerName: 'Edit',
+        flex: 1,
+        cellRenderer: (params: ICellRendererParams<IRow, number>) => {
+          const ID = params.data?.ID ?? ""; //TODO: Add proper edit and delete functions.
+          const Initials = params.data?.Initials ?? "";
+          return "Edit"
+        } 
+      },
+      { field: "Delete",
+        flex: 1,
+        cellRenderer: (params: ICellRendererParams<IRow,number>) => {
+          const ID = params.data?.ID ?? "";
+          const Initials = params.data?.Initials ?? "";
+          return "Delete"
+        }
+      },
+      { field: "AdminInitials",
+        hide: true
+      },
+      { field: "Comment",
+        hide: true
+      }
     ]);
 
     /* TABLE BUILDING
@@ -78,9 +124,6 @@ function Events() {
             })
           }
         );
-        if(!response.ok){
-          throw new Error(`Error: ${response.statusText}`);
-        }
       } catch(e: any){
         console.log(e.message);
       }
@@ -90,6 +133,7 @@ function Events() {
     const handleModalClose = useCallback(() => {
       fetchRowData();
     },[]);
+    
     return (
       <Container sx={{display: 'block', height: '100vh', width: '85vh'}}>
           <Box sx={{ display: 'flex', p: 1 }}>
