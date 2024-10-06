@@ -35,7 +35,7 @@ function ClientModal(){
       if(open && !hasFetchedRoles) {
         const fetchRoles = async () => {
           try {
-            const response = await fetch(`/api/getRoles`);
+            const response = await fetch(`http://localhost:5000/api/getRoles`);
             const data = await response.json();
             setRoles(data);
             setHasFetchedRoles(true)
@@ -104,7 +104,7 @@ function ClientModal(){
       }
       //Attempt to create an Account
       try {
-        const response = await fetch(`/api/createAccount`, account)
+        const response = await fetch(`http://localhost:5000/api/createAccount`, account)
         if (!response.ok) {
           throw new Error('Error creating account');
         }
@@ -121,7 +121,7 @@ function ClientModal(){
               "password": pwd
             })
           }
-          const adminResponse = await fetch(`/api/createAdmin`,adminAccount)
+          const adminResponse = await fetch(`http://localhost:5000/api/createAdmin`,adminAccount)
           if (!adminResponse.ok) {
             throw new Error('Error creating Administrator Account');
           }
@@ -134,7 +134,7 @@ function ClientModal(){
             "userID": userID
           })
         }
-        const badgeResponse = await fetch(`/api/generateBadge`,badgeDetails)
+        const badgeResponse = await fetch(`http://localhost:5000/api/generateBadge`,badgeDetails)
         if (!badgeResponse.ok) {
           throw new Error('Error creating User Badge');
         }
