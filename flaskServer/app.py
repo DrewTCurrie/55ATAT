@@ -16,8 +16,8 @@ import schedule
 from threading import Thread
 
 app = Flask(__name__)
-CORS(app,resources={r"*": {"origins":"http://localhost:5173"""}})
-
+#CORS(app,resources={r"*": {"origins":"http://localhost:5173"""}})
+CORS(app)
 sys.path.append(os.path.join(sys.path[0], '/xlsx'))
 sys.path.append(os.path.join(sys.path[0], '/profileImage'))
 image_folder = 'flaskServer/profileImage'
@@ -43,7 +43,7 @@ def generate_report():
     while time.time() - start_time < 60:
         if os.path.isfile('/home/55ATAT/55ATAT/flaskServer/xlsx/'+fileName):
             print('found file')
-            return make_response(jsonify(dir + fileName), 200)
+            return make_response(jsonify(fileName), 200)
         time.sleep(1)
     return make_response("Error: File not found", 404)
 
