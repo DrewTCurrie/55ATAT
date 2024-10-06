@@ -30,12 +30,7 @@ def generate_qr_code(userID, filename):
 def add_text_to_image(img_path, text, output_path, position, font_size=50):
     img = Image.open(img_path).convert("RGBA")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.load_default()
-    try:
-        font = ImageFont.truetype("arial.ttf", font_size)
-    except IOError:
-        font = ImageFont.load_default()
-
+    font = ImageFont.truetype("APIFuncs/Arial.ttf", font_size)
     # Split the text into multiple lines
     lines = text.split('\n')
     y = position[1]
@@ -82,7 +77,8 @@ def generate_badge(userID):
             front_img_path,
             f"{initials}\nEmployee\n\n{formatted_phone}\n{formatted_address}",
             front_output_path,
-            (50, 570)
+            (50, 570),
+            font_size=30
         )
         # Embed user image into EmployeeFrontWithDetails
         #Check to see if an image exists, if not then use base ptclogo
@@ -126,7 +122,8 @@ def generate_badge(userID):
             front_img_path,
             f"{initials}\n{formatted_service}",
             front_output_path,
-            (60, 850)  # Adjust as needed to fit text and QR code
+            (60, 850), # Adjust as needed to fit text and QR code
+            font_size=30
         )
 
         # Generate QR code and place it on the front image

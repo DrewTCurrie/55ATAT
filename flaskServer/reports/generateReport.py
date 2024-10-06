@@ -65,7 +65,7 @@ class report_params:
     def parse_query(self):
         #Get Roles
         roles = utils.getRoles()
-
+        print(roles)
         #Initialize DB Session
         Session = sqlalchemy.orm.sessionmaker()
         Session.configure(bind=api.engine)
@@ -197,28 +197,30 @@ def create_spreadsheet(params):
         #Write Client Information
         #Assign roles based on if they are appended to the events
         roles = params.roles[events[0]]
+        print(roles)
         roleString = ''
-        if roles[0] == 'Employee':
-            roleString = roleString + 'E/'
-            if 'Employee_BCBA' in roles:
-                roleString = roleString + 'BCBA'
-            if 'Employee_SPOT' in roles:
-                roleString = roleString + 'SPOT'
-            if 'Administrator' in roles:
-                roleString = roleString + 'Admin'
-        elif roles[0] == 'Client':
-            roleString = roleString + 'C/'
-            if len(roles) > 2:
-                roleString = roleString + 'Multiple'
-            else:
-                if 'ABA_Teen' in roles:
-                    roleString = roleString + 'ABA Teen'
-                if 'ABA_Earlychildhood' in roles:
-                    roleString = roleString + 'ABA Early'
-                if 'Speech_Therapy' in roles:
-                    roleString = roleString + 'Speech'
-                if 'Occupational_Therapy' in roles:
-                    roleString = roleString + 'OT'
+        if roles:
+            if roles[0] == 'Employee':
+                roleString = roleString + 'E/'
+                if 'Employee_BCBA' in roles:
+                    roleString = roleString + 'BCBA'
+                if 'Employee_SPOT' in roles:
+                    roleString = roleString + 'SPOT'
+                if 'Administrator' in roles:
+                    roleString = roleString + 'Admin'
+            elif roles[0] == 'Client':
+                roleString = roleString + 'C/'
+                if len(roles) > 2:
+                    roleString = roleString + 'Multiple'
+                else:
+                    if 'ABA_Teen' in roles:
+                        roleString = roleString + 'ABA Teen'
+                    if 'ABA_Earlychildhood' in roles:
+                        roleString = roleString + 'ABA Early'
+                    if 'Speech_Therapy' in roles:
+                        roleString = roleString + 'Speech'
+                    if 'Occupational_Therapy' in roles:
+                        roleString = roleString + 'OT'
         worksheet.write(index + 5, 0, roleString)
 
         #Write Attendee Initials

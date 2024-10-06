@@ -108,7 +108,7 @@ const handleModalClose = useCallback(() => {
 
 //Render Page
 return (
-<Container sx={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%' }}>
+<Container sx={{ display: 'flex', flexDirection: 'column', height: '100vh', minWidth: '100%' }}>
     <Box sx={{ display: 'flex', p: 1 }}>
       <Box sx={{ flex: 1}}/>
       <Box sx={{flex: 1, backgroundColor: 'gray', padding: 2 }}>
@@ -129,7 +129,8 @@ return (
         }}>
         <div
           className="ag-theme-quartz"
-          style={{ height: 500, width: '80vh' }} // the Data Grid will fill the size of the parent container
+          //TODO: Make webpage take as much screenspace as possible for ease of viewing
+          style={{ height: 750, width: '125vh' }} // the Data Grid will fill the size of the parent container
         >
           <AgGridReact
               rowData={rowData}

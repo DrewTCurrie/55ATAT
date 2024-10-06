@@ -109,11 +109,11 @@ function Events() {
       //Try 
       console.log(quickReport)
       try {
-        const response = await fetch(`http://192.168.1.12:5000/api/generateReport`, quickReport,).then(
+        const response = await fetch(`/api/generateReport`, quickReport,).then(
           res => res.json()
         ).then(
            data => {
-            axios.get(`http://192.168.1.12:5000/api/download/${data}`,{responseType: 'blob'}
+            axios.get(`/api/download/${data}`,{responseType: 'blob'}
             ).then((downloadRes) => {
               const url = window.URL.createObjectURL(new Blob([downloadRes.data]));
               const link = document.createElement('a');

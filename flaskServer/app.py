@@ -4,7 +4,7 @@ import uuid
 
 from flask import Flask, Blueprint, render_template, send_from_directory, request, jsonify, make_response, send_file
 from flask_cors import CORS
-from reports import generateReport
+from reports import generateReport, reportScheduler
 from APIFuncs import utils
 from APIFuncs import MariaDBapi
 from APIFuncs import badgeGenerator
@@ -12,14 +12,26 @@ import sys
 import os
 import time
 
-app = Flask(__name__)
-CORS(app,resources={r"*": {"origins":"http://localhost:5173"""}})
+#Scheduling library
+import schedule
+#Need threading for schedules
+from threading import Thread
 
+app = Flask(__name__)
+#CORS(app,resources={r"*": {"origins":"http://localhost:5173"""}})
+CORS(app)
 sys.path.append(os.path.join(sys.path[0], '/xlsx'))
 sys.path.append(os.path.join(sys.path[0], '/profileImage'))
 image_folder = 'flaskServer/profileImage'
 
 
+#--Schedule funciton. Needs to stay in the main flask app ----------------------------------------------
+def ScheduleManager():
+    while 1: 
+        schedule.run_pending()
+        time.sleep(5)
+
+#----------Web Routes ------------------------------------------------------------------------------------
 @app.route('/api/generateReport', methods=['GET', 'POST'])
 def generate_report():
     data = request.json
@@ -33,7 +45,7 @@ def generate_report():
     while time.time() - start_time < 60:
         if os.path.isfile('/home/55ATAT/55ATAT/flaskServer/xlsx/'+fileName):
             print('found file')
-            return make_response(jsonify(dir + fileName), 200)
+            return make_response(jsonify(fileName), 200)
         time.sleep(1)
     return make_response("Error: File not found", 404)
 
@@ -41,9 +53,7 @@ def generate_report():
 @app.route('/api/download/<path:filename>', methods=['GET', 'POST'])
 def download_file(filename):
     print("filename received: " + filename)
-    modifiedPath = filename[17:]
-    print("ModifiedPath is: " + modifiedPath)
-    return send_from_directory(directory='xlsx', path = modifiedPath, as_attachment=True)
+    return send_from_directory(directory='xlsx', path = filename, as_attachment=True)
 
 @app.route('/api/attendeeInitials',methods=['GET'])
 def getAttendeeInitials():
@@ -215,4 +225,14 @@ def index():
 
 if __name__ == '__main__':
     print("Flask Server started from app.py")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    #---------Scheduled Processes-----------------------------------------------------------------------------
+    schedule.every().day.at("17:00").do(reportScheduler.CheckReportsSchedule)
+    #schedule.every(60).seconds.do(reportScheduler.CheckReportsSchedule)
+    
+    #This may not be the most effecient way to run this code however I cannot find a more effecient way to run 
+    #python code on a monthly basis. This seems to work but it does require a thread that is running that is basically
+    #just polling the current date/time every 15 minutes to see if it is the correct time to generate a report
+    #It is more effecient than the original polling of like every second
+    ScheduleMangerThread = Thread(target=ScheduleManager)
+    ScheduleMangerThread.start()
+    app.run(host='0.0.0.0', port=5000, debug=False)
