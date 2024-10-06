@@ -51,9 +51,7 @@ def generate_report():
 @app.route('/api/download/<path:filename>', methods=['GET', 'POST'])
 def download_file(filename):
     print("filename received: " + filename)
-    modifiedPath = filename[17:]
-    print("ModifiedPath is: " + modifiedPath)
-    return send_from_directory(directory='xlsx', path = modifiedPath, as_attachment=True)
+    return send_from_directory(directory='xlsx', path = filename, as_attachment=True)
 
 @app.route('/api/attendeeInitials',methods=['GET'])
 def getAttendeeInitials():
