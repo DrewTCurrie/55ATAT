@@ -27,12 +27,12 @@ def generate_qr_code(userID, filename):
 
 
 # Function to add text to an image
-def add_text_to_image(img_path, text, output_path, position, font_size=50):
+def add_text_to_image(img_path, text, output_path, position, font_size=100):
     img = Image.open(img_path).convert("RGBA")
     draw = ImageDraw.Draw(img)
     font = ImageFont.load_default()
     try:
-        font = ImageFont.truetype("arial.ttf", font_size)
+        font = ImageFont.truetype("Quicksand-Bold.ttf", font_size)
     except IOError:
         font = ImageFont.load_default()
 
