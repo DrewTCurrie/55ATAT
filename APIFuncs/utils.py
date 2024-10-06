@@ -1,6 +1,6 @@
 #Utilities for accessing the database
-# Drew Currie
-# Last Updated 09/19/2024
+# Drew Currie, Samuel Lovering
+# Last Updated 09/30/2024
 
 #This file provides a series of useful functions for accessing the MariaDB database
 #Each of the functions is documented in the declaration of the function
@@ -92,7 +92,7 @@ def NewAttendanceEvent(UserID):
     UserInitials = GetUserInitials(UserID, NAESession)
 
     # Create an Object of type Attendance Event with all the parameters. Timestamp is automatically populated
-    NewAttendanceEvent = api.AttendanceEvent(EventUUID=str(EventID), ID=UserID, AttendeeInitials=UserInitials,
+    NewAttendanceEvent = api.AttendanceEvent(EventUUID=EventID, ID=UserID, AttendeeInitials=UserInitials,
                                              Timestamp=datetime.now(), Absent=False, TIL_Violation=0,
                                              AdminInitials="N/A", Comment="N/A")
     # Try to add the attendance event to the database, if it fails, return error code 400, close session
@@ -221,7 +221,7 @@ def NewAttendeeFromWeb(AttendeeJSON):
             return (Error)
 
 
-# This funciton updates an attendee using information provided from the web.
+# This function updates an attendee using information provided from the web.
 def editAttendeeFromWeb(editAttendeeJSON):
     #Create SqlAlchemy Session
     api.Base.metadata.create_all(api.engine)
@@ -241,7 +241,7 @@ def editAttendeeFromWeb(editAttendeeJSON):
     Session.close()
 
 
-# This function chains from the createAttendeeFromWeb funciton, if the attendee created is an administrator,
+# This function chains from the createAttendeeFromWeb function, if the attendee created is an administrator,
 # then this function will be called.
 def createAdministrator(AdministratorJSON):
     #Create SqlAlchemy Session
@@ -334,6 +334,68 @@ def getAllAttendees():
     Session.close()
     return attendeeList
 
+def getEvents(numEvents):
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #Query for last numEvents from the database
+    query = Session.query(api.AttendanceEvent).order_by(api.AttendanceEvent.Timestamp.desc()).limit(numEvents).all()
+    #Put query data into dictionary to be returned as JSON to webpage
+    eventList = []
+    for row in query:
+        eventList.append({
+            'EventID': row.EventUUID,
+            'ID': row.ID,
+            'Initials': row.AttendeeInitials,
+            'Timestamp': row.Timestamp,
+            'Absent': row.Absent,
+            'TIL_Violation': row.TIL_Violation,
+            'AdminInitials': row.AdminInitials,
+            'Comment': row.Comment,
+        })
+    Session.close()
+    return eventList
+
+def createEventFromWeb(eventData):
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #If there is missing data, add placeholders.
+    if eventData.get('initials') == '':
+        initials = 'N/A' #Assign a placeholder
+        attendeeID = 'PTCBZN-99999999999' #Assign placeholder ID
+    else:
+        initials = eventData.get('initials')
+        # Query to get a userID to assign to DB
+        query = Session.query(api.Attendee).filter_by(AttendeeInitials=eventData.get('initials')).first()
+        attendeeID = query.ID
+    if eventData.get('date') is None:
+        # If no time, assign current date
+        date = datetime.now()
+    else:
+        date = datetime.strptime(eventData.get('date'), "%Y-%m-%dT%H:%M:%S.%fZ")
+
+    #Create a UUID for the event
+    EventID = uuid.uuid4()
+    #Create attendance event object
+    newEvent = api.AttendanceEvent(
+        EventUUID=EventID,
+        ID=attendeeID,
+        AttendeeInitials=initials,
+        Timestamp=date,
+        Absent=eventData.get('absence'),
+        TIL_Violation=eventData.get('tail'),
+        AdminInitials="N/A",                #TODO: Unimplemented, will be added with log.
+        Comment=eventData.get('comment'))
+
+    #Add NewAttendanceEvent to the database.
+    Session.add(newEvent)
+    Session.commit()
+    Session.close()
 
 def getAttendeeRole(AttendeeID):
     #Create Sqlalchemy Session
@@ -434,4 +496,4 @@ def ClearAdministrators():
 
 
 if __name__ == '__main__':
-    deleteAttendee("PTCBZN-10872623683")
+    getEvents(50)

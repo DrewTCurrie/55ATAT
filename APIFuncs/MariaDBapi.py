@@ -31,9 +31,9 @@ class Administrator(Base):
 
 class AttendanceEvent(Base):
       __tablename__ = 'CurrentAttendanceEvents'
-      EventUUID = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+      EventUUID = sqlalchemy.Column(sqlalchemy.Uuid, primary_key=True)
       ID = sqlalchemy.Column(sqlalchemy.String(length = 24))
-      AttendeeInitials = sqlalchemy.Column(sqlalchemy.String(length=6))
+      AttendeeInitials = sqlalchemy.Column(sqlalchemy.String(length=12))
       Timestamp = sqlalchemy.Column(sqlalchemy.TIMESTAMP, default=datetime.now())
       Absent = sqlalchemy.Column(sqlalchemy.Boolean, default = False)
       TIL_Violation = sqlalchemy.Column(sqlalchemy.Integer, default = 0)
@@ -42,7 +42,7 @@ class AttendanceEvent(Base):
 
 class ArchivalEvent(Base):
       __tablename__ = 'ArchivalEvents'
-      EventUUID = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+      EventUUID = sqlalchemy.Column(sqlalchemy.Uuid, primary_key=True)
       ID = sqlalchemy.Column(sqlalchemy.String(length = 24))
       AttendeeInitials = sqlalchemy.Column(sqlalchemy.String(length=6))
       Timestamp = sqlalchemy.Column(sqlalchemy.TIMESTAMP, default=datetime.now())

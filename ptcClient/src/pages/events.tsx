@@ -2,40 +2,99 @@ import { Container, Box, Typography, Button, ButtonGroup} from '@mui/material';
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import { useState } from 'react'
-import { ColDef } from 'ag-grid-community';
+import { useCallback, useEffect, useState } from 'react'
+import { ColDef, ICellRendererParams } from 'ag-grid-community';
 import ReportModal from '../components/reportModal';
 import * as React from 'react';
 import axios from 'axios';
+import NewEvent from '../components/newEventModal';
 
 //TODO: Make this table useable for Event Listings
 interface IRow {
-  make: string;
-  model: string;
-  price: number;
-  electric: boolean;
+  EventID: string,
+  ID: string,
+  Initials: string,
+  Timestamp: string,
+  Absent: boolean,
+  TIL_Violation: boolean,
+  AdminInitials: string,
+  Comment: string
 }
 
 function Events() {
-    // Row Data: The data to be displayed.
-    const [rowData, setRowData] = useState<IRow[]>([
-      { make: "Tesla", model: "Model Y", price: 64950, electric: true },
-      { make: "Ford", model: "F-Series", price: 33850, electric: false },
-      { make: "Toyota", model: "Corolla", price: 29600, electric: false },
-      { make: "Mercedes", model: "EQA", price: 48890, electric: true },
-      { make: "Fiat", model: "500", price: 15774, electric: false },
-      { make: "Nissan", model: "Juke", price: 20675, electric: false },
-    ]);
-
     // Column Definitions: Defines the columns to be displayed.
-    const [colDefs, setColDefs] = useState<ColDef<IRow>[]>([
-      { field: "make" },
-      { field: "model" },
-      { field: "price" },
-      { field: "electric" },
+    const [colDefs] = useState<ColDef[]>([
+      { field: "EventID",
+        hide: true
+       },
+      { field: "ID",
+        hide: true
+       },
+      { field: "Initials",
+        flex: 1
+       },
+      { field: "Timestamp",
+        flex: 4,
+        cellRenderer: (params: ICellRendererParams<IRow,number>) => {
+          const date = new Date(params.data?.Timestamp ?? "")
+          return date.toLocaleString();
+        }
+       },
+      { field: "Absent",
+        flex: 1,
+      },
+      { field: "TIL_Violation",
+        headerName: 'TIL',
+        flex: 1,
+      },
+      { field: "Edit",
+        headerName: 'Edit',
+        flex: 1,
+        cellRenderer: (params: ICellRendererParams<IRow, number>) => {
+          const ID = params.data?.ID ?? ""; //TODO: Add proper edit and delete functions.
+          const Initials = params.data?.Initials ?? "";
+          return "Edit"
+        } 
+      },
+      { field: "Delete",
+        flex: 1,
+        cellRenderer: (params: ICellRendererParams<IRow,number>) => {
+          const ID = params.data?.ID ?? "";
+          const Initials = params.data?.Initials ?? "";
+          return "Delete"
+        }
+      },
+      { field: "AdminInitials",
+        hide: true
+      },
+      { field: "Comment",
+        hide: true
+      }
     ]);
 
-    
+    /* TABLE BUILDING
+    Fetch all attendees in database (maybe limit this if db gets huge)
+    */
+    const [rowData, setRowData] = useState<IRow[]>([])
+    const [hasFetchedRowData, setHasFetchedRowData] = useState(false)
+    const fetchRowData = async () => {
+      try{
+        const response = await fetch(`/api/getRecentEvents`)
+        const data = await response.json();
+        setRowData(data);
+        setHasFetchedRowData(true);
+      } catch(e){
+        console.error("Error fetching Attendees:", e);
+      }
+    }
+
+    //This use effect loads Row data on webpage load
+    useEffect(()=> {
+      if(!hasFetchedRowData){
+          fetchRowData();
+        };
+      }
+    )
 
     const generateQuickReport = async () => {
       //JSON for a quick report, (7 days back), Python will autofill information.
@@ -65,15 +124,16 @@ function Events() {
             })
           }
         );
-        if(!response.ok){
-          throw new Error(`Error: ${response.statusText}`);
-        }
       } catch(e: any){
         console.log(e.message);
       }
     };
 
-
+    //When a modal closes, reload the table.
+    const handleModalClose = useCallback(() => {
+      fetchRowData();
+    },[]);
+    
     return (
       <Container sx={{display: 'block', height: '100vh', width: '85vh'}}>
           <Box sx={{ display: 'flex', p: 1 }}>
@@ -103,7 +163,7 @@ function Events() {
                     columnDefs={colDefs}
               />
               </div>
-              <Button variant='contained' sx={{display: 'flex'}}>New</Button>
+              <NewEvent onClose={handleModalClose}></NewEvent>
           </Box>
         </Container>
       );
