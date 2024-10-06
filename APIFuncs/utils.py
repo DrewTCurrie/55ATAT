@@ -76,7 +76,7 @@ def NewAttendanceEvent(UserID):
 
     #Take user ID from QR code as function input
     #Generate UUID for the EventID
-    EventID = uuid.uuid4()
+    EventID = random.randint(100000000, 999999999)
 
     #Query Database to get the Attendee Initials for the corresponding UserID
     # Open new session to the database.
@@ -92,7 +92,7 @@ def NewAttendanceEvent(UserID):
     UserInitials = GetUserInitials(UserID, NAESession)
 
     # Create an Object of type Attendance Event with all the parameters. Timestamp is automatically populated
-    NewAttendanceEvent = api.AttendanceEvent(EventUUID=str(EventID), ID=UserID, AttendeeInitials=UserInitials,
+    NewAttendanceEvent = api.AttendanceEvent(EventUUID=EventID, ID=UserID, AttendeeInitials=UserInitials,
                                              Timestamp=datetime.now(), Absent=False, TIL_Violation=0,
                                              AdminInitials="N/A", Comment="N/A")
     # Try to add the attendance event to the database, if it fails, return error code 400, close session

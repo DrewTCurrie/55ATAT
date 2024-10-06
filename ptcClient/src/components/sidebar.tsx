@@ -4,6 +4,7 @@ import { useState, useEffect} from 'react'
 import { Link } from 'react-router-dom'
 
 const navItems = [
+  {text: 'Scanner', link: '/'},
   {text: 'Events', link:'/events'},
   {text: 'Clients', link:'/clients'},
 ];

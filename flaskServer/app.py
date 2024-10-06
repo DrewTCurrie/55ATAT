@@ -63,6 +63,12 @@ def getAllAttendees():
 def getRecentEvents():
     return make_response(jsonify(utils.getEvents(50)), 200)
 
+#This endpoint takes a userID, and creates an attendance event with it
+@app.route('/api/scanEvent',methods=['POST'])
+def scanEvent():
+    data = request.json
+    return make_response(jsonify(utils.NewAttendanceEvent(data.get('id'))), 200)
+
 
 #createAccount parses the formdata, creates an account, saves an image associated with the id for badge creation, and returns the id.
 @app.route('/api/createAccount', methods=['POST'])
