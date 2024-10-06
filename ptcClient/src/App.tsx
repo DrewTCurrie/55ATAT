@@ -1,10 +1,9 @@
-import { useState } from 'react'
 import Sidebar from './components/sidebar'
 import './App.css'
 import Events from './pages/events'
 import Clients from './pages/clients'
 import { Routes, Route } from 'react-router-dom'
-import { Box, Container } from '@mui/material'
+import { Box } from '@mui/material'
 import React from 'react'
 import Scanner from './pages/scanner'
 
