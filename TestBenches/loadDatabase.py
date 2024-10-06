@@ -5,9 +5,13 @@ import random
 import string
 import sys
 import sqlalchemy
+import uuid
 
-sys.path.append(os.path.join(sys.path[0], '../APIFuncs'))
-from APIFuncs import utils, MariaDBapi as api
+sys.path.append(os.path.join(sys.path[0], '/home/55ATAT/55ATAT'))
+sys.path.append(os.path.join(sys.path[0], '/home/55ATAT/55ATAT/APIFuncs'))
+
+from APIFuncs import MariaDBapi as api
+from APIFuncs import utils
 
 
 # Todo, create a way to load attendance events associated with an attendee
@@ -52,7 +56,7 @@ def create_attendees_and_events():
         #Make 10 attendance events for each attendee starting from today
         for i in range(10):
             EventID = RandomID.randint(100000000, 999999999)
-            NewAttendanceEvent = api.AttendanceEvent(EventUUID=EventID, ID=newUserID, AttendeeInitials=AttendeeJSON['AttendeeInitials'],
+            NewAttendanceEvent = api.AttendanceEvent(EventUUID= str(uuid.uuid4()), ID=newUserID, AttendeeInitials=AttendeeJSON['AttendeeInitials'],
                                                      Timestamp=(datetime.datetime.now() - datetime.timedelta(days=i)), Absent=False, TIL_Violation=0,
                                                      AdminInitials="N/A", Comment="N/A")
             Session.add(NewAttendanceEvent)
