@@ -8,8 +8,10 @@ import ReportModal from '../components/reportModal';
 import * as React from 'react';
 import axios from 'axios';
 import NewEvent from '../components/newEventModal';
+import DeleteEvent from '../components/deleteEvent';
+import EditEvent from '../components/editEvent';
 
-//TODO: Make this table useable for Event Listings
+
 interface IRow {
   EventID: string,
   ID: string,
@@ -42,26 +44,46 @@ function Events() {
        },
       { field: "Absent",
         flex: 1,
+        cellRenderer: (params: ICellRendererParams<IRow, number>) => {
+          if (params.data?.Absent === false) {
+            return <Typography sx={{my:'.3rem'}}>No</Typography>;
+          } else {
+            return <Typography color='red' sx={{my:'.3rem'}}>Yes</Typography>;
+          }
+        }
       },
       { field: "TIL_Violation",
         headerName: 'TIL',
         flex: 1,
+        cellRenderer: (params: ICellRendererParams<IRow, number>) => {
+          if (params.data?.TIL_Violation === false) {
+            return <Typography sx={{my:'.3rem'}}>No</Typography>;
+          } else {
+            return <Typography color='red' sx={{my:'.3rem'}}>Yes</Typography>;
+          }
+        }
       },
       { field: "Edit",
         headerName: 'Edit',
         flex: 1,
         cellRenderer: (params: ICellRendererParams<IRow, number>) => {
-          const ID = params.data?.ID ?? ""; //TODO: Add proper edit and delete functions.
+          const EventID = params.data?.EventID ?? ""; 
           const Initials = params.data?.Initials ?? "";
-          return "Edit"
+          const Timestamp = params.data?.Timestamp ?? "";
+          const Absent = params.data?.Absent ?? false
+          const TIL = params.data?.TIL_Violation ?? false
+          const AdminInitials = params.data?.AdminInitials ?? "";
+          const Comment = params.data?.Comment ?? "";
+          return <EditEvent onClose={handleModalClose} EventID={EventID} Initials={Initials} Timestamp={Timestamp} Absent={Absent} TIL={TIL} AdminInitials={AdminInitials} Comment={Comment}/>
         } 
       },
       { field: "Delete",
         flex: 1,
         cellRenderer: (params: ICellRendererParams<IRow,number>) => {
-          const ID = params.data?.ID ?? "";
+          const EventID = params.data?.EventID ?? "";
           const Initials = params.data?.Initials ?? "";
-          return "Delete"
+          const Timestamp = new Date(params.data?.Timestamp ?? "")
+          return <DeleteEvent onClose={handleModalClose} ID={EventID} Initials={Initials} Timestamp={Timestamp.toLocaleString()}/>
         }
       },
       { field: "AdminInitials",

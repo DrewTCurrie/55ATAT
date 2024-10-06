@@ -334,6 +334,7 @@ def getAllAttendees():
     Session.close()
     return attendeeList
 
+
 def getEvents(numEvents):
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
@@ -358,6 +359,7 @@ def getEvents(numEvents):
     Session.close()
     return eventList
 
+
 def createEventFromWeb(eventData):
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
@@ -365,9 +367,10 @@ def createEventFromWeb(eventData):
     Session.configure(bind=api.engine)
     Session = Session()
     #If there is missing data, add placeholders.
-    if eventData.get('initials') == '':
-        initials = 'N/A' #Assign a placeholder
-        attendeeID = 'PTCBZN-99999999999' #Assign placeholder ID
+    print(eventData.get('initials'))
+    if eventData.get('initials') is None:
+        initials = 'N/A'  #Assign a placeholder
+        attendeeID = 'PTCBZN-99999999999'  #Assign placeholder ID
     else:
         initials = eventData.get('initials')
         # Query to get a userID to assign to DB
@@ -389,13 +392,76 @@ def createEventFromWeb(eventData):
         Timestamp=date,
         Absent=eventData.get('absence'),
         TIL_Violation=eventData.get('tail'),
-        AdminInitials="N/A",                #TODO: Unimplemented, will be added with log.
+        AdminInitials="N/A",  #TODO: Unimplemented, will be added with log.
         Comment=eventData.get('comment'))
 
     #Add NewAttendanceEvent to the database.
     Session.add(newEvent)
     Session.commit()
     Session.close()
+
+
+def editEvent(eventData):
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #If there is missing data, add placeholders.
+    if eventData.get('initials') == '' or eventData.get('initials') == 'N/A':
+        initials = 'N/A'  #Assign a placeholder
+        attendeeID = 'PTCBZN-99999999999'  #Assign placeholder ID
+    else:
+        initials = eventData.get('initials')
+        # Query to get a userID to assign to DB
+        query = Session.query(api.Attendee).filter_by(AttendeeInitials=eventData.get('initials')).first()
+        attendeeID = query.ID
+    if eventData.get('date') is None:
+        # If no time, assign current date
+        date = datetime.now()
+    else:
+        date = datetime.strptime(eventData.get('date'), "%Y-%m-%dT%H:%M:%S.%fZ")
+
+    #Query Database for Event, overwrite entry
+    eventToEdit = Session.query(api.AttendanceEvent).filter_by(EventUUID=eventData.get('eventid')).first()
+    if eventToEdit:
+        eventToEdit.ID = attendeeID
+        eventToEdit.Initials = initials
+        eventToEdit.Timestamp = date
+        eventToEdit.Absent = eventData.get('absence')
+        eventToEdit.TIL_Violation = eventData.get('tail')
+        eventToEdit.AdminInitials = "N/A"
+        eventToEdit.Comment = eventData.get('comment')
+    else:
+        editedEvent = api.AttendanceEvent(
+            EventUUID=eventData.get('eventid'),
+            ID=attendeeID,
+            AttendeeInitials=initials,
+            Timestamp=date,
+            Absent=eventData.get('absence'),
+            TIL_Violation=eventData.get('tail'),
+            AdminInitials="N/A",
+            Comment=eventData.get('comment')
+        )
+        Session.add(editedEvent)
+    Session.commit()
+    Session.close()
+
+
+def deleteEvent(EventID):
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    # Query for attendance Events with input eventID
+    query = Session.query(api.AttendanceEvent).filter_by(EventUUID=EventID).first()
+    # Delete query result
+    if query is not None:
+        Session.delete(query)
+    Session.commit()
+    Session.close()
+
 
 def getAttendeeRole(AttendeeID):
     #Create Sqlalchemy Session

@@ -1,25 +1,39 @@
-import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, FormControlLabel, Grid2, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, FormControlLabel, Grid2, IconButton, Stack, TextField } from '@mui/material';
 import * as React from 'react';
-import AddIcon from '@mui/icons-material/Add'
 import { useEffect, useState } from 'react';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import EditIcon from '@mui/icons-material/Edit';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 
 interface modalProps{
     onClose: () => void;
+    EventID: string;
+    Initials: string;
+    Timestamp: string;
+    Absent: boolean;
+    TIL: boolean;
+    AdminInitials: string;
+    Comment: string;
 }
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export default function NewEvent({onClose}:modalProps){
+export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL,AdminInitials,Comment}:modalProps){
     //Handling the open and closing of edit modal
     const [open, setOpen] = useState(false);
     const handleClickOpen = () => {
         //Autofill details from the table
+        handleAutoCompleteChange('nameAutoComplete', Initials)
+        setIsChecked(prevState => ({
+            ...prevState,
+            tailCheckbox: TIL,
+            absentCheckbox: Absent
+          }));
+        setComment(Comment)
         setOpen(true);
     };
     const handleClose = () => {
@@ -52,7 +66,7 @@ export default function NewEvent({onClose}:modalProps){
     }
     
     //Date Hooks
-    const [date, setDate]=useState(dayjs());
+    const [date, setDate]=useState(dayjs(Timestamp));
     //Hook for Comment
     const [comment, setComment] = useState('');
     //Checkbox hook, identifies which checkbox then changes it
@@ -106,6 +120,7 @@ export default function NewEvent({onClose}:modalProps){
             method: 'POST',
             headers: {'Content-Type':'application/json',},
             body: JSON.stringify({
+                eventid: EventID,
                 initials: autoCompleteVal.nameAutoComplete,
                 date: date,
                 tail: isChecked.tailCheckbox,
@@ -115,7 +130,7 @@ export default function NewEvent({onClose}:modalProps){
         }
         //try catch to query backend
         try{
-            const response = await fetch(`/api/createEvent`,event);
+            const response = await fetch(`/api/editEvent`,event);
             if (!response.ok) {
               throw new Error('Error creating event');
             } else {
@@ -129,23 +144,11 @@ export default function NewEvent({onClose}:modalProps){
     }
     return(
         <>
-        <Box 
-            display="flex" 
-            alignItems="center" 
-            sx={{
-                maxWidth: '8rem',
-                border: '1px solid blue',
-                padding: '8px',            
-                borderRadius: '4px'        
-              }}>
-            <IconButton 
-                color="primary"
+        <IconButton 
                 onClick={handleClickOpen}
-                aria-label='new attendance event'>
-                <AddIcon />
-                <Typography variant="body1">New Event</Typography>
+                aria-label='edit'>
+                <EditIcon/>
             </IconButton>
-        </Box>
         <Dialog
         open={open}
         onClose={handleClose}>
@@ -212,9 +215,9 @@ export default function NewEvent({onClose}:modalProps){
             sx={{mb:'.6rem',mt:'.4rem',mx:'.4rem'}}>
                 <Button 
                     variant='outlined'
-                    disabled={loading || eventSubmitted}
+                    disabled={loading}
                     onClick={createEvent}>
-                        {loading ? 'Loading' : eventSubmitted ? 'Event Created Successfully' : 'Submit Event'}
+                        {loading ? 'Loading' : eventSubmitted ? 'Event Edited Successfully' : 'Submit Event'}
                 </Button>
                 <Button
                     variant='contained'

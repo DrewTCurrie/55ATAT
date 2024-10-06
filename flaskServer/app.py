@@ -150,6 +150,18 @@ def createEvent():
     utils.createEventFromWeb(data)
     return make_response(jsonify({"message": "Success"}), 200)
 
+@app.route('/api/deleteEvent', methods=['POST'])
+def deleteEvent():
+    data = request.json
+    utils.deleteEvent(data.get('ID'))
+    return make_response(jsonify({"message": "Success"}), 200)
+
+@app.route('/api/editEvent', methods=['POST'])
+def editEvent():
+    data = request.json
+    utils.editEvent(data)
+    return make_response(jsonify({"message": "Success"}), 200)
+
 
 
 #editAccount recieves a formdata object from the front end, then updates the db data with it.
