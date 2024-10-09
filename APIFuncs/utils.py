@@ -9,7 +9,6 @@
 import collections
 import json
 
-import pytz
 import sqlalchemy.cyextension
 from APIFuncs import MariaDBapi as api
 from APIFuncs import JSONHandler as jsonhandler
