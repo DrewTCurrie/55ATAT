@@ -10,15 +10,14 @@
 start_flask_server() {
     echo "Starting Flask server..."
     source ~/55ATAT/venv/bin/activate
-    cd ~/55ATAT/flaskServer
-    flask run
+    cd ~/55ATAT
+    python3 flaskServer/app.py
 }
 
 start_npm_server() {
     echo "Starting NodeJS Server in Development Mode."
-    cd ~/55ATAT/client
-    (npm run dev&)
+    cd ~/55ATAT/ptcClient
+    (npm run dev -- --host)
 }
 
-#start_flask_server &
-start_npm_server
+start_flask_server & start_npm_server
