@@ -107,7 +107,7 @@ export default function NewEvent({onClose}:modalProps){
             headers: {'Content-Type':'application/json',},
             body: JSON.stringify({
                 initials: autoCompleteVal.nameAutoComplete,
-                date: date,
+                date: date.tz("America/Denver").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
                 tail: isChecked.tailCheckbox,
                 absence: isChecked.absentCheckbox,
                 comment: comment
@@ -172,7 +172,7 @@ export default function NewEvent({onClose}:modalProps){
                 label="Date & Time (Blank for Current)" 
                 sx={{mb:'.5rem',mx:'.8rem', mt:'.4rem', minWidth: 300}} 
                 value={date}
-                onChange={(newDate: any)=> setDate(dayjs.tz(newDate, "America/Denver"))}
+                onChange={(newDate: any)=> setDate(dayjs(newDate))}
                 />
             </LocalizationProvider>
             <Box display="flex" sx={{mb:'.6rem',mx:'.8rem'}}>
