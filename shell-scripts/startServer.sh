@@ -20,4 +20,4 @@ start_npm_server() {
     (npm run dev -- --host)
 }
 
-start_flask_server & start_npm_server
+start_flask_server & start_npm_server & firefox -kiosk http://localhost
