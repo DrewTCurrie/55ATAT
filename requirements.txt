@@ -17,3 +17,6 @@ Werkzeug==3.0.3
 WTForms==3.1.2
 XlsxWriter==3.2.0
 schedule==1.2.2
+pytz~=2024.1
+pillow~=10.4.0
+qrcode~=6.1
