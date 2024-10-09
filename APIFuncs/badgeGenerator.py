@@ -102,8 +102,8 @@ def generate_badge(userID):
         back_img.paste(qr_img, (110, 400))
         back_img.save(back_output_path)
 
-        front_url = url_for('static', filename='EmployeeFrontWithDetails.png')
-        back_url = url_for('static', filename='EmployeeBackWithQR.png')
+        front_url = url_for('static', filename='EmployeeFrontWithDetails.png', _external=True)
+        back_url = url_for('static', filename='EmployeeBackWithQR.png', _external=True)
         return jsonify({'front': front_url,'back':back_url})
 
     else:
@@ -137,7 +137,7 @@ def generate_badge(userID):
         front_img.paste(qr_img, (110, 480))  # Adjust position to fit text and QR
         front_img.save(front_output_path)
         # Create a URL for the image, to service the webpage.
-        front_url = url_for('static', filename='NonEmployeeFrontWithDetails.png')
+        front_url = url_for('static', filename='NonEmployeeFrontWithDetails.png', _external=True)
         return jsonify({'front': front_url})
 
 

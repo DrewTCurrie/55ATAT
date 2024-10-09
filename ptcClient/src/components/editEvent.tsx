@@ -122,7 +122,7 @@ export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL
             body: JSON.stringify({
                 eventid: EventID,
                 initials: autoCompleteVal.nameAutoComplete,
-                date: date,
+                date: date.tz("America/Denver").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
                 tail: isChecked.tailCheckbox,
                 absence: isChecked.absentCheckbox,
                 comment: comment
@@ -152,7 +152,7 @@ export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL
         <Dialog
         open={open}
         onClose={handleClose}>
-            <DialogTitle align='center'>New Attendance Event</DialogTitle>
+            <DialogTitle align='center'>Edit Attendance Event</DialogTitle>
             <Grid2
                 display="flex" 
                 flexDirection="column" 
@@ -175,7 +175,7 @@ export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL
                 label="Date & Time (Blank for Current)" 
                 sx={{mb:'.5rem',mx:'.8rem', mt:'.4rem', minWidth: 300}} 
                 value={date}
-                onChange={(newDate: any)=> setDate(dayjs.tz(newDate, "America/Denver"))}
+                onChange={(newDate: any)=> setDate(dayjs(newDate))}
                 />
             </LocalizationProvider>
             <Box display="flex" sx={{mb:'.6rem',mx:'.8rem'}}>

@@ -125,7 +125,7 @@ function ClientModal({onClose}: modalProps){
               "password": pwd
             })
           }
-          const adminResponse = await fetch(`http://localhost:5000/api/createAdmin`,adminAccount)
+          const adminResponse = await fetch(`/api/createAdmin`,adminAccount)
           if (!adminResponse.ok) {
             throw new Error('Error creating Administrator Account');
           }
@@ -138,7 +138,7 @@ function ClientModal({onClose}: modalProps){
             "userID": userID
           })
         }
-        const badgeResponse = await fetch(`http://localhost:5000/api/generateBadge`,badgeDetails)
+        const badgeResponse = await fetch(`/api/generateBadge`,badgeDetails)
         if (!badgeResponse.ok) {
           throw new Error('Error creating User Badge');
         }
@@ -183,11 +183,11 @@ function ClientModal({onClose}: modalProps){
             </style>
             <body>
               <div class="page">
-                <img src="http://localhost:5000${badgeURLs?.front}" alt="Output 1" />
+                <img src="${badgeURLs?.front}" alt="Output 1" />
               </div>
               ${badgeURLs?.back ? (`
               <div class="page">
-                <img src=http://localhost:5000${badgeURLs.back} alt="Output 2" />
+                <img src=${badgeURLs.back} alt="Output 2" />
               </div>
               `):''}
             </body>
@@ -307,7 +307,7 @@ function ClientModal({onClose}: modalProps){
               style={scrollableContentStyle}>
                 {badgeURLs?.front ? (
                   <> 
-                    <img src={`http://localhost:5000${badgeURLs.front}`} //Change to production evniroment name for flask server eventually
+                    <img src={`${badgeURLs.front}`} //Change to production evniroment name for flask server eventually
                     />
                   </>
                 ):(
@@ -316,7 +316,7 @@ function ClientModal({onClose}: modalProps){
                 {badgeURLs?.back ? (
                   <>
                     <img 
-                    src={`http://localhost:5000${badgeURLs.back}`}  //Change to production evniroment name for flask server eventually 
+                    src={`${badgeURLs.back}`}  //Change to production evniroment name for flask server eventually 
                     />
                   </>
                 ):(
