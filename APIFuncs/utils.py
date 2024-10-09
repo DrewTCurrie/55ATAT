@@ -9,13 +9,14 @@
 import collections
 import json
 
+import pytz
 import sqlalchemy.cyextension
 from APIFuncs import MariaDBapi as api
 from APIFuncs import JSONHandler as jsonhandler
 import sqlalchemy
 from sqlalchemy import delete, select, inspect
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 import random
 from sqlalchemy.ext.declarative import declarative_base
 import sys
@@ -91,9 +92,11 @@ def NewAttendanceEvent(UserID):
     # Call get Initials function to find the user intials based on the UserID passed in
     UserInitials = GetUserInitials(UserID, NAESession)
 
+    #Get a Date and convert it to the right timezone.
+    date = datetime.now()
     # Create an Object of type Attendance Event with all the parameters. Timestamp is automatically populated
     NewAttendanceEvent = api.AttendanceEvent(EventUUID=EventID, ID=UserID, AttendeeInitials=UserInitials,
-                                             Timestamp=datetime.now(), Absent=False, TIL_Violation=0,
+                                             Timestamp=date, Absent=False, TIL_Violation=0,
                                              AdminInitials="N/A", Comment="N/A")
     # Try to add the attendance event to the database, if it fails, return error code 400, close session
     # If it suceeds, close the session and return 200 for success. 
@@ -350,7 +353,7 @@ def getEvents(numEvents):
             'EventID': row.EventUUID,
             'ID': row.ID,
             'Initials': row.AttendeeInitials,
-            'Timestamp': row.Timestamp,
+            'Timestamp': row.Timestamp.replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"),
             'Absent': row.Absent,
             'TIL_Violation': row.TIL_Violation,
             'AdminInitials': row.AdminInitials,
@@ -416,7 +419,7 @@ def editEvent(eventData):
         # Query to get a userID to assign to DB
         query = Session.query(api.Attendee).filter_by(AttendeeInitials=eventData.get('initials')).first()
         attendeeID = query.ID
-    if eventData.get('date') is None:
+    if eventData.get('date') is None or eventData.get('date') == "Invalid Date":
         # If no time, assign current date
         date = datetime.now()
     else:
@@ -426,7 +429,7 @@ def editEvent(eventData):
     eventToEdit = Session.query(api.AttendanceEvent).filter_by(EventUUID=uuid.UUID(eventData.get('eventid'))).first()
     if eventToEdit:
         eventToEdit.ID = attendeeID
-        eventToEdit.Initials = initials
+        eventToEdit.AttendeeInitials = initials
         eventToEdit.Timestamp = date
         eventToEdit.Absent = eventData.get('absence')
         eventToEdit.TIL_Violation = eventData.get('tail')

@@ -4,6 +4,8 @@ import os
 import random
 import string
 import sys
+
+import pytz
 import sqlalchemy
 import uuid
 
@@ -55,9 +57,12 @@ def create_attendees_and_events():
         Session.add(NewAttendee)
         #Make 10 attendance events for each attendee starting from today
         for i in range(10):
+            date = datetime.datetime.now()
+            mst = pytz.timezone('America/Denver')
+            date = mst.localize(date)
             EventID = RandomID.randint(100000000, 999999999)
-            NewAttendanceEvent = api.AttendanceEvent(EventUUID= str(uuid.uuid4()), ID=newUserID, AttendeeInitials=AttendeeJSON['AttendeeInitials'],
-                                                     Timestamp=(datetime.datetime.now() - datetime.timedelta(days=i)), Absent=False, TIL_Violation=0,
+            NewAttendanceEvent = api.AttendanceEvent(EventUUID=uuid.uuid4(), ID=newUserID, AttendeeInitials=AttendeeJSON['AttendeeInitials'],
+                                                     Timestamp=(date - datetime.timedelta(days=i)), Absent=False, TIL_Violation=0,
                                                      AdminInitials="N/A", Comment="N/A")
             Session.add(NewAttendanceEvent)
     Session.commit()

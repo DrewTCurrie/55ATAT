@@ -37,10 +37,10 @@ function Events() {
        },
       { field: "Timestamp",
         flex: 4,
-        cellRenderer: (params: ICellRendererParams<IRow,number>) => {
-          const date = new Date(params.data?.Timestamp ?? "")
-          return date.toLocaleString();
-        }
+        // cellRenderer: (params: ICellRendererParams<IRow,number>) => {
+        //   const date = new Date(params.data?.Timestamp ?? "")
+        //   return date;
+        // }
        },
       { field: "Absent",
         flex: 1,
