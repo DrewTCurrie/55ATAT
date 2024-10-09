@@ -238,7 +238,7 @@ def index():
 if __name__ == '__main__':
     print("Flask Server started from app.py")
     #---------Scheduled Processes-----------------------------------------------------------------------------
-    schedule.every().day.at("17:00").do(reportScheduler.CheckReportsSchedule)
+    schedule.every().day.at("21:00").do(reportScheduler.CheckReportsSchedule)
     #schedule.every(60).seconds.do(reportScheduler.CheckReportsSchedule)
     
     #This may not be the most effecient way to run this code however I cannot find a more effecient way to run 
