@@ -125,7 +125,7 @@ function ClientModal({onClose}: modalProps){
               "password": pwd
             })
           }
-          const adminResponse = await fetch(`http://localhost:5000/api/createAdmin`,adminAccount)
+          const adminResponse = await fetch(`/api/createAdmin`,adminAccount)
           if (!adminResponse.ok) {
             throw new Error('Error creating Administrator Account');
           }
@@ -138,7 +138,7 @@ function ClientModal({onClose}: modalProps){
             "userID": userID
           })
         }
-        const badgeResponse = await fetch(`http://localhost:5000/api/generateBadge`,badgeDetails)
+        const badgeResponse = await fetch(`/api/generateBadge`,badgeDetails)
         if (!badgeResponse.ok) {
           throw new Error('Error creating User Badge');
         }
