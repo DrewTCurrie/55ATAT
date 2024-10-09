@@ -228,7 +228,7 @@ function ClientModal({onClose}: modalProps){
                     value={name}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                       setName(event.target.value);}}
-                    inputProps={{ maxLength: 8 }}
+                    inputProps={{ maxLength: 256 }}
                   />
                 </Box>
                 <Box sx={{mb:'.6rem',mx:'.8rem'}}>
