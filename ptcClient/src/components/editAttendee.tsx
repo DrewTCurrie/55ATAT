@@ -202,11 +202,11 @@ interface modalProps{
                 </style>
                 <body>
                 <div class="page">
-                    <img src="http://localhost:5000${badgeURLs?.front}" alt="Output 1" />
+                    <img src="${badgeURLs?.front}" alt="Output 1" />
                 </div>
                 ${badgeURLs?.back ? (`
                 <div class="page">
-                    <img src=http://localhost:5000${badgeURLs.back} alt="Output 2" />
+                    <img src=${badgeURLs.back} alt="Output 2" />
                 </div>
                 `):''}
                 </body>
@@ -346,7 +346,7 @@ interface modalProps{
               style={scrollableContentStyle}>
                 {badgeURLs?.front ? (
                   <> 
-                    <img src={`http://localhost:5000${badgeURLs.front}`} //Change to production evniroment name for flask server eventually
+                    <img src={`${badgeURLs.front}`} //Change to production evniroment name for flask server eventually
                     />
                   </>
                 ):(
@@ -355,7 +355,7 @@ interface modalProps{
                 {badgeURLs?.back ? (
                   <>
                     <img 
-                    src={`http://localhost:5000${badgeURLs.back}`}  //Change to production evniroment name for flask server eventually 
+                    src={`${badgeURLs.back}`}  //Change to production evniroment name for flask server eventually 
                     />
                   </>
                 ):(
