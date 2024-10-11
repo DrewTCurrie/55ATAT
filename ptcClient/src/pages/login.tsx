@@ -1,0 +1,93 @@
+import * as React from "react";
+import {useState} from 'react';
+import {Box,Typography,TextField,Button} from '@mui/material'
+import { useAuth } from "../funcitons/AuthProvider";
+
+
+//https://dev.to/miracool/how-to-manage-user-authentication-with-react-js-3ic5 Template to build this off of
+
+
+export default function Login(){
+    //Hook for Credentials Object to be passed to AuthProvider
+    const [credentials, setCredentials] = useState({
+      username: '',
+      password: ''
+    });
+    //Input Change handler
+    const handleChnage = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const {name, value} = event.target;
+      setCredentials((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    };
+    //Initialize authProvider as auth
+    const auth = useAuth();
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      if(credentials.username !== '' && credentials.password !== ''){
+        auth?.attemptLogin(credentials)
+        return;
+      }
+    }
+
+
+    return(
+    <Box
+      sx={{
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+      }}
+    >
+      <Box
+        sx={{
+          padding: '2rem',
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          minWidth: '300px',
+        }}
+      >
+        <Typography variant="h5" component="h1" gutterBottom color='black'>
+          Login
+        </Typography>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Username"
+            name="username"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={credentials.username}
+            onChange={handleChnage}
+            required
+          />
+          <TextField
+            label="Password"
+            name="password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={credentials.password}
+            onChange={handleChnage}
+            required
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ marginTop: '1rem' }}
+          >
+            Login
+          </Button>
+        </form>
+      </Box>
+    </Box>
+    )
+}

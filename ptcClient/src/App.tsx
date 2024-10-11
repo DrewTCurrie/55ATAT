@@ -6,6 +6,7 @@ import { Routes, Route } from 'react-router-dom'
 import { Box } from '@mui/material'
 import React from 'react'
 import Scanner from './pages/scanner'
+import Login from './pages/login'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Sidebar/>
       <Routes>
         <Route path='' element={<Scanner/>}/>
+        <Route path='login' element={<Login/>}/>
         <Route path='events' element={<Events/>} />
         <Route path='clients' element={<Clients/>} />
       </Routes>
