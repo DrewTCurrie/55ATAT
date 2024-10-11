@@ -6,6 +6,7 @@ import { Routes, Route } from 'react-router-dom'
 import { Box } from '@mui/material'
 import React from 'react'
 import Scanner from './pages/scanner'
+import Table from './components/table'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path='' element={<Scanner/>}/>
         <Route path='events' element={<Events/>} />
         <Route path='clients' element={<Clients/>} />
+        <Route path='table' element={<Table/>}/>
       </Routes>
     </Box>
   );
