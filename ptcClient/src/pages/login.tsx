@@ -13,6 +13,7 @@ export default function Login(){
       username: '',
       password: ''
     });
+
     //Input Change handler
     const handleChnage = (event: React.ChangeEvent<HTMLInputElement>) => {
       const {name, value} = event.target;
@@ -21,14 +22,29 @@ export default function Login(){
         [name]: value,
       }));
     };
+
+    //Loading and Error Handling
+    const [error, setError] = useState('')
+    const [success, setSuccess] = useState(false)
+    const [loading, setLoading] = useState(false)
+
     //Initialize authProvider as auth
     const auth = useAuth();
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+      setLoading(true)
       event.preventDefault();
       if(credentials.username !== '' && credentials.password !== ''){
-        auth?.attemptLogin(credentials)
-        return;
+        const loginError = await auth?.attemptLogin(credentials) //only returns error messages.
+        if(loginError){
+          setError(loginError);
+          setSuccess(false)
+        } else {
+          setSuccess(true)
+          setError('')
+        }
+        
       }
+      setLoading(false)
     }
 
 
@@ -82,10 +98,13 @@ export default function Login(){
             variant="contained"
             color="primary"
             fullWidth
-            sx={{ marginTop: '1rem' }}
+            sx={{ marginTop: '1rem',mb:'.4rem' }}
+            disabled={loading}
           >
-            Login
+            {loading ? 'Loading' : 'Login'}
           </Button>
+          {success ? <Typography variant="h6" color='green'>Login Successful</Typography> : ''}
+          {error ? <Typography variant="h6" color='red'>{error}</Typography> : ''}
         </form>
       </Box>
     </Box>

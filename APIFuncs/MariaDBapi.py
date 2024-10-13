@@ -2,7 +2,7 @@ import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
-engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:X%i7us7tCMg9bmKQp&9rD&@127.0.0.1/PTCBozeman")
+engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:lovering@127.0.0.1/ptctest")
 Base = declarative_base()
 
 class Attendee(Base):
@@ -26,7 +26,7 @@ class Administrator(Base):
         __tablename__ = 'Administrators'
         ID = sqlalchemy.Column(sqlalchemy.String(length=24), primary_key =True)
         UserName = sqlalchemy.Column(sqlalchemy.String(length=32))
-        Password = sqlalchemy.Column(sqlalchemy.String(length=32))
+        Password = sqlalchemy.Column(sqlalchemy.String(length=128))
 
 
 class AttendanceEvent(Base):

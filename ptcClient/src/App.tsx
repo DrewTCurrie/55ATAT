@@ -7,18 +7,21 @@ import { Box } from '@mui/material'
 import React from 'react'
 import Scanner from './pages/scanner'
 import Login from './pages/login'
+import AuthProvider from './funcitons/AuthProvider'
 
 function App() {
   return (
-    <Box sx={{display: 'flex'}}>
-      <Sidebar/>
-      <Routes>
-        <Route path='' element={<Scanner/>}/>
-        <Route path='login' element={<Login/>}/>
-        <Route path='events' element={<Events/>} />
-        <Route path='clients' element={<Clients/>} />
-      </Routes>
-    </Box>
+    <AuthProvider>
+      <Box sx={{display: 'flex'}}>
+        <Sidebar/>
+        <Routes>
+          <Route path='' element={<Scanner/>}/>
+          <Route path='login' element={<Login/>}/>
+          <Route path='events' element={<Events/>} />
+          <Route path='clients' element={<Clients/>} />
+        </Routes>
+      </Box>
+    </AuthProvider>
   );
 };
 

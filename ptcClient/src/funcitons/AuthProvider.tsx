@@ -18,7 +18,7 @@ interface authProps {
 interface AuthContextType {
     adminInitials: string | null,
     token: string | null,
-    attemptLogin: (data: userCredentials) => Promise<void>,
+    attemptLogin: (data: userCredentials) => Promise<void | string>,
     logOut: () => void;
 }
 
@@ -29,7 +29,33 @@ const AuthProvider: React.FC<authProps> = ({children}) => {
     const navigate = useNavigate();
     //This calls to the backend to attempt to login, on success it returns the adminInitials and a token for site authentication.
     const attemptLogin = async (data: userCredentials) => {
-
+        const loginDetails = {
+            method: 'POST',
+            headers: {'Content-Type':'application/json',},
+            body: JSON.stringify({
+                UserName: data.username,
+                Password: data.password
+            })
+        }
+        try{
+            const login = await fetch(`/api/login`,loginDetails)
+            const data = await login.json()
+            console.log(data)
+            if(data.Success == true){
+                setAdminInitials(data.adminInitials)
+                setToken(data.userToken);
+                localStorage.setItem('token',data.userToken)
+                return;
+            } else {
+                console.error("Error on User Login", data)
+                return data.Message
+            }
+        }catch(e: any){
+            console.error("Error on User Login",e)
+            if (e.response && e.response.data && e.response.data.Success) {
+                return e.response.data.Success; // Return error message from backend
+            }
+        }
     };
     const logOut = () => {
         setAdminInitials("");

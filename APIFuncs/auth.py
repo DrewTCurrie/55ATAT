@@ -1,6 +1,10 @@
 import hashlib
 import os
-from APIFuncs import MariaDBapi as api
+
+import sqlalchemy
+
+from APIFuncs import MariaDBapi as api, utils
+
 
 # This function takes in a string, then salts, encrypts and appends
 # the salt to the string for decryption.
@@ -16,27 +20,52 @@ def encrypt(stringToBeEncrypted):
     #return as hex string for entry in DB.
     return salt_and_hash.hex()
 
-# This function pulls
-def decrypt(stringToBeDecrypted):
-    #Convert the hex string into bytes
-    salt_and_hash = bytes.fromhex(stringToBeDecrypted)
-    print(salt_and_hash)
-    # Extract the salt (first 16 bytes)
-    salt = salt_and_hash[:16]
-    print(salt)
-    hashedString = salt_and_hash[16:]
-    print(hashedString)
-
-#def createToken():
+def adminLogin(username, inputPassword):
+    if username == 'admin' and inputPassword == 'admin':
+        return True
+    else:
+        return False
 
 #This function attempts to check the login of a user, and returns true if it is valid
-def attemptLogin(username, password):
+def attemptLogin(username, inputPassword):
+    # Try global password
+    if adminLogin(username, inputPassword):
+        return {"Success": True, "Message": 'Login Successful', "adminInitials":"GlobalAdmin"}
+    # Create Sql Alchemy Session
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #Query Database for username + hashedPassword
+    query = Session.query(api.Administrator).filter_by(UserName=username).first()
+    if query is None:
+        return {"Success": False, "Message": 'Username not Found'}
+    else:
+        #Parse dbPassword for salt and rest of password
+        dbPassword = bytes.fromhex(query.Password)
+        dbSalt = dbPassword[:16]
+        dbHashedPassword = dbPassword[16:]
+    #Append Salt to inputPassword
+    saltedInput = dbSalt + inputPassword.encode('utf-8')
+    hashedInput = hashlib.sha256(saltedInput).digest()
+
+    #Close Session
+    Session.close()
+
+    if hashedInput == dbHashedPassword:
+        #Get Attendee Data from Adminsitrator Username
+        adminID = utils.getIDFromAdministrator(username)
+        # Get AdminInitials and add it to response
+        adminInfo = utils.getAttendee(adminID)
+        return {"Success": True, "Message": 'Login Successful',"adminInitials": adminInfo.AttendeeInitials}
+    else:
+        return {"Success": False, "Message": 'Incorrect password'}
 
 
 
 if __name__ == "__main__":
     testVal = 'Test'
+    print(len(testVal))
     print(testVal)
     test = encrypt(testVal)
     print(test)
-    decrypt(test)
+    print(len(test))
