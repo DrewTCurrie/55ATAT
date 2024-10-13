@@ -1,6 +1,6 @@
 import hashlib
 import os
-
+from APIFuncs import MariaDBapi as api
 
 # This function takes in a string, then salts, encrypts and appends
 # the salt to the string for decryption.
@@ -16,7 +16,7 @@ def encrypt(stringToBeEncrypted):
     #return as hex string for entry in DB.
     return salt_and_hash.hex()
 
-# This function pulls 
+# This function pulls
 def decrypt(stringToBeDecrypted):
     #Convert the hex string into bytes
     salt_and_hash = bytes.fromhex(stringToBeDecrypted)
@@ -28,7 +28,10 @@ def decrypt(stringToBeDecrypted):
     print(hashedString)
 
 #def createToken():
-#def attemptLogin(username, password):
+
+#This function attempts to check the login of a user, and returns true if it is valid
+def attemptLogin(username, password):
+
 
 
 if __name__ == "__main__":
