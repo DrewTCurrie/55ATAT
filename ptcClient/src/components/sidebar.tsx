@@ -39,7 +39,6 @@ export default function Sidebar() {
 
   //Initialize authProvider as auth for Admin Initials
   const auth = useAuth();
-  console.log(auth)
 
   return(
       <Box>

@@ -406,7 +406,7 @@ def createEventFromWeb(eventData):
         Timestamp=date,
         Absent=eventData.get('absence'),
         TIL_Violation=eventData.get('tail'),
-        AdminInitials="N/A",  #TODO: Unimplemented, will be added with log.
+        AdminInitials=eventData.get('adminInitials'),
         Comment=eventData.get('comment'))
 
     #Add NewAttendanceEvent to the database.
@@ -444,7 +444,7 @@ def editEvent(eventData):
         eventToEdit.Timestamp = date
         eventToEdit.Absent = eventData.get('absence')
         eventToEdit.TIL_Violation = eventData.get('tail')
-        eventToEdit.AdminInitials = "N/A"
+        eventToEdit.AdminInitials = eventData.get('adminInitials')
         eventToEdit.Comment = eventData.get('comment')
     else:
         editedEvent = api.AttendanceEvent(
@@ -454,7 +454,7 @@ def editEvent(eventData):
             Timestamp=date,
             Absent=eventData.get('absence'),
             TIL_Violation=eventData.get('tail'),
-            AdminInitials="N/A",
+            AdminInitials=eventData.get('adminInitials'),
             Comment=eventData.get('comment')
         )
         Session.add(editedEvent)
