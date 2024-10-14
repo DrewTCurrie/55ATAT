@@ -61,7 +61,7 @@ const AuthProvider: React.FC<authProps> = ({children}) => {
     const logOut = () => {
         setAdminInitials("");
         setToken("")
-        localStorage.removeItem('site')
+        localStorage.removeItem('token')
         navigate('/login')
     };
 
