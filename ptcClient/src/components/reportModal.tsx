@@ -4,6 +4,12 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Fragment, useEffect, useState } from "react";
 import * as React from "react"; 
 import axios from 'axios'
+import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 function ReportModal(){
     //Open React Hook
@@ -13,6 +19,10 @@ function ReportModal(){
       setOpen(true);
     };
     const handleClose = () => {
+      handleAutoCompleteChange('roleAutoComplete', '')
+      handleAutoCompleteChange('nameAutoComplete', '')
+      setStartDate(dayjs())
+      setEndDate(dayjs())
       setOpen(false);
     };
 
@@ -51,8 +61,8 @@ function ReportModal(){
     }})
 
     //Date Hooks
-    const [startDate, setStartDate]=useState(null);
-    const [endDate, setEndDate]=useState(null);
+    const [startDate, setStartDate]=useState(dayjs());
+    const [endDate, setEndDate]=useState(dayjs());
     
     //Checkbox hook, identifies which checkbox then changes it
     const [isChecked, setIsChecked] = useState<{ [key: string]: boolean }>({
@@ -88,8 +98,8 @@ function ReportModal(){
           body: JSON.stringify({
             "name": autoCompleteVal.nameAutoComplete,
             "role": autoCompleteVal.roleAutoComplete,
-            "startDate": startDate,
-            "endDate": endDate
+            "startDate": startDate.tz("America/Denver").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
+            "endDate": endDate.tz("America/Denver").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]")
           })}
       //Try 
       console.log(report)
@@ -109,9 +119,6 @@ function ReportModal(){
             })
           }
         );
-        if(!response.ok){
-          throw new Error(`Error: ${response.statusText}`);
-        }  
       } catch(e: any){
         console.log(e.message);
       }
@@ -157,7 +164,7 @@ function ReportModal(){
                 label="Start Date" 
                 sx={{mb:'.5rem',mx:'.8rem'}}
                 value={startDate}
-                onChange={(newDate: any)=> setStartDate(newDate)}
+                onChange={(newDate: any)=> setStartDate(dayjs(newDate).startOf('day'))}
                 maxDate={endDate}
                 />
             </LocalizationProvider>
@@ -166,7 +173,7 @@ function ReportModal(){
                 label="End Date" 
                 sx={{mb:'.5rem',mx:'.8rem'}} 
                 value={endDate}
-                onChange={(newDate: any)=> setEndDate(newDate)}
+                onChange={(newDate: any)=> setEndDate(dayjs(newDate).endOf('day'))}
                 minDate={startDate}
                 />
             </LocalizationProvider>
