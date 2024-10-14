@@ -84,7 +84,7 @@ export default function Sidebar() {
               textAlign:'center'
             }}>
               {auth?.adminInitials ? 
-                    <Typography>{`Welcome, ${auth?.adminInitials}`}</Typography>: "" }
+                    <Typography sx={{mb:'.4rem'}}>{`Welcome, ${auth?.adminInitials}`}</Typography>: "" }
                 <Divider/>
                 <List>
                   <ListItemButton component={Link} to={`/settings`} sx={{ textAlign: 'center' }}>
