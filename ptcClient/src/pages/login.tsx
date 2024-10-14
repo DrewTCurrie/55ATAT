@@ -30,6 +30,7 @@ export default function Login(){
 
     //Initialize authProvider as auth
     const auth = useAuth();
+    //Submit Handler.
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
       setLoading(true)
       event.preventDefault();

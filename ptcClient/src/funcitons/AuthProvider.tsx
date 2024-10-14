@@ -45,6 +45,7 @@ const AuthProvider: React.FC<authProps> = ({children}) => {
                 setAdminInitials(data.adminInitials)
                 setToken(data.userToken);
                 localStorage.setItem('token',data.userToken)
+                navigate('/events')
                 return;
             } else {
                 console.error("Error on User Login", data)
