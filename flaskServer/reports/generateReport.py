@@ -235,11 +235,11 @@ def create_spreadsheet(params):
                 if event_date.date() == date.date():
                     if event.Absent == True:
                         worksheet.write(index + 5, colIndex + 2, "A", unapproved_cancel_format)
-                        worksheet.write_comment(index + 5, colIndex + 2, f"{event.AdminInitials}\n{event.Timestamp}",
+                        worksheet.write_comment(index + 5, colIndex + 2, f"{event.AdminInitials}\n{event.Comment}",
                                                 {'author': event.AdminInitials})
                     elif event.TIL_Violation == True:
                         worksheet.write(index + 5, colIndex + 2, "T", tardy_format)
-                        worksheet.write_comment(index + 5, colIndex + 2, f"{event.AdminInitials}\n{event.Timestamp}",
+                        worksheet.write_comment(index + 5, colIndex + 2, f"{event.AdminInitials}\n{event.Comment}",
                                                 {'author': event.AdminInitials})
                     else:
                         worksheet.write(index + 5, colIndex + 2, "P", present_format)

@@ -7,6 +7,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import { useAuth } from '../funcitons/AuthProvider';
 
 interface modalProps{
     onClose: () => void;
@@ -109,10 +110,11 @@ export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL
     */
     //Hook for handling the modal loading (waiting for input)
     const [loading, setLoading] = useState(false);
-
+    //Initialize authProvider as auth for Admin Initials
+    const auth = useAuth();
     //Hook to check for event submission
     const [eventSubmitted, setEventSubmitted] = useState(false)
-    const createEvent = async () => {
+    const createEvent = async () => {        
         //Set Loading to True to disable button
         setLoading(true)
         //create the event JSON
@@ -125,7 +127,8 @@ export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL
                 date: date.tz("America/Denver").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
                 tail: isChecked.tailCheckbox,
                 absence: isChecked.absentCheckbox,
-                comment: comment
+                comment: comment,
+                adminInitials:(isChecked.tailCheckbox || isChecked.absentCheckbox) && auth?.adminInitials ? auth?.adminInitials : 'N/A'
             })
         }
         //try catch to query backend

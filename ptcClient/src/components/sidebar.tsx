@@ -2,6 +2,7 @@ import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Typ
 import React from 'react';
 import { useState, useEffect} from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../funcitons/AuthProvider';
 
 const navItems = [
   {text: 'Scanner', link: '/'},
@@ -30,9 +31,15 @@ const useWindowSize = () => {
   return windowSize;
 };
 
+
 export default function Sidebar() {
   const {width} = useWindowSize();
   const drawerWidth = width * .15;
+
+
+  //Initialize authProvider as auth for Admin Initials
+  const auth = useAuth();
+
   return(
       <Box>
         <Drawer
@@ -46,22 +53,53 @@ export default function Sidebar() {
             },
           }}
         >
+
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h6" sx={{ my: 2 }}>
               PTC
             </Typography>
             <Divider />
           </Box>
-          <Box sx={{ overflow: 'auto' }}>
-          <List>
-              {navItems.map((item) => (
-                <ListItem key={item.text} disablePadding>
-                  <ListItemButton component={Link} to={item.link} sx={{ textAlign: 'center' }}>
-                    <ListItemText primary={item.text} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
+          <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            height: '100%',
+          }}>
+            <Box sx={{ overflow: 'auto' }}>
+            <List>
+                {navItems.map((item) => (
+                  <ListItem key={item.text} disablePadding>
+                    <ListItemButton component={Link} to={item.link} sx={{ textAlign: 'center' }}>
+                      <ListItemText primary={item.text} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
             </List>
+            </Box>
+            <Box
+            sx={{
+              padding:2,
+              textAlign:'center'
+            }}>
+              {auth?.adminInitials ? 
+                    <Typography sx={{mb:'.4rem'}}>{`Welcome, ${auth?.adminInitials}`}</Typography>: "" }
+                <Divider/>
+                <List>
+                  <ListItemButton component={Link} to={`/settings`} sx={{ textAlign: 'center' }}>
+                    <ListItemText primary={`Settings`}/>
+                  </ListItemButton>
+                {auth?.adminInitials ?
+                  <ListItemButton onClick={auth?.logOut} sx={{ textAlign: 'center' }}>
+                    <ListItemText primary={`Logout`}/>
+                  </ListItemButton> 
+                : <ListItemButton component={Link} to={`/login`} sx={{ textAlign: 'center' }}>
+                    <ListItemText primary={`Login`}/>
+                  </ListItemButton>
+                }
+                </List>
+            </Box>
           </Box>
         </Drawer>
       </Box>

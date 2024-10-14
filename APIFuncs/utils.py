@@ -10,6 +10,7 @@ import collections
 import json
 
 import sqlalchemy.cyextension
+from APIFuncs import auth
 from APIFuncs import MariaDBapi as api
 from APIFuncs import JSONHandler as jsonhandler
 import sqlalchemy
@@ -255,7 +256,7 @@ def createAdministrator(AdministratorJSON):
     NewAdministrator = api.Administrator(
         ID=AdministratorJSON['ID'],
         UserName=AdministratorJSON['username'],
-        Password=AdministratorJSON['password']  #TODO: Create a function that encrypts + salts this, outside of utils.py
+        Password=auth.encrypt(AdministratorJSON['password'])
     )
     #Add to DB
     NASession.add(NewAdministrator)
@@ -275,13 +276,13 @@ def editAdministrator(editAdministratorJSON):
         if editAdministratorJSON['UserName']:
             admin.UserName = editAdministratorJSON['UserName']
         if editAdministratorJSON['Password']:
-            admin.Password = editAdministratorJSON['Password']
+            admin.Password = auth.encrypt(editAdministratorJSON['Password'])
     else:
         #This shouldn't be happening, as the attendee has to exist in the database to be displayed, but create a new attendee if that is the case
         newAdmin = api.Administrator(
             ID=editAdministratorJSON['ID'],
             UserName=editAdministratorJSON['UserName'],
-            Password=editAdministratorJSON['Password']
+            Password=auth.encrypt(editAdministratorJSON['Password'])
         )
         Session.add(newAdmin)
     Session.commit()
@@ -314,6 +315,17 @@ def getAttendee(AttendeeID):
     query = Session.query(api.Attendee).filter_by(ID=AttendeeID).first()
     Session.close()
     return query
+
+def getIDFromAdministrator(username):
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #Query for attendee from administrator
+    query = Session.query(api.Administrator).filter_by(UserName=username).first()
+    Session.close()
+    return query.ID
 
 
 #Returns all attendees and data from the database.
@@ -394,7 +406,7 @@ def createEventFromWeb(eventData):
         Timestamp=date,
         Absent=eventData.get('absence'),
         TIL_Violation=eventData.get('tail'),
-        AdminInitials="N/A",  #TODO: Unimplemented, will be added with log.
+        AdminInitials=eventData.get('adminInitials'),
         Comment=eventData.get('comment'))
 
     #Add NewAttendanceEvent to the database.
@@ -432,7 +444,7 @@ def editEvent(eventData):
         eventToEdit.Timestamp = date
         eventToEdit.Absent = eventData.get('absence')
         eventToEdit.TIL_Violation = eventData.get('tail')
-        eventToEdit.AdminInitials = "N/A"
+        eventToEdit.AdminInitials = eventData.get('adminInitials')
         eventToEdit.Comment = eventData.get('comment')
     else:
         editedEvent = api.AttendanceEvent(
@@ -442,7 +454,7 @@ def editEvent(eventData):
             Timestamp=date,
             Absent=eventData.get('absence'),
             TIL_Violation=eventData.get('tail'),
-            AdminInitials="N/A",
+            AdminInitials=eventData.get('adminInitials'),
             Comment=eventData.get('comment')
         )
         Session.add(editedEvent)

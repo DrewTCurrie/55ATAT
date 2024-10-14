@@ -7,6 +7,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import { useAuth } from '../funcitons/AuthProvider';
 
 interface modalProps{
     onClose: () => void;
@@ -89,13 +90,13 @@ export default function NewEvent({onClose}:modalProps){
         };
         fetchNames();
     }})
-    
+    //Initialize authProvider as auth for Admin Initials
+    const auth = useAuth();
     /**
     * Event Creation handler, this calls createEvent with appropriate information.
     */
     //Hook for handling the modal loading (waiting for input)
     const [loading, setLoading] = useState(false);
-
     //Hook to check for event submission
     const [eventSubmitted, setEventSubmitted] = useState(false)
     const createEvent = async () => {
@@ -110,7 +111,8 @@ export default function NewEvent({onClose}:modalProps){
                 date: date.tz("America/Denver").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
                 tail: isChecked.tailCheckbox,
                 absence: isChecked.absentCheckbox,
-                comment: comment
+                comment: comment,
+                adminInitials:(isChecked.tailCheckbox || isChecked.absentCheckbox) && auth?.adminInitials ? auth?.adminInitials : 'N/A'
             })
         }
         //try catch to query backend
