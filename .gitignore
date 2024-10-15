@@ -1,0 +1,20 @@
+#Files for git to ignore
+venv/*
+venv
+
+#VS Code addons
+.idea
+.idea/*
+.vscode
+.vscode/*
+__pycache__
+**/__pycache__/*
+
+#for the xlsx generation spam
+.xlsx
+flaskServer/xlsx/
+node_modules/
+#for profile images
+flaskServer/profileImage
+flaskServer/__pycache__
+ptcClient/node_modules
