@@ -11,6 +11,7 @@ from APIFuncs import utils
 from APIFuncs import MariaDBapi
 from APIFuncs import badgeGenerator
 from APIFuncs import auth
+from APIFuncs import messages
 import sys
 import os
 import time
@@ -270,6 +271,14 @@ def login():
     else:
         return make_response(jsonify(loginResponse), 401)
 
+
+#--------------- Settings Routes -----------------------------------------------------
+@app.route('/api/getDefaultMessage',methods=['GET'])
+def getDefaultMessage():
+    defaultMessage = messages.getDefaultMessage()
+    return
+# @app.route('/api/getDefaultAudio',methods=['GET'])
+# def getDefaultAudio():
 
 @app.route('/')
 def index():

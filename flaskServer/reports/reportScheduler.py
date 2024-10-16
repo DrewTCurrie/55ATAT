@@ -15,7 +15,7 @@ import sys, time
 from reports import generateReport
 #Add to system path the directory of the API Functions to access the utilities functions
 sys.path.insert(0, '/home/drew/Documents/capstone/55ATAT/APIFuncs')
-import utils
+from APIFuncs import utils
 
 
 
