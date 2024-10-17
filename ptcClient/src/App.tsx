@@ -10,16 +10,21 @@ import Login from './pages/login'
 import AuthProvider from './funcitons/AuthProvider'
 import ProtectedRoute from './funcitons/ProtectedRoute'
 import Settings from './pages/settings'
+import SettingsProvider from './funcitons/SettingsProvider'
 
 function App() {
   return (
     <AuthProvider>
       <Box sx={{display: 'flex'}}>
         <Sidebar/>
+        <SettingsProvider>
+          <Routes>
+            <Route path='settings' element={<Settings/>} />
+          </Routes>
+        </SettingsProvider>
         <Routes>
           <Route path='' element={<Scanner/>}/>
           <Route path='login' element={<Login/>}/>
-          <Route path='settings' element={<Settings/>} />
           <Route element={<ProtectedRoute/>}>
             <Route path='events' element={<Events/>} />
           </Route>

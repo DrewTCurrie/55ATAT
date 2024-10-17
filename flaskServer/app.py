@@ -273,12 +273,47 @@ def login():
 
 
 #--------------- Settings Routes -----------------------------------------------------
+
+#---------------Default Messages Routes -----------------------------------------------------
 @app.route('/api/getDefaultMessage',methods=['GET'])
 def getDefaultMessage():
     defaultMessage = messages.getDefaultMessage()
-    return
+    return make_response(jsonify({"message": defaultMessage}), 200)
 # @app.route('/api/getDefaultAudio',methods=['GET'])
 # def getDefaultAudio():
+
+@app.route('/api/setDefaultMessage', methods=['POST'])
+def setDefaultMessage():
+    #Parse JSON data
+    data = request.json
+    messages.setDefaultMessage(data.get('message'))
+    return make_response(jsonify({"message": "Success"}), 200)
+
+@app.route('/api/resetDefaults', methods=['GET'])
+def resetDefault():
+    messages.resetDefaults()
+    return make_response(jsonify({"message": "Success"}), 200)
+
+#---------------Attendee Messages Routes -----------------------------------------------------
+@app.route('/api/getAttendeeMessage',methods=['POST'])
+def getAttendeeMessage():
+    # Parse JSON data
+    data = request.json
+    #Get Attendee Message from messages.py
+    message = messages.getAttendeeMessage(data.get('initials'))
+    return make_response(jsonify({"message": message}), 200)
+
+@app.route('/api/setAttendeeMessage', methods=['POST'])
+def setAttendeeMessage():
+    data = request.json
+    messages.setAttendeeMessage(data.get('initials'),data.get('message'))
+    return make_response(jsonify({"message": "Success"}), 200)
+
+@app.route('/api/resetAttendee', methods=['POST'])
+def resetAttendee():
+    data = request.json
+    messages.resetAttendee(data.get('initials'))
+    return make_response(jsonify({"message": "Success"}), 200)
 
 @app.route('/')
 def index():

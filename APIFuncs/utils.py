@@ -348,6 +348,16 @@ def getAllAttendees():
     Session.close()
     return attendeeList
 
+def getIDfromInitials(AttendeeInitials):
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    query = Session.query(api.Attendee).filter_by(AttendeeInitials=AttendeeInitials).first()
+    Session.close()
+    return query.ID
+
 
 def getEvents(numEvents):
     # Create Sqlalchemy Session
