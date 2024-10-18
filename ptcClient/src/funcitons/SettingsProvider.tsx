@@ -19,7 +19,7 @@ interface SettingsContextType {
     getDefaultMessage: () => void,
     setDefaultMessage: (message: string) => void,
     resetAttendee: (attendeInitials: string) => void,
-    setAttendeeAudio: (attendeeInitials: string, audioFile: File) => void,
+    setAttendeeAudio: (attendeeInitials: string, audioFile: File) => Promise<void>,
     getAttendeeAudio: (attendeeInitials: string) => void,
     getDefaultAudio: () => void
     setDefaultAudio: (audioFile: File) => void,

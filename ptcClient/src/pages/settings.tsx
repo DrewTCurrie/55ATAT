@@ -159,12 +159,20 @@ function Settings() {
     }
 
     //This will handle the submission of default audioFile
-    const submitAttendeeAudio = () => {
+    const submitAttendeeAudio = async () => {
+        try{
         setLoading(true)
-        if(selectedAttendeeFile){
-            settings?.setAttendeeAudio(selectedAttendee, selectedAttendeeFile)
+            if(selectedAttendeeFile){
+            await settings?.setAttendeeAudio(selectedAttendee, selectedAttendeeFile)
+            } else {
+                throw new Error('No attendee audio selected')
+            }
+        } catch(e){
+            console.error("Error submitting attendee Audio:", e)
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
+        
     }
 
     return(
