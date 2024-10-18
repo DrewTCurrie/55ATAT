@@ -14,9 +14,6 @@ import ProtectedRoute from './funcitons/ProtectedRoute'
 
 function App() {
   return (
-
-function App() {
-  return (
     <AuthProvider>
       <Box sx={{display: 'flex'}}>
         <Sidebar/>
