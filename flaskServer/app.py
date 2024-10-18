@@ -89,6 +89,9 @@ def getRoles():
 def getAllAttendees():
     return make_response(jsonify(utils.getAllAttendees()), 200)
 
+@app.route('/api/getAttendeeInitialsAndID', methods=['GET'])
+def getAttendeeInitialsAndID():
+    return make_response(jsonify(utils.getAllAttendeeInitialsAndIDs()),200)
 
 #This endpoint returns the 50 most recent attendance events for usage in the webpage table. This can be expanded based on testing.
 @app.route('/api/getRecentEvents', methods=['GET'])
@@ -313,32 +316,32 @@ def getAttendeeMessage():
     # Parse JSON data
     data = request.json
     #Get Attendee Message from messages.py
-    message = messages.getAttendeeMessage(data.get('initials'))
+    message = messages.getAttendeeMessage(data.get('id'))
     return make_response(jsonify({"message": message}), 200)
 
 @app.route('/api/setAttendeeMessage', methods=['POST'])
 def setAttendeeMessage():
     data = request.json
-    messages.setAttendeeMessage(data.get('initials'),data.get('message'))
+    messages.setAttendeeMessage(data.get('id'),data.get('message'))
     return make_response(jsonify({"message": "Success"}), 200)
 
 @app.route('/api/resetAttendee', methods=['POST'])
 def resetAttendee():
     data = request.json
-    messages.resetAttendee(data.get('initials'))
+    messages.resetAttendee(data.get('id'))
     return make_response(jsonify({"message": "Success"}), 200)
 
 #---------------Attendee Audio Routes -----------------------------------------------------
 @app.route('/api/getAttendeeAudio', methods=['POST'])
 def getAttendeeAudio():
     data = request.json
-    audioURL = messages.getAttendeeAudio(data.get('initials'))
+    audioURL = messages.getAttendeeAudio(data.get('id'))
     return make_response(jsonify({"url": audioURL}), 200)
 
 @app.route('/api/setAttendeeAudio',methods=['POST'])
 def setAttendeeAudio():
     #This will be passed in as a form data.
-    messages.setAttendeeAudio(request.form['initials'],request.files['audio'])
+    messages.setAttendeeAudio(request.form['id'],request.files['audio'])
     return make_response(jsonify({"message": "Success"}), 200)
 
 @app.route('/')

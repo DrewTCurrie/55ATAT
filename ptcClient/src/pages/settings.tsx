@@ -10,6 +10,7 @@ const AudioPlayer: React.FC<{ audioUrl: string | null, audioType: string | null 
       // Reload the audio when the audioUrl changes
       if (audioRef.current) {
         audioRef.current.load();
+        audioRef.current.currentTime = 0;
       }
     }, [audioUrl]);
   
@@ -23,29 +24,38 @@ const AudioPlayer: React.FC<{ audioUrl: string | null, audioType: string | null 
     );
   };
 
+  interface Attendee {
+    ID: string;
+    Initials: string;
+  }
 
 function Settings() {
     //Initialize Setting Provides as setttings
     const settings = useSettings();
     //Gets Names of Attendees in Database for Personalized Messasges.
-    const [names, setNames] = useState([]);
+    const [names, setNames] = useState<{ Initials: string; ID: string }[]>([]);
     const [hasFetchedNames, setHasFetchedNames] = useState(false)
 
     useEffect(()=> {
       if(!hasFetchedNames) {
         const fetchNames = async () => {
           try {
-            const response = await fetch(`/api/attendeeInitials`);
-            const data = await response.json();
-            setNames(data);
-            setHasFetchedNames(true)
+            const response = await fetch(`/api/getAttendeeInitialsAndID`);
+            const data: Attendee[]  = await response.json();
+            // Map data to the format needed by Autocomplete
+            const formattedNames = data.map(attendee => ({
+                Initials: attendee.Initials,  // Label for display
+                ID: attendee.ID         // Value for identification
+            }));
+            setNames(formattedNames);
+            setHasFetchedNames(true);
           } catch(e){
             console.error("Error fetching names:", e);
           }
         };
             fetchNames();
         }
-    })
+    },[hasFetchedNames])
     //Hook for handling the modal loading (waiting for input)
     const [loading, setLoading] = useState(false);
 
@@ -109,25 +119,35 @@ function Settings() {
 
 
     //This handles selecting an attendee from the attendee list
-    const [selectedAttendee, setSelectedAttendee] = useState('')
+    const [selectedAttendee, setSelectedAttendee] = useState<Attendee>();
     const [attendeeSelected, isAttendeeSelected] = useState(false)
-    const handleSelectAttendee = (attendee: string) =>{
-        setSelectedAttendee(attendee)
-        settings?.getAttendeeMessage(attendee)
-        settings?.getAttendeeAudio(attendee)
-        isAttendeeSelected(true)
+    const handleSelectAttendee = (attendee: Attendee) =>{
+        if(attendee){
+            setSelectedAttendee(attendee)
+            settings?.getAttendeeMessage(attendee.ID)
+            settings?.getAttendeeAudio(attendee.ID)
+            isAttendeeSelected(true)
+        } else {
+            isAttendeeSelected(false)
+        }
+
     }
 
     //This will handle the submission of a attendee message
     const submitAttendeeMessage = () => {
         setLoading(true)
-        settings?.setAttendeeMessage(selectedAttendee, settings?.attendeeMessage)
+        if(selectedAttendee){
+            settings?.setAttendeeMessage(selectedAttendee.ID, settings?.attendeeMessage)
+        }    
         setLoading(false)
     }
     //This will handle the reseting of an attendee
     const resetAttendee = () =>{
         setLoading(true)
-        settings?.resetAttendee(selectedAttendee)
+        console.log(selectedAttendee)
+        if(selectedAttendee){
+            settings?.resetAttendee(selectedAttendee.ID)
+        }
         setLoading(false)
     }
 
@@ -162,8 +182,8 @@ function Settings() {
     const submitAttendeeAudio = async () => {
         try{
         setLoading(true)
-            if(selectedAttendeeFile){
-            await settings?.setAttendeeAudio(selectedAttendee, selectedAttendeeFile)
+            if(selectedAttendeeFile && selectedAttendee){
+            await settings?.setAttendeeAudio(selectedAttendee.ID, selectedAttendeeFile)
             } else {
                 throw new Error('No attendee audio selected')
             }
@@ -300,17 +320,19 @@ function Settings() {
                     <Autocomplete 
                         key="nameAutoComplete"
                         options={names} 
+                        getOptionLabel={(option) => option.Initials}
                         onChange={(_event: any, newValue: any) => handleSelectAttendee(newValue)}
                         value={selectedAttendee}
                         fullWidth
                         renderInput={(params: any) => <TextField {...params} label="Name (Initials)" />}
                         sx={{
                             my: '.4rem'
-                        }}/>
+                        }}
+                        isOptionEqualToValue={(option, value) => option.ID === value?.value}/>
                         {attendeeSelected ? 
                         <Box>
                         <TextField
-                            label={`${selectedAttendee}'s Message`}
+                            label={`${selectedAttendee?.Initials}'s Message`}
                             name="defaultmessage"
                             variant="outlined"
                             fullWidth
@@ -331,14 +353,11 @@ function Settings() {
                             disabled={loading}
                             onClick={submitAttendeeMessage}
                         >
-                            {loading ? 'Loading' : `Update ${selectedAttendee}'s Message`}
+                            {loading ? 'Loading' : `Update ${selectedAttendee?.Initials}'s Message`}
                         </Button>
                         {settings?.attendeeAudio && !attendeeAudioSrc && (
                                 <div>
-                                    <audio controls>
-                                        <source src={settings?.attendeeAudio} type='audio/mpeg' />
-                                        Your browser does not support the audio element.
-                                    </audio>
+                                    <AudioPlayer audioUrl={settings?.attendeeAudio} audioType='audio/mpeg'/>
                                 </div>
                             )}
                             {attendeeAudioSrc && (
@@ -382,7 +401,7 @@ function Settings() {
                                 disabled={loading}
                                 onClick={submitAttendeeAudio}
                                 >
-                                    {loading ? 'Loading' : `Update ${selectedAttendee}'s Audio`}
+                                    {loading ? 'Loading' : `Update ${selectedAttendee?.Initials}'s Audio`}
                                 </Button> : ''}
                             </Box>
                         <Button
@@ -394,7 +413,7 @@ function Settings() {
                             disabled={loading}
                             onClick={resetAttendee}
                         >
-                            {loading ? 'Loading' :  `Reset ${selectedAttendee}'s Settings`}
+                            {loading ? 'Loading' :  `Reset ${selectedAttendee?.Initials}'s Settings`}
                         </Button>
                         </Box>
                         : ''}

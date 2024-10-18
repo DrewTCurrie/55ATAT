@@ -53,6 +53,23 @@ def getAllUserInitials():
     results = json.dumps([r[0] for r in query])
     return results
 
+def getAllAttendeeInitialsAndIDs():
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #query for all attendees in the attendee table
+    query = Session.query(api.Attendee).all()
+    # Creating results by parsing each entry into JSON
+    attendeeList = []
+    for row in query:
+        attendeeList.append({
+            'ID': row.ID,
+            'Initials': row.AttendeeInitials,
+        })
+    Session.close()
+    return attendeeList
 
 def getRoles():
     # Create Sql Alchemy Session

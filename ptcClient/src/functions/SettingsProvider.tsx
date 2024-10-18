@@ -14,13 +14,13 @@ interface SettingsContextType {
     attendeeMessage: string,
     defaultAudio: string,
     attendeeAudio: string,
-    setAttendeeMessage: (attendeeInitials: string, message: string) => void,
-    getAttendeeMessage: (attendeInitials: string) => void,
+    setAttendeeMessage: (attendeeID: string, message: string) => void,
+    getAttendeeMessage: (attendeeID: string) => void,
     getDefaultMessage: () => void,
     setDefaultMessage: (message: string) => void,
-    resetAttendee: (attendeInitials: string) => void,
-    setAttendeeAudio: (attendeeInitials: string, audioFile: File) => Promise<void>,
-    getAttendeeAudio: (attendeeInitials: string) => void,
+    resetAttendee: (attendeeID: string) => void,
+    setAttendeeAudio: (attendeeID: string, audioFile: File) => Promise<void>,
+    getAttendeeAudio: (attendeeID: string) => void,
     getDefaultAudio: () => void
     setDefaultAudio: (audioFile: File) => void,
     resetDefaults: () => void,
@@ -85,16 +85,16 @@ const SettingsProvider: React.FC<settingsProps> = ({children}) => {
     /**
      * Attendee Audio Functions
      */
-    const getAttendeeAudio = async (attendeeInitials: string) => {
-        const initials = {
+    const getAttendeeAudio = async (attendeeID: string) => {
+        const id = {
             method: 'POST',
             headers: {'Content-Type':'application/json',},
             body: JSON.stringify({
-                initials: attendeeInitials
+                id: attendeeID
             })
         }
         try{
-            const message = await fetch(`/api/getAttendeeAudio`,initials)
+            const message = await fetch(`/api/getAttendeeAudio`,id)
             const messageContent = await message.json()
             setAAudio(messageContent.url)
         } catch(e){
@@ -103,10 +103,10 @@ const SettingsProvider: React.FC<settingsProps> = ({children}) => {
     }
 
 
-    const setAttendeeAudio = async (attendeeInitials: string, audioFile: File) => {
+    const setAttendeeAudio = async (attendeeID: string, audioFile: File) => {
         const audio = new FormData();
         audio.append('audio', audioFile)
-        audio.append('initials',attendeeInitials)
+        audio.append('id',attendeeID)
         const audioRequest = {
            method: 'POST',
            body: audio
@@ -124,16 +124,16 @@ const SettingsProvider: React.FC<settingsProps> = ({children}) => {
      /**
      * Attendee Message Functions
      */
-    const getAttendeeMessage = async (attendeeInitials: string) => {
-        const initials = {
+    const getAttendeeMessage = async (attendeeID: string) => {
+        const id = {
             method: 'POST',
             headers: {'Content-Type':'application/json',},
             body: JSON.stringify({
-                initials: attendeeInitials
+                id: attendeeID
             })
         }
         try{
-            const message = await fetch(`/api/getAttendeeMessage`,initials)
+            const message = await fetch(`/api/getAttendeeMessage`,id)
             const messageContent = await message.json()
             setAMessage(messageContent.message)
         } catch(e){
@@ -141,39 +141,36 @@ const SettingsProvider: React.FC<settingsProps> = ({children}) => {
         }
     }
 
-    const setAttendeeMessage = async (attendeeInitials: string, message: string) => {
+    const setAttendeeMessage = async (attendeeID: string, message: string) => {
         const attendeeMessage = {
             method: 'POST',
             headers: {'Content-Type':'application/json',},
             body: JSON.stringify({
-                initials: attendeeInitials,
+                id: attendeeID,
                 message: message
             })
         }
         try{
-            const messageRespone = await fetch(`/api/setAttendeeMessage`,attendeeMessage)
-            const messageResponeContent = await messageRespone.json()
-            setAMessage(messageResponeContent.message)
+            await fetch(`/api/setAttendeeMessage`,attendeeMessage)
         } catch(e){
             console.log("Error Changing Default Message", e)
         }
     }
 
-    const resetAttendee = async (attendeeInitials: string) => {
+    const resetAttendee = async (attendeeID: string) => {
         const attendee = {
             method: 'POST',
             headers: {'Content-Type':'application/json',},
             body: JSON.stringify({
-                initials: attendeeInitials,
+                id: attendeeID,
             })
         }
         try{
             const resetRespone = await fetch(`/api/resetAttendee`, attendee)
             const resetResponeContent = await resetRespone.json()
             console.log(resetResponeContent)
-            getAttendeeMessage(attendeeInitials)
-            setFetchedDAudio(false)
-            setFetchedDmesg(false)
+            getAttendeeMessage(attendeeID)
+            getAttendeeAudio(attendeeID)
         } catch(e){
             console.log("Error reseting Defaults", e)
         }

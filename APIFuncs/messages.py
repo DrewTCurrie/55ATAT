@@ -9,14 +9,11 @@ from APIFuncs import MariaDBapi as api, utils
 
 #Pathing to audioFiles folder
 sys.path.append(os.path.join(sys.path[0], '/audioFiles'))
-image_folder = 'flaskServer/static/audioFiles'
-
+defaultAudioFilePath = os.path.join('flaskServer', 'static', 'audioFiles', '0.mp3')
 #--------------- Attendee Handling -----------------------------------------------------
 
 #--------------- Message Handling -----------------------------------------------------
-def getAttendeeMessage(attendeeInitials):
-    #Get Attendee Initials
-    attendeeID = utils.getIDfromInitials(attendeeInitials)
+def getAttendeeMessage(attendeeID):
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
     Session = sqlalchemy.orm.sessionmaker()
@@ -25,13 +22,14 @@ def getAttendeeMessage(attendeeInitials):
     #Query for attendee messasge
     query = Session.query(api.AttendeeMessage).filter_by(ID=attendeeID).first()
     if query is not None:
-        return query.Message
+        message = query.Message
+        Session.close()
+        return message
     else:
+        Session.close()
         return getDefaultMessage()
 
-def setAttendeeMessage(attendeeInitials, message):
-    #Get Attendee Initials
-    attendeeID = utils.getIDfromInitials(attendeeInitials)
+def setAttendeeMessage(attendeeID, message):
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
     Session = sqlalchemy.orm.sessionmaker()
@@ -44,15 +42,13 @@ def setAttendeeMessage(attendeeInitials, message):
         query.Message = message
     else:
         #If not, create a new ID='0' entry.
-        newDefault = api.AttendeeMessage(ID=attendeeID, Message=message, audioPath='')
+        newDefault = api.AttendeeMessage(ID=attendeeID, Message=message, audioPath=defaultAudioFilePath)
         Session.add(newDefault)
     Session.commit()
     Session.close()
 
 #--------------- Audio Handling -----------------------------------------------------
-def getAttendeeAudio(attendeeInitials):
-    #Get Attendee Initials
-    attendeeID = utils.getIDfromInitials(attendeeInitials)
+def getAttendeeAudio(attendeeID):
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
     Session = sqlalchemy.orm.sessionmaker()
@@ -68,42 +64,39 @@ def getAttendeeAudio(attendeeInitials):
         urlFilePath = urlFilePath.replace('\\', '/')
         #Create a URL for the file path to service to flask server
         audioURL = url_for('static', filename=urlFilePath,_external=True)
+        Session.close()
         return audioURL
     else:
+        Session.close()
         return getDefaultSuccessAudio()
 
 
 
 
 #--------------- Reset Handling -----------------------------------------------------
-def resetAttendee(attendeeInitials):
-    #Get Attendee Initials
-    attendeeID = utils.getIDfromInitials(attendeeInitials)
+def resetAttendee(attendeeID):
 
     #Default Messages/Audio
     defaultMessage = "Welcome to PTC"
-    defaultAudioPath = os.path.join('flaskServer', 'static', 'defaultSuccessMaster.wav')
+    defaultAudioPath = os.path.join('flaskServer', 'static', 'audioFiles', 'defaultSuccessMaster.wav')
 
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
     Session = sqlalchemy.orm.sessionmaker()
     Session.configure(bind=api.engine)
     Session = Session()
-
+    audioFilePath = convertAudio('0', defaultAudioPath)
     defaultEntry = Session.query(api.AttendeeMessage).filter_by(ID=attendeeID).first()
     if defaultEntry:
         defaultEntry.Message = defaultMessage
-        defaultEntry.audioPath = defaultAudioPath
+        defaultEntry.audioPath = audioFilePath
     else:
-        newDefault = api.AttendeeMessage(ID=attendeeID,Message=defaultMessage,audioPath=defaultAudioPath)
+        newDefault = api.AttendeeMessage(ID=attendeeID,Message=defaultMessage,audioPath=audioFilePath)
         Session.add(newDefault)
     Session.commit()
     Session.close()
 
-def setAttendeeAudio(attendeeInitials,audioFile):
-    #Get Attendee Initials
-    attendeeID = utils.getIDfromInitials(attendeeInitials)
-
+def setAttendeeAudio(attendeeID,audioFile):
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
     Session = sqlalchemy.orm.sessionmaker()
@@ -120,7 +113,7 @@ def setAttendeeAudio(attendeeInitials,audioFile):
         query.audioPath = audioFilePath
     else:
         #If not, create a new ID=attendeeID entry.
-        newDefault = api.AttendeeMessage(ID=attendeeID, Message='', audioPath=audioFilePath)
+        newDefault = api.AttendeeMessage(ID=attendeeID, Message='Welcome To PTC', audioPath=audioFilePath)
         Session.add(newDefault)
     Session.commit()
     Session.close()
@@ -137,9 +130,10 @@ def getDefaultMessage():
 
     #Query for default entry, '0'
     defaultEntry = Session.query(api.AttendeeMessage).filter_by(ID='0').first()
-    Session.close()
     if defaultEntry.Message:
-        return defaultEntry.Message
+        message = defaultEntry.Message
+        Session.close()
+        return message
     else:
         return "No Message Found"
 def setDefaultMessage(message):
@@ -156,7 +150,7 @@ def setDefaultMessage(message):
         defaultEntry.Message = message
     else:
         #If not, create a new ID='0' entry.
-        newDefault = api.AttendeeMessage(ID='0', Message=message, audioPath='')
+        newDefault = api.AttendeeMessage(ID='0', Message=message, audioPath=defaultAudioFilePath)
         Session.add(newDefault)
     Session.commit()
     Session.close()
@@ -180,7 +174,7 @@ def setDefaultAudio(audioFile):
         defaultEntry.audioPath = audioFilePath
     else:
         #If not, create a new ID='0' entry.
-        newDefault = api.AttendeeMessage(ID='0', Message='', audioPath=audioFilePath)
+        newDefault = api.AttendeeMessage(ID='0', Message='Welcome to PTC', audioPath=audioFilePath)
         Session.add(newDefault)
     Session.commit()
     Session.close()
@@ -202,8 +196,10 @@ def getDefaultSuccessAudio():
         urlFilePath = urlFilePath.replace('\\', '/')
         #Create a URL for the file path to service to flask server
         audioURL = url_for('static', filename=urlFilePath,_external=True)
+        Session.close()
         return audioURL
     else:
+        Session.close()
         return "No Default Audio Found"
 
 
@@ -256,5 +252,6 @@ def convertAudio(attendeeID,audioFile):
 
 
 if __name__ == '__main__':
-    resetDefaults()
-    getDefaultSuccessAudio()
+    defaultAudioPath = os.path.join('..','flaskServer', 'static', 'audioFiles', 'defaultSuccessMaster.wav')
+    audioFilePath = convertAudio('0', defaultAudioPath)
+    print(audioFilePath)
