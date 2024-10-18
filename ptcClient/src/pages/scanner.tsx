@@ -1,5 +1,5 @@
 import { Button, Card, Grid2, TextField, Typography } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 //https://cdn.shopify.com/s/files/1/2144/8019/files/A5_Desktop_Scanner_User_Manual-V1.29.PDF?v=1706669102
 //NETUM A5 Scanner will need to have the cariage return function set to automaticaly submit content
@@ -22,10 +22,17 @@ export default function Scanner(){
 
     //React Hook for handling submission
     const [loading, setLoading] = useState(false);
+    //Input reference to refocus the input box after loading is false
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    useEffect(() => {
+      if (!loading && inputRef.current) {
+        inputRef.current.focus();  // Refocus the text field when no longer loading
+      }
+    }, [loading]);
+
     const [eventSubmitted, setEventSubmitted] = useState(false);
     const [eventFailed, setEventFailed] = useState(false);
     const handleSubmit = async () => {
-        // Perform your submission logic here, e.g., API call
         console.log('Scanned Data Submitted:', scanData);
         setLoading(true)
         const event = {
@@ -42,12 +49,15 @@ export default function Scanner(){
             } else {
               setEventFailed(false)
               setEventSubmitted(true)
-              setLoading(false)
             }
           } catch(e){
             console.error("Error creating Event", e);
             setEventSubmitted(false)
             setEventFailed(true)
+            setLoading(false)
+          } finally {
+            //This waits for 1 second, before re-enabling
+            await new Promise(f => setTimeout(f, 1000))
             setLoading(false)
           }
         // Reset the input field if needed
@@ -69,13 +79,16 @@ export default function Scanner(){
             sx={{my:'.8rem'}}>
               Welcome to PTC</Typography>
             <TextField
+
             label="Scan Input"
             variant="outlined"
             fullWidth
             value={scanData}
+            disabled={loading}
             onChange={handleInputChange}
-            onKeyDown={handleKeyDown} // Detect "Enter" key
-            autoFocus // Optional: focuses the TextField automatically
+            onKeyDown={handleKeyDown}
+            autoFocus
+            inputRef={inputRef}
             />
             <Button
               variant="contained"
