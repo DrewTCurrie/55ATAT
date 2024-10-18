@@ -1,6 +1,6 @@
 import { Autocomplete, Box, Button, Divider, TextField, Typography } from '@mui/material';
 import React, {useEffect, useRef, useState} from 'react'
-import { useSettings } from '../funcitons/SettingsProvider';
+import { useSettings } from '../functions/SettingsProvider';
 
 //This is so the audio player can reload, by adding a custom useEffect that activates when audioURL is changed.
 const AudioPlayer: React.FC<{ audioUrl: string | null, audioType: string | null }> = ({ audioUrl,audioType }) => {

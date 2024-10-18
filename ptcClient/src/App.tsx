@@ -7,23 +7,18 @@ import { Box } from '@mui/material'
 import React from 'react'
 import Scanner from './pages/scanner'
 import Login from './pages/login'
-import AuthProvider from './funcitons/AuthProvider'
-import ProtectedRoute from './funcitons/ProtectedRoute'
+import AuthProvider from './functions/AuthProvider'
+import ProtectedRoute from './functions/ProtectedRoute'
 import Settings from './pages/settings'
-import SettingsProvider from './funcitons/SettingsProvider'
+import SettingsProvider from './functions/SettingsProvider'
 
 function App() {
   return (
     <AuthProvider>
       <Box sx={{display: 'flex'}}>
         <Sidebar/>
-        <SettingsProvider>
           <Routes>
-            <Route path='settings' element={<Settings/>} />
-          </Routes>
-        </SettingsProvider>
-        <Routes>
-          <Route path='' element={<Scanner/>}/>
+          <Route path='' element={<SettingsProvider><Scanner/></SettingsProvider>}/>
           <Route path='login' element={<Login/>}/>
           <Route element={<ProtectedRoute/>}>
             <Route path='events' element={<Events/>} />
@@ -31,9 +26,9 @@ function App() {
           <Route element={<ProtectedRoute/>}>
             <Route path='clients' element={<Clients/>} />
           </Route>
-          {/* <Route element={<ProtectedRoute/>}>
-            <Route path='settings' element={<Settings/>} />
-          </Route> */}
+          <Route element={<ProtectedRoute/>}>
+            <Route path='settings' element={<SettingsProvider><Settings/></SettingsProvider>} />
+          </Route>
         </Routes>
       </Box>
     </AuthProvider>
