@@ -7,6 +7,8 @@
  # the ArchiveAttendanceEvents database table, and then when verified the data has been transferred, it will empty the currentAttendanceEvents 
  # database table to prepare for the next month of attendance events.
 
+#10/17/2024 Update:
+#Adding mailing feature to automatically send reports via an email client
 
 #Libraries used:
 from datetime import datetime, timedelta, date
@@ -17,16 +19,18 @@ from reports import generateReport
 sys.path.insert(0, '/home/drew/Documents/capstone/55ATAT/APIFuncs')
 import utils
 
+#Import mailing service
+from reports import mailer
 
 
-def CheckReportsSchedule():
+def CheckReportsSchedule(app, mail):
     print("Checking if reports need generated today")
     today = datetime.today()
     #Check if today is friday
     #Maps the days of the week on Monday = 0 through Sunday = 6
     if date.today().weekday() == 4:
          #If it is Friday create the weekly report
-         weekly_reports()
+         weekly_reports(app, mail)
     time.sleep(60)
     
     #Check if today is the last day of the month -> Must happen after week as month clears database
@@ -34,7 +38,7 @@ def CheckReportsSchedule():
     #If today is equal to the last day of the month create a report
     if calendar.monthrange(today.year, today.month)[1] == today.day:
          #If it is the last day of the month, generate monthly attendance report
-         monthly_reports()
+         monthly_reports(app, mail)
          #Delete archival records then move current records into archive
          #Archive records and then delete records from current attedance event table
          #This resets the database in prepartion for the new month
@@ -47,19 +51,22 @@ def CheckReportsSchedule():
 
 
 
-def weekly_reports():
+def weekly_reports(app, mail):
     print("Weekly report generation called.")
     fileName = generateReport.generate_spreadsheet(start_date=(datetime.now() - timedelta(weeks= 1)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
     print(fileName)
-    #TODO: Link with flaskMail to send an email with the attachment. 
+    mailer.SendWeeklyReport(app, mail, fileName)
+    #TODO: Link with flaskMail to send an email with the attachment.
 
 
 
-def monthly_reports():
+
+def monthly_reports(app, mail):
     print("Montly report generation called.")
     fileName = generateReport.generate_spreadsheet(start_date=(datetime.now() - timedelta(weeks= 4)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+    mailer.SendMonthlyReport(app, mail, fileName)
     print(fileName)
     
 if __name__ == '__main__':
-        sys.exit(CheckReportsSchedule())
+        sys.exit(print("Do not run this file directly!"))
  
