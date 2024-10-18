@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Divider, Stack, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, Divider, TextField, Typography } from '@mui/material';
 import React, {useEffect, useRef, useState} from 'react'
 import { useSettings } from '../funcitons/SettingsProvider';
 
@@ -114,6 +114,7 @@ function Settings() {
     const handleSelectAttendee = (attendee: string) =>{
         setSelectedAttendee(attendee)
         settings?.getAttendeeMessage(attendee)
+        settings?.getAttendeeAudio(attendee)
         isAttendeeSelected(true)
     }
 
@@ -127,6 +128,42 @@ function Settings() {
     const resetAttendee = () =>{
         setLoading(true)
         settings?.resetAttendee(selectedAttendee)
+        setLoading(false)
+    }
+
+    //This handles the uploading of attendee audio to the webpage
+    const [selectedAttendeeFile, setSelectedAttendeeFile] = useState<File>();
+    const [attendeeAudioSrc, setAttendeeAudioSrc] = useState('');
+    const [attendeeFileName, setAttendeeFileName] = useState("")
+    const [attendeeAudioType, setAttendeeAudioType] = useState("")
+    const handleAttendeeAudioChange = (event: any) => {
+        setLoading(true)
+        //revoke prior urls
+        const file = event.target.files[0];
+        URL.revokeObjectURL(file)
+        setAttendeeAudioSrc('')
+        if(file){
+            const fileType = file.type 
+            if(fileType.startsWith('audio/')){
+                //Set Player audio Type
+                setAttendeeAudioType(fileType)
+                //Set audio File and audio file name.
+                setSelectedAttendeeFile(file);
+                setAttendeeFileName(file ? file.name : "");
+                //allow for local playback by creating a url for audio player source.
+                const tempAudioURL = URL.createObjectURL(file);
+                setAttendeeAudioSrc(tempAudioURL)
+            }
+        }
+        setLoading(false)
+    }
+
+    //This will handle the submission of default audioFile
+    const submitAttendeeAudio = () => {
+        setLoading(true)
+        if(selectedAttendeeFile){
+            settings?.setAttendeeAudio(selectedAttendee, selectedAttendeeFile)
+        }
         setLoading(false)
     }
 
@@ -286,8 +323,60 @@ function Settings() {
                             disabled={loading}
                             onClick={submitAttendeeMessage}
                         >
-                            {loading ? 'Loading' : 'Update Message'}
+                            {loading ? 'Loading' : `Update ${selectedAttendee}'s Message`}
                         </Button>
+                        {settings?.attendeeAudio && !attendeeAudioSrc && (
+                                <div>
+                                    <audio controls>
+                                        <source src={settings?.attendeeAudio} type='audio/mpeg' />
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                </div>
+                            )}
+                            {attendeeAudioSrc && (
+                                
+                                <div>
+                                    <AudioPlayer audioUrl={attendeeAudioSrc} audioType={attendeeAudioType}/>
+                                </div>
+                            )}
+                            {attendeeFileName && (
+                                <Typography
+                                sx={{mt:'.4rem'}}>
+                                    File name: {attendeeFileName}
+                                </Typography>
+                            )}
+                            <Box>
+                            <input
+                                accept="audio/*"
+                                style={{ display: 'none' }}
+                                id="attendee-audio-upload"
+                                type="file"
+                                onChange={handleAttendeeAudioChange}
+                            />
+                            <label htmlFor="attendee-audio-upload">
+                                <Button 
+                                    variant="contained"
+                                    component="span"
+                                    color="secondary"
+                                    fullWidth
+                                    sx={{ my:'.2rem' }}
+                                    disabled={loading}>
+                                    Select Audio File
+                                </Button>
+                            </label>
+                            {attendeeAudioSrc ?                         
+                                <Button
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                                fullWidth
+                                sx={{ my:'.2rem' }}
+                                disabled={loading}
+                                onClick={submitAttendeeAudio}
+                                >
+                                    {loading ? 'Loading' : `Update ${selectedAttendee}'s Audio`}
+                                </Button> : ''}
+                            </Box>
                         <Button
                             type="submit"
                             variant="contained"
@@ -297,7 +386,7 @@ function Settings() {
                             disabled={loading}
                             onClick={resetAttendee}
                         >
-                            {loading ? 'Loading' : 'Reset Attendee Settings'}
+                            {loading ? 'Loading' :  `Reset ${selectedAttendee}'s Settings`}
                         </Button>
                         </Box>
                         : ''}

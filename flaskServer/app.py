@@ -328,6 +328,19 @@ def resetAttendee():
     messages.resetAttendee(data.get('initials'))
     return make_response(jsonify({"message": "Success"}), 200)
 
+#---------------Attendee Audio Routes -----------------------------------------------------
+@app.route('/api/getAttendeeAudio', methods=['POST'])
+def getAttendeeAudio():
+    data = request.json
+    audioURL = messages.getAttendeeAudio(data.get('initials'))
+    return make_response(jsonify({"url": audioURL}), 200)
+
+@app.route('/api/setAttendeeAudio',methods=['POST'])
+def setAttendeeAudio():
+    #This will be passed in as a form data.
+    messages.setAttendeeAudio(request.form['initials'],request.files['audio'])
+    return make_response(jsonify({"message": "Success"}), 200)
+
 @app.route('/')
 def index():
     return render_template('index.html')
