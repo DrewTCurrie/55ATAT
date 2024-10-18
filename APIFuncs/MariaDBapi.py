@@ -26,7 +26,7 @@ class Administrator(Base):
         __tablename__ = 'Administrators'
         ID = sqlalchemy.Column(sqlalchemy.String(length=24), primary_key =True)
         UserName = sqlalchemy.Column(sqlalchemy.String(length=32))
-        Password = sqlalchemy.Column(sqlalchemy.String(length=32))
+        Password = sqlalchemy.Column(sqlalchemy.String(length=128))
 
 
 class AttendanceEvent(Base):
