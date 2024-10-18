@@ -1,6 +1,28 @@
-import { Autocomplete, Box, Button, Divider, TextField, Typography } from '@mui/material';
-import React, {useEffect, useState} from 'react'
+import { Autocomplete, Box, Button, Divider, Stack, TextField, Typography } from '@mui/material';
+import React, {useEffect, useRef, useState} from 'react'
 import { useSettings } from '../funcitons/SettingsProvider';
+
+//This is so the audio player can reload, by adding a custom useEffect that activates when audioURL is changed.
+const AudioPlayer: React.FC<{ audioUrl: string | null, audioType: string | null }> = ({ audioUrl,audioType }) => {
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+    useEffect(() => {
+      // Reload the audio when the audioUrl changes
+      if (audioRef.current) {
+        audioRef.current.load();
+      }
+    }, [audioUrl]);
+  
+    return (
+      <div>
+        <audio ref={audioRef} controls>
+          <source src={audioUrl || ''} type={audioType || ''} />
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+    );
+  };
+
 
 function Settings() {
     //Initialize Setting Provides as setttings
@@ -32,14 +54,52 @@ function Settings() {
      * Default GETS/SETS
      */
     //This will handle the submission of a default message.
-    const submitDefaultMessage = () => {
+    const submitDefaultMessage = async () => {
         setLoading(true)
         settings?.setDefaultMessage(settings?.defaultMessage)
         setLoading(false)
+        
     }
+    //This resets the default settings
     const resetDefaults = () =>{
         setLoading(true)
         settings?.resetDefaults()
+        setLoading(false)
+    }
+
+    //This handles the uploading of files to the webpage
+    const [selectedFile, setSelectedFile] = useState<File>();
+    const [audioSrc, setAudioSrc] = useState('');
+    const [fileName, setFileName] = useState("")
+    const [audioType, setAudioType] = useState("")
+    const handleDefaultAudioChange = (event: any) => {
+        setLoading(true)
+        //revoke prior urls
+        const file = event.target.files[0];
+        URL.revokeObjectURL(file)
+        setAudioSrc('')
+        if(file){
+            const fileType = file.type 
+            if(fileType.startsWith('audio/')){
+                //Set Player audio Type
+                setAudioType(fileType)
+                //Set audio File and audio file name.
+                setSelectedFile(file);
+                setFileName(file ? file.name : "");
+                //allow for local playback by creating a url for audio player source.
+                const tempAudioURL = URL.createObjectURL(file);
+                setAudioSrc(tempAudioURL)
+            }
+        }
+        setLoading(false)
+    }
+
+    //This will handle the submission of default audioFile
+    const submitDefaultAudio = () => {
+        setLoading(true)
+        if(selectedFile){
+            settings?.setDefaultAudio(selectedFile)
+        }
         setLoading(false)
     }
 
@@ -120,12 +180,64 @@ function Settings() {
                         >
                             {loading ? 'Loading' : 'Update Message'}
                         </Button>
+                            {settings?.defaultAudio && !audioSrc && (
+                                <div>
+                                    <audio controls>
+                                        <source src={settings?.defaultAudio} type='audio/mpeg' />
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                </div>
+                            )}
+                            {audioSrc && (
+                                
+                                <div>
+                                    <AudioPlayer audioUrl={audioSrc} audioType={audioType}/>
+                                </div>
+                            )}
+                            {fileName && (
+                                <Typography
+                                sx={{mt:'.4rem'}}>
+                                    File name: {fileName}
+                                </Typography>
+                            )}
+                            <Box>
+                            <input
+                                accept="audio/*"
+                                style={{ display: 'none' }}
+                                id="audio-upload"
+                                type="file"
+                                onChange={handleDefaultAudioChange}
+                            />
+                            <label htmlFor="audio-upload">
+                                <Button 
+                                    variant="contained"
+                                    component="span"
+                                    color="secondary"
+                                    fullWidth
+                                    sx={{ my:'.2rem' }}
+                                    disabled={loading}>
+                                    Select Audio File
+                                </Button>
+                            </label>
+                            {audioSrc ?                         
+                                <Button
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                                fullWidth
+                                sx={{ my:'.2rem' }}
+                                disabled={loading}
+                                onClick={submitDefaultAudio}
+                                >
+                                    {loading ? 'Loading' : 'Update Audio'}
+                                </Button> : ''}
+                            </Box>
                         <Button
                             type="submit"
                             variant="contained"
                             color="error"
                             fullWidth
-                            sx={{ my:'.4rem' }}
+                            sx={{ my:'.2rem' }}
                             disabled={loading}
                             onClick={resetDefaults}
                         >

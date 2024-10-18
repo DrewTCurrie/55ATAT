@@ -12,6 +12,7 @@ interface settingsProps {
 interface SettingsContextType {
     defaultMessage: string,
     attendeeMessage: string,
+    defaultAudio: string,
     //audioFile: File,
     setAttendeeMessage: (attendeeInitials: string, message: string) => void,
     getAttendeeMessage: (attendeInitials: string) => void,
@@ -20,11 +21,12 @@ interface SettingsContextType {
     resetAttendee: (attendeInitials: string) => void,
     //setAudio: (attendeeID: string, audioFile: File) => void,
     //getAudio: (attendeeID: string) => File,
-    //getDefaultAudio: () => File
-    //setDefaultAudio: (audioFile: File) => void,
+    getDefaultAudio: () => void
+    setDefaultAudio: (audioFile: File) => void,
     resetDefaults: () => void,
     setDMessage: (message: string) => void,
     setAMessage: (message: string) => void,
+    setDAudio: (audioURL: string) => void,
 };
 
 const SettingsProvider: React.FC<settingsProps> = ({children}) => {
@@ -32,17 +34,53 @@ const SettingsProvider: React.FC<settingsProps> = ({children}) => {
     //These two hooks are used to pass messages and editing across the Provider to other elements.    
     const [defaultMessage, setDMessage] = useState('')
     const [attendeeMessage, setAMessage] = useState('')
-
+    const [defaultAudio, setDAudio] = useState('')
     /**
      * Fetching Functions
      */
 
     const [hasFetchedDmesg, setFetchedDmesg] = useState(false)
+    const [hasFetchedDAudio, setFetchedDAudio] = useState(false)
     useEffect(() => {
         if(!hasFetchedDmesg){
             getDefaultMessage();
+        }
+        if(!hasFetchedDAudio){
+            getDefaultAudio();
         }  
-    },[hasFetchedDmesg])
+    },[hasFetchedDmesg,hasFetchedDAudio])
+    /**
+     * Default Audio Functions
+     */
+    const getDefaultAudio = async () => {
+        try{
+            const audio = await fetch(`/api/getDefaultAudio`)
+            const audioURL = await audio.json()
+            setDAudio(audioURL.url)
+            setFetchedDAudio(true)
+            
+        }catch(e){
+            console.log("Error Retrieving Default Audio",e)
+        }
+        
+    }
+    const setDefaultAudio = async (audioFile: File) => {
+         const audio = new FormData();
+         audio.append('audio', audioFile)
+         const audioRequest = {
+            method: 'POST',
+            body: audio
+         }
+         try {
+            const response = await fetch(`/api/setDefaultAudio`,audioRequest)
+            if (!response.ok) {
+                throw new Error('Error setting deafult audio');
+            }
+         }catch(e){
+            console.log("Error setting default audio.",e)
+         }
+    }
+
 
      /**
      * Attendee Message Functions
@@ -76,6 +114,7 @@ const SettingsProvider: React.FC<settingsProps> = ({children}) => {
         try{
             const messageRespone = await fetch(`/api/setAttendeeMessage`,attendeeMessage)
             const messageResponeContent = await messageRespone.json()
+            setAMessage(messageResponeContent.message)
         } catch(e){
             console.log("Error Changing Default Message", e)
         }
@@ -94,6 +133,8 @@ const SettingsProvider: React.FC<settingsProps> = ({children}) => {
             const resetResponeContent = await resetRespone.json()
             console.log(resetResponeContent)
             getAttendeeMessage(attendeeInitials)
+            setFetchedDAudio(false)
+            setFetchedDmesg(false)
         } catch(e){
             console.log("Error reseting Defaults", e)
         }
@@ -143,10 +184,14 @@ const SettingsProvider: React.FC<settingsProps> = ({children}) => {
         value={{
             defaultMessage, 
             attendeeMessage, 
+            defaultAudio,
+            setAMessage,
             getAttendeeMessage, 
             setAttendeeMessage, 
             resetAttendee,
-            setAMessage, 
+            setDAudio,
+            getDefaultAudio,
+            setDefaultAudio,
             setDMessage, 
             getDefaultMessage, 
             setDefaultMessage, 

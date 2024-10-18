@@ -2,6 +2,7 @@ import os
 import sys
 
 import sqlalchemy
+from flask import url_for
 from pydub import AudioSegment
 
 from APIFuncs import MariaDBapi as api, utils
@@ -12,8 +13,7 @@ image_folder = 'flaskServer/static/audioFiles'
 
 #--------------- Attendee Handling -----------------------------------------------------
 
-# def setAttendeeMessage(attendeeID):
-#
+#--------------- Message Handling -----------------------------------------------------
 def getAttendeeMessage(attendeeInitials):
     #Get Attendee Initials
     attendeeID = utils.getIDfromInitials(attendeeInitials)
@@ -48,8 +48,13 @@ def setAttendeeMessage(attendeeInitials, message):
         Session.add(newDefault)
     Session.commit()
     Session.close()
+#--------------- Audio Handling -----------------------------------------------------
 
 
+
+
+
+#--------------- Reset Handling -----------------------------------------------------
 def resetAttendee(attendeeInitials):
     #Get Attendee Initials
     attendeeID = utils.getIDfromInitials(attendeeInitials)
@@ -76,6 +81,7 @@ def resetAttendee(attendeeInitials):
 
 #--------------- Default Handling -----------------------------------------------------
 
+#--------------- Message Handling -----------------------------------------------------
 def getDefaultMessage():
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
@@ -109,27 +115,73 @@ def setDefaultMessage(message):
     Session.commit()
     Session.close()
 
-#def setDefaultAudio(audioFile):
+#--------------- Audio Handling -----------------------------------------------------
 
-
-#This function resets the generic message back to default.
-def resetDefaults():
-    #Default Messages/Audio
-    defaultMessage = "Welcome to PTC"
-    defaultAudioPath = os.path.join('flaskServer', 'static', 'defaultSuccessMaster.wav')
-
+def setDefaultAudio(audioFile):
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
     Session = sqlalchemy.orm.sessionmaker()
     Session.configure(bind=api.engine)
     Session = Session()
 
+    #Convert audio File into mp3, and rename to '0' (master entry)
+    audioFilePath = convertAudio('0', audioFile)
+
+    #Query for default entry, '0'
+    defaultEntry = Session.query(api.AttendeeMessage).filter_by(ID='0').first()
+    #If this exists, edit the messages
+    if defaultEntry:
+        defaultEntry.audioPath = audioFilePath
+    else:
+        #If not, create a new ID='0' entry.
+        newDefault = api.AttendeeMessage(ID='0', Message='', audioPath=audioFilePath)
+        Session.add(newDefault)
+    Session.commit()
+    Session.close()
+
+def getDefaultSuccessAudio():
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+
+    # Query for default entry, '0'
+    defaultEntry = Session.query(api.AttendeeMessage).filter_by(ID='0').first()
+    if defaultEntry:
+        #Truncate file path for usage
+        urlFullFilePath = defaultEntry.audioPath
+        urlFilePath = urlFullFilePath.replace(r"flaskServer\static"+"\\", "")
+        #replace backslashes with forward slashes for url.
+        urlFilePath = urlFilePath.replace('\\', '/')
+        print(urlFilePath)
+        #Create a URL for the file path to service to flask server
+        audioURL = url_for('static', filename=urlFilePath,_external=True)
+        return audioURL
+    else:
+        return "No Default Audio Found"
+
+
+#--------------- Reset Handling -----------------------------------------------------
+
+#This function resets the generic message back to default.
+def resetDefaults():
+    #Default Messages/Audio
+    defaultMessage = "Welcome to PTC"
+    defaultAudioPath = os.path.join('flaskServer', 'static', 'audioFiles', 'defaultSuccessMaster.wav')
+    #flaskServer / static / audioFiles / defaultSuccessMaster.wav
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    audioFilePath = convertAudio('0', defaultAudioPath)
     defaultEntry = Session.query(api.AttendeeMessage).filter_by(ID='0').first()
     if defaultEntry:
         defaultEntry.Message = defaultMessage
-        defaultEntry.audioPath = defaultAudioPath
+        defaultEntry.audioPath = audioFilePath
     else:
-        newDefault = api.AttendeeMessage(ID='0',Message=defaultMessage,audioPath=defaultAudioPath)
+        newDefault = api.AttendeeMessage(ID='0', Message=defaultMessage, audioPath=defaultAudioPath)
         Session.add(newDefault)
     Session.commit()
     Session.close()
@@ -146,17 +198,18 @@ def convertAudio(attendeeID,audioFile):
     file_extension = '.mp3'  # Get the file extension
     new_filename = f"{attendeeID}{file_extension}"
     #Assign file path to staic folder
-    AudioFilePath = os.path.join('flaskServer', 'static', new_filename)
+    AudioFilePath = os.path.join('flaskServer', 'static', 'audioFiles', new_filename)
     #Read File from File path.
     audioToConvert = AudioSegment.from_file(audioFile)
+    #Create a new file for output
+    file = open(AudioFilePath, 'w+')
     #Export audio as mp3
     audioToConvert.export(AudioFilePath, format="mp3")
+    file.close()
+
+    return AudioFilePath
 
 
 if __name__ == '__main__':
-    defaultAudioPath = "flaskServer/static/audioFiles/defaultSuccessMaster.wav"
-    print('Messages Test')
-    print(setDefaultMessage('Test Test Test'))
-    print(getDefaultMessage())
     resetDefaults()
-    print(getDefaultMessage())
+    getDefaultSuccessAudio()

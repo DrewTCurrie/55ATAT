@@ -294,6 +294,19 @@ def resetDefault():
     messages.resetDefaults()
     return make_response(jsonify({"message": "Success"}), 200)
 
+#---------------Default Audio Routes -----------------------------------------------------
+
+@app.route('/api/setDefaultAudio',methods=['POST'])
+def setDefaultAudio():
+    #This will be passed in as a form data.
+    messages.setDefaultAudio(request.files['audio'])
+    return make_response(jsonify({"message": "Success"}), 200)
+
+@app.route('/api/getDefaultAudio',methods=['GET'])
+def getDefaultAudio():
+    audioURL = messages.getDefaultSuccessAudio()
+    return make_response(jsonify({"url": audioURL}), 200)
+
 #---------------Attendee Messages Routes -----------------------------------------------------
 @app.route('/api/getAttendeeMessage',methods=['POST'])
 def getAttendeeMessage():
