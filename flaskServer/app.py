@@ -56,7 +56,8 @@ def generate_report():
     role = data.get('role')
     start_date = data.get('startDate')
     end_date = data.get('endDate')
-    fileName = generateReport.generate_spreadsheet(name, role, start_date, end_date)
+    eventType = data.get('eventType')
+    fileName = generateReport.generate_spreadsheet(name, role,eventType, start_date, end_date)
     #Checking if file exists for a minute before throwing an error.
     start_time = time.time()
     while time.time() - start_time < 60:

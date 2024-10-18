@@ -6,9 +6,14 @@ import { Routes, Route } from 'react-router-dom'
 import { Box } from '@mui/material'
 import React from 'react'
 import Scanner from './pages/scanner'
+import Table from './components/table'
+
 import Login from './pages/login'
 import AuthProvider from './funcitons/AuthProvider'
 import ProtectedRoute from './funcitons/ProtectedRoute'
+
+function App() {
+  return (
 
 function App() {
   return (
@@ -30,6 +35,7 @@ function App() {
         </Routes>
       </Box>
     </AuthProvider>
+
   );
 };
 
