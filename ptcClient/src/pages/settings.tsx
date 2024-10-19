@@ -1,35 +1,16 @@
 import { Autocomplete, Box, Button, Divider, TextField, Typography } from '@mui/material';
 import React, {useEffect, useRef, useState} from 'react'
 import { useSettings } from '../functions/SettingsProvider';
+import { AudioPlayer } from '../components/audioPlayer';
 
-//This is so the audio player can reload, by adding a custom useEffect that activates when audioURL is changed.
-const AudioPlayer: React.FC<{ audioUrl: string | null, audioType: string | null }> = ({ audioUrl,audioType }) => {
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-  
-    useEffect(() => {
-      // Reload the audio when the audioUrl changes
-      if (audioRef.current) {
-        audioRef.current.load();
-        audioRef.current.currentTime = 0;
-      }
-    }, [audioUrl]);
-  
-    return (
-      <div>
-        <audio ref={audioRef} controls>
-          <source src={audioUrl || ''} type={audioType || ''} />
-          Your browser does not support the audio element.
-        </audio>
-      </div>
-    );
-  };
-
-  interface Attendee {
+interface Attendee {
     ID: string;
     Initials: string;
-  }
+}
 
 function Settings() {
+    //Initialize Audio Player
+    const audioRef = useRef<HTMLAudioElement | null>(null);
     //Initialize Setting Provides as setttings
     const settings = useSettings();
     //Gets Names of Attendees in Database for Personalized Messasges.
@@ -256,7 +237,7 @@ function Settings() {
                             {audioSrc && (
                                 
                                 <div>
-                                    <AudioPlayer audioUrl={audioSrc} audioType={audioType}/>
+                                    <AudioPlayer audioUrl={audioSrc} audioType={audioType} audioRef={audioRef}/>
                                 </div>
                             )}
                             {fileName && (
@@ -357,13 +338,13 @@ function Settings() {
                         </Button>
                         {settings?.attendeeAudio && !attendeeAudioSrc && (
                                 <div>
-                                    <AudioPlayer audioUrl={settings?.attendeeAudio} audioType='audio/mpeg'/>
+                                    <AudioPlayer audioUrl={settings?.attendeeAudio} audioType='audio/mpeg' audioRef={audioRef}/>
                                 </div>
                             )}
                             {attendeeAudioSrc && (
                                 
                                 <div>
-                                    <AudioPlayer audioUrl={attendeeAudioSrc} audioType={attendeeAudioType}/>
+                                    <AudioPlayer audioUrl={attendeeAudioSrc} audioType={attendeeAudioType}  audioRef={audioRef}/>
                                 </div>
                             )}
                             {attendeeFileName && (

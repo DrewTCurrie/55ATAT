@@ -103,7 +103,11 @@ def getRecentEvents():
 @app.route('/api/scanEvent', methods=['POST'])
 def scanEvent():
     data = request.json
-    return make_response(jsonify(utils.NewAttendanceEvent(data.get('id'))), 200)
+    response = utils.NewAttendanceEvent(data.get('id'))
+    if response is False:
+        return make_response(jsonify({'message': "Unable to find attendee: " + data.get('id')}), 400)
+    else:
+        return make_response(jsonify({'message': "Event Created for attendee: " + data.get('id')}), 200)
 
 
 #createAccount parses the formdata, creates an account, saves an image associated with the id for badge creation, and returns the id.
@@ -308,6 +312,11 @@ def setDefaultAudio():
 @app.route('/api/getDefaultAudio',methods=['GET'])
 def getDefaultAudio():
     audioURL = messages.getDefaultSuccessAudio()
+    return make_response(jsonify({"url": audioURL}), 200)
+
+@app.route('/api/getFailureAudio', methods=['GET'])
+def getFailureAudio():
+    audioURL = messages.getFailureAudio()
     return make_response(jsonify({"url": audioURL}), 200)
 
 #---------------Attendee Messages Routes -----------------------------------------------------

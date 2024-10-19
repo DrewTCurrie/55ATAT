@@ -108,6 +108,8 @@ def NewAttendanceEvent(UserID):
 
     # Call get Initials function to find the user intials based on the UserID passed in
     UserInitials = GetUserInitials(UserID, NAESession)
+    if(UserInitials == 400):
+        return False
 
     #Get a Date and convert it to the right timezone.
     date = datetime.now()
@@ -119,6 +121,8 @@ def NewAttendanceEvent(UserID):
     # If it suceeds, close the session and return 200 for success. 
     NAESession.add(NewAttendanceEvent)
     NAESession.commit()
+    NAESession.close()
+    return True
 
     #try:
     #   NAESession.add(NewAttendanceEvent)

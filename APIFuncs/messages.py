@@ -202,6 +202,12 @@ def getDefaultSuccessAudio():
         Session.close()
         return "No Default Audio Found"
 
+def getFailureAudio():
+    failurePath = os.path.join('audioFiles', '1.mp3')
+    urlFilePath = failurePath.replace('\\', '/')
+    audioURL = url_for('static', filename=urlFilePath,_external=True)
+    return audioURL
+
 
 #--------------- Reset Handling -----------------------------------------------------
 
@@ -239,7 +245,7 @@ def convertAudio(attendeeID,audioFile):
     file_extension = '.mp3'  # Get the file extension
     new_filename = f"{attendeeID}{file_extension}"
     #Assign file path to staic folder
-    AudioFilePath = os.path.join('flaskServer', 'static', 'audioFiles', new_filename)
+    AudioFilePath = os.path.join('..','flaskServer', 'static', 'audioFiles', new_filename)
     #Read File from File path.
     audioToConvert = AudioSegment.from_file(audioFile)
     #Create a new file for output
@@ -252,6 +258,6 @@ def convertAudio(attendeeID,audioFile):
 
 
 if __name__ == '__main__':
-    defaultAudioPath = os.path.join('..','flaskServer', 'static', 'audioFiles', 'defaultSuccessMaster.wav')
-    audioFilePath = convertAudio('0', defaultAudioPath)
+    defaultAudioPath = os.path.join('..','flaskServer', 'static', 'audioFiles', 'defaultFailureMaster.wav')
+    audioFilePath = convertAudio('1', defaultAudioPath)
     print(audioFilePath)

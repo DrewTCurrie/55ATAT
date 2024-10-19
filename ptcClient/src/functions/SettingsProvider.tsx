@@ -21,8 +21,9 @@ interface SettingsContextType {
     resetAttendee: (attendeeID: string) => void,
     setAttendeeAudio: (attendeeID: string, audioFile: File) => Promise<void>,
     getAttendeeAudio: (attendeeID: string) => void,
-    getDefaultAudio: () => void
+    getDefaultAudio: () => void,
     setDefaultAudio: (audioFile: File) => void,
+    getFailureAudio: () => void,
     resetDefaults: () => void,
     setDMessage: (message: string) => void,
     setAMessage: (message: string) => void,
@@ -65,6 +66,16 @@ const SettingsProvider: React.FC<settingsProps> = ({children}) => {
             console.log("Error Retrieving Default Audio",e)
         }
         
+    }
+    const getFailureAudio = async () => {
+        try{
+            const audio = await fetch(`/api/getFailureAudio`)
+            const audioURL = await audio.json()
+            setAAudio(audioURL.url)
+            setFetchedDAudio(true)
+        }catch(e){
+            console.log("Error Retrieving Default Audio",e)
+        }
     }
     const setDefaultAudio = async (audioFile: File) => {
          const audio = new FormData();
@@ -232,6 +243,7 @@ const SettingsProvider: React.FC<settingsProps> = ({children}) => {
             setDAudio,
             getDefaultAudio,
             setDefaultAudio,
+            getFailureAudio,
             setDMessage, 
             getDefaultMessage, 
             setDefaultMessage, 
