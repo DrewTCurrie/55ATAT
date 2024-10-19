@@ -12,7 +12,7 @@ from APIFuncs import utils
 # Helper function to generate a QR code, generates QR code based on ID so that it remains the same if needing to be regenerated.
 def generate_qr_code(userID, filename):
     ptclogo = Image.open(
-        os.path.join('flaskServer', 'static', 'ptclogo.png'))  #TODO: add ptclogo to center of QR code.
+        os.path.join('flaskServer', 'static', 'BadgeTemplates', 'Template_ptclogo.png'))  #TODO: add ptclogo to center of QR code.
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
@@ -71,7 +71,7 @@ def generate_badge(userID):
         formatted_phone = f"Phone: {phone}"
 
         # Add name, "Employee", phone, and address to EmployeeFront
-        front_img_path = os.path.join('flaskServer', 'static', 'EmployeeFront.png')
+        front_img_path = os.path.join('flaskServer', 'static', 'BadgeTemplates', 'Template_EmployeeFront.png')
         front_output_path = os.path.join('flaskServer', 'static', 'EmployeeFrontWithDetails.png')
         add_text_to_image(
             front_img_path,
@@ -85,7 +85,7 @@ def generate_badge(userID):
         if os.path.isfile(os.path.join('flaskServer', 'profileImage', f'{userID}.png')):
             user_image_path = os.path.join('flaskServer', 'profileImage', f'{userID}.png')
         else:
-            user_image_path = os.path.join('flaskServer', 'static', 'ptclogo.png')
+            user_image_path = os.path.join('flaskServer', 'static', 'BadgeTemplates', 'Template_ptclogo.png')
         embed_user_image(front_output_path, user_image_path, front_output_path, user_img_size=(360, 360),
                          user_img_position=(114, 165))
 
@@ -95,7 +95,7 @@ def generate_badge(userID):
         generate_qr_code(qr_data, qr_filename)
 
         # Combine QR code with EmployeeBack and add details
-        back_img_path = os.path.join('flaskServer', 'static', 'EmployeeBack.png')
+        back_img_path = os.path.join('flaskServer', 'static', 'BadgeTemplates', 'Template_EmployeeBack.png')
         back_output_path = os.path.join('flaskServer', 'static', 'EmployeeBackWithQR.png')
         back_img = Image.open(back_img_path).convert("RGBA")
         qr_img = Image.open(qr_filename).resize((400, 400))
@@ -115,7 +115,7 @@ def generate_badge(userID):
         formatted_service = "\n".join(service_lines)
 
         # Add initials and service details to NonEmployeeFront
-        front_img_path = os.path.join('flaskServer', 'static', 'NonEmployeeFront.png')
+        front_img_path = os.path.join('flaskServer', 'static', 'BadgeTemplates',  'Template_NonEmployeeFront.png')
         front_output_path = os.path.join('flaskServer', 'static', 'NonEmployeeFrontWithDetails.png')
 
         add_text_to_image(
