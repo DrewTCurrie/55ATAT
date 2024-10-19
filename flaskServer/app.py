@@ -15,6 +15,9 @@ import sys
 import os
 import time
 
+#Flask mailing system 
+from flask_mail import Mail, Message
+from reports import mailerCredentials
 #Scheduling library
 import schedule
 #Need threading for schedules
@@ -37,6 +40,11 @@ sys.path.append(os.path.join(sys.path[0], '/xlsx'))
 sys.path.append(os.path.join(sys.path[0], '/profileImage'))
 image_folder = 'flaskServer/profileImage'
 
+#--Mailing service. Needed for automatic report mailing --------------------------------------------------
+#Setup the mail app with hidden information
+mailerCredentials.SetupCredentials(app)
+#Create mail app after setup
+mail = Mail(app)
 
 #--Schedule funciton. Needs to stay in the main flask app ----------------------------------------------
 def ScheduleManager():
@@ -274,13 +282,20 @@ def login():
 
 @app.route('/')
 def index():
+    #TODO: Remove generating reports on route for testing only!
+    reportScheduler.weekly_reports(app, mail)
+    time.sleep(30)
+    reportScheduler.monthly_reports(app, mail)
     return render_template('index.html')
 
 
 if __name__ == '__main__':
     print("Flask Server started from app.py")
+    app.run(host='0.0.0.0', port=5000, debug=False)
+
+
     #---------Scheduled Processes-----------------------------------------------------------------------------
-    schedule.every().day.at("21:00").do(reportScheduler.CheckReportsSchedule)
+    schedule.every().day.at("21:00").do(reportScheduler.CheckReportsSchedule(app, mail))
     #schedule.every(60).seconds.do(reportScheduler.CheckReportsSchedule)
 
     #This may not be the most effecient way to run this code however I cannot find a more effecient way to run 
@@ -289,4 +304,4 @@ if __name__ == '__main__':
     #It is more effecient than the original polling of like every second
     ScheduleMangerThread = Thread(target=ScheduleManager)
     ScheduleMangerThread.start()
-    app.run(host='0.0.0.0', port=5000, debug=False)
+
