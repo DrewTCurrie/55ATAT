@@ -13,6 +13,7 @@ __pycache__
 #for the xlsx generation spam
 .xlsx
 flaskServer/xlsx/
+!flaskServer/xlsx/.gitkeep
 node_modules/
 #for profile images
 flaskServer/profileImage
