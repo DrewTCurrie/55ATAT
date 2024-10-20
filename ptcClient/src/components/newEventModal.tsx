@@ -7,7 +7,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import { useAuth } from '../funcitons/AuthProvider';
+import { useAuth } from '../functions/AuthProvider';
 
 interface modalProps{
     onClose: () => void;

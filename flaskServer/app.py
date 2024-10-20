@@ -15,6 +15,7 @@ from APIFuncs import utils
 from APIFuncs import MariaDBapi
 from APIFuncs import badgeGenerator
 from APIFuncs import auth
+from APIFuncs import messages
 import sys
 import os
 import time
@@ -109,6 +110,9 @@ def getRoles():
 def getAllAttendees():
     return make_response(jsonify(utils.getAllAttendees()), 200)
 
+@app.route('/api/getAttendeeInitialsAndID', methods=['GET'])
+def getAttendeeInitialsAndID():
+    return make_response(jsonify(utils.getAllAttendeeInitialsAndIDs()),200)
 
 #This endpoint returns the 50 most recent attendance events for usage in the webpage table. This can be expanded based on testing.
 @app.route('/api/getRecentEvents', methods=['GET'])
@@ -120,7 +124,11 @@ def getRecentEvents():
 @app.route('/api/scanEvent', methods=['POST'])
 def scanEvent():
     data = request.json
-    return make_response(jsonify(utils.NewAttendanceEvent(data.get('id'))), 200)
+    response = utils.NewAttendanceEvent(data.get('id'))
+    if response is False:
+        return make_response(jsonify({'message': "Unable to find attendee: " + data.get('id')}), 400)
+    else:
+        return make_response(jsonify({'message': "Event Created for attendee: " + data.get('id')}), 200)
 
 
 #createAccount parses the formdata, creates an account, saves an image associated with the id for badge creation, and returns the id.
@@ -291,6 +299,80 @@ def login():
     else:
         return make_response(jsonify(loginResponse), 401)
 
+
+#--------------- Settings Routes -----------------------------------------------------
+
+#---------------Default Messages Routes -----------------------------------------------------
+@app.route('/api/getDefaultMessage',methods=['GET'])
+def getDefaultMessage():
+    defaultMessage = messages.getDefaultMessage()
+    return make_response(jsonify({"message": defaultMessage}), 200)
+# @app.route('/api/getDefaultAudio',methods=['GET'])
+# def getDefaultAudio():
+
+@app.route('/api/setDefaultMessage', methods=['POST'])
+def setDefaultMessage():
+    #Parse JSON data
+    data = request.json
+    messages.setDefaultMessage(data.get('message'))
+    return make_response(jsonify({"message": "Success"}), 200)
+
+@app.route('/api/resetDefaults', methods=['GET'])
+def resetDefault():
+    messages.resetDefaults()
+    return make_response(jsonify({"message": "Success"}), 200)
+
+#---------------Default Audio Routes -----------------------------------------------------
+
+@app.route('/api/setDefaultAudio',methods=['POST'])
+def setDefaultAudio():
+    #This will be passed in as a form data.
+    messages.setDefaultAudio(request.files['audio'])
+    return make_response(jsonify({"message": "Success"}), 200)
+
+@app.route('/api/getDefaultAudio',methods=['GET'])
+def getDefaultAudio():
+    audioURL = messages.getDefaultSuccessAudio()
+    return make_response(jsonify({"url": audioURL}), 200)
+
+@app.route('/api/getFailureAudio', methods=['GET'])
+def getFailureAudio():
+    audioURL = messages.getFailureAudio()
+    return make_response(jsonify({"url": audioURL}), 200)
+
+#---------------Attendee Messages Routes -----------------------------------------------------
+@app.route('/api/getAttendeeMessage',methods=['POST'])
+def getAttendeeMessage():
+    # Parse JSON data
+    data = request.json
+    #Get Attendee Message from messages.py
+    message = messages.getAttendeeMessage(data.get('id'))
+    return make_response(jsonify({"message": message}), 200)
+
+@app.route('/api/setAttendeeMessage', methods=['POST'])
+def setAttendeeMessage():
+    data = request.json
+    messages.setAttendeeMessage(data.get('id'),data.get('message'))
+    return make_response(jsonify({"message": "Success"}), 200)
+
+@app.route('/api/resetAttendee', methods=['POST'])
+def resetAttendee():
+    data = request.json
+    messages.resetAttendee(data.get('id'))
+    return make_response(jsonify({"message": "Success"}), 200)
+
+#---------------Attendee Audio Routes -----------------------------------------------------
+@app.route('/api/getAttendeeAudio', methods=['POST'])
+def getAttendeeAudio():
+    data = request.json
+    audioURL = messages.getAttendeeAudio(data.get('id'))
+    return make_response(jsonify({"url": audioURL}), 200)
+
+@app.route('/api/setAttendeeAudio',methods=['POST'])
+def setAttendeeAudio():
+    #This will be passed in as a form data.
+    messages.setAttendeeAudio(request.form['id'],request.files['audio'])
+    return make_response(jsonify({"message": "Success"}), 200)
 
 @app.route('/')
 def index():

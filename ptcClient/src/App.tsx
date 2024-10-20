@@ -9,16 +9,18 @@ import Scanner from './pages/scanner'
 import Table from './components/table'
 
 import Login from './pages/login'
-import AuthProvider from './funcitons/AuthProvider'
-import ProtectedRoute from './funcitons/ProtectedRoute'
+import AuthProvider from './functions/AuthProvider'
+import ProtectedRoute from './functions/ProtectedRoute'
+import Settings from './pages/settings'
+import SettingsProvider from './functions/SettingsProvider'
 
 function App() {
   return (
     <AuthProvider>
       <Box sx={{display: 'flex'}}>
         <Sidebar/>
-        <Routes>
-          <Route path='' element={<Scanner/>}/>
+          <Routes>
+          <Route path='' element={<SettingsProvider><Scanner/></SettingsProvider>}/>
           <Route path='login' element={<Login/>}/>
           <Route element={<ProtectedRoute/>}>
             <Route path='events' element={<Events/>} />
@@ -27,7 +29,7 @@ function App() {
             <Route path='clients' element={<Clients/>} />
           </Route>
           <Route element={<ProtectedRoute/>}>
-            <Route path='settings' element={<Scanner/>} />
+            <Route path='settings' element={<SettingsProvider><Settings/></SettingsProvider>} />
           </Route>
         </Routes>
       </Box>

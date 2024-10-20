@@ -53,6 +53,23 @@ def getAllUserInitials():
     results = json.dumps([r[0] for r in query])
     return results
 
+def getAllAttendeeInitialsAndIDs():
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #query for all attendees in the attendee table
+    query = Session.query(api.Attendee).all()
+    # Creating results by parsing each entry into JSON
+    attendeeList = []
+    for row in query:
+        attendeeList.append({
+            'ID': row.ID,
+            'Initials': row.AttendeeInitials,
+        })
+    Session.close()
+    return attendeeList
 
 def getRoles():
     # Create Sql Alchemy Session
@@ -91,6 +108,8 @@ def NewAttendanceEvent(UserID):
 
     # Call get Initials function to find the user intials based on the UserID passed in
     UserInitials = GetUserInitials(UserID, NAESession)
+    if(UserInitials == 400):
+        return False
 
     #Get a Date and convert it to the right timezone.
     date = datetime.now()
@@ -102,6 +121,8 @@ def NewAttendanceEvent(UserID):
     # If it suceeds, close the session and return 200 for success. 
     NAESession.add(NewAttendanceEvent)
     NAESession.commit()
+    NAESession.close()
+    return True
 
     #try:
     #   NAESession.add(NewAttendanceEvent)
@@ -347,6 +368,16 @@ def getAllAttendees():
         })
     Session.close()
     return attendeeList
+
+def getIDfromInitials(AttendeeInitials):
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    query = Session.query(api.Attendee).filter_by(AttendeeInitials=AttendeeInitials).first()
+    Session.close()
+    return query.ID
 
 
 def getEvents(numEvents):

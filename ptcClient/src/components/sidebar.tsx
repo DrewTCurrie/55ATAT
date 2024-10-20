@@ -2,7 +2,7 @@ import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Typ
 import React from 'react';
 import { useState, useEffect} from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../funcitons/AuthProvider';
+import { useAuth } from '../functions/AuthProvider';
 
 const navItems = [
   {text: 'Scanner', link: '/'},
