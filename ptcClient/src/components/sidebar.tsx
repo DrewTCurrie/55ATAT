@@ -7,7 +7,7 @@ import { useAuth } from '../functions/AuthProvider';
 const navItems = [
   {text: 'Scanner', link: '/'},
   {text: 'Events', link:'/events'},
-  {text: 'Clients', link:'/clients'},
+  {text: 'Attendees', link:'/clients'},
 ];
 
 const useWindowSize = () => {
