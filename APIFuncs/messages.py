@@ -63,6 +63,7 @@ def getAttendeeAudio(attendeeID):
         print("URL FULL FILE PATH:" + urlFullFilePath)
         urlFilePath = urlFullFilePath.replace(r"/home/55ATAT/55ATAT/flaskServer/static/", "")
         #replace backslashes with forward slashes for url.
+        urlFilePath = urlFilePath.replace('\\', '/')
         print("RETURN URL: " + urlFilePath)
         #Create a URL for the file path to service to flask server
         audioURL = url_for('static', filename=urlFilePath,_external=True)
@@ -196,7 +197,7 @@ def getDefaultSuccessAudio():
         print("URLFULLFILEPATH: " + urlFullFilePath)
         urlFilePath = urlFullFilePath.replace(r"/home/55ATAT/55ATAT/flaskServer/static/", "")
         #replace backslashes with forward slashes for url.
-        #urlFilePath = urlFilePath.replace('\\', '/')
+        urlFilePath = urlFilePath.replace('\\', '/')
         print("RETURN URL: " + urlFilePath)
         #Create a URL for the file path to service to flask server
         audioURL = url_for('static', filename=urlFilePath,_external=True)
