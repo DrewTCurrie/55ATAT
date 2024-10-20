@@ -59,7 +59,9 @@ def MonthlyTasks(app, mail):
     #Run garbage collector on everything
     print("Running garbage collector")
     garbagecollector.CollectGarbage()
-
+    #Also remove audio files monthly to save storage
+    print("Running removal of old audio files seperately.")
+    garbagecollector.RemoveOldAudioFiles()
 
 def WeeklyTasks(app, mail):
     reportScheduler.weekly_reports(app, mail)

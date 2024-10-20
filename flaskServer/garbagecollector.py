@@ -30,6 +30,8 @@ def RemoveOldBadges():
     for BadgeArtifact in BadgeGenerationFileList:
         if BadgeArtifact == "BadgeTemplates":
             print("Ignoring badge templates")
+        elif BadgeArtifact == "audioFiles":
+            print("Ignoring audioFiles directory. This will be cleaned up in a seperate function.")
         elif BadgeArtifact == ".gitignore":
             print("Keeping" + BadgeArtifact + "as it is not an artifact of creating a badege and is required for system operation.")
         else:
@@ -50,13 +52,35 @@ def RemoveOldProfilePictures():
             if os.path.isfile(path+ProfilePicture):
                 os.remove(path+ProfilePicture)
 
+def RemoveOldAudioFiles():
+    currentWorkingDirectory = os.path.abspath(os.getcwd())
+    path = os.path.join(currentWorkingDirectory, 'flaskServer', 'static', 'audioFiles/')
+    audioFilesList = os.listdir(path)
+    print("Removing old audio files in audioFiles folder")
+    print(audioFilesList)
+    for CustomAudio in audioFilesList:
+        if CustomAudio == '0.mp3':
+            print("Ignoring " + CustomAudio + "as it is a default audio file.")
+        elif CustomAudio == '1.mp3':
+            print("Ignoring " + CustomAudio + "as it is a default audio file.")
+        elif CustomAudio == 'defaultFailureMaster.wav':
+            print("Ignoring " + CustomAudio + "as it is a default audio file.")
+        elif CustomAudio == 'defaultSuccessMaster.wav':
+            print("Ignoring " + CustomAudio + "as it is a default audio file.")
+        elif CustomAudio == '.gitkeep':
+            print("Ignoring .gitkeep as it is not an audio file and is requried for system operation.")      
+        else: 
+            if os.path.isfile(path+CustomAudio):
+                print("DELETING" + path+CustomAudio)
+                os.remove(path+CustomAudio)
 
 def CollectGarbage():
     RemoveOldReports()
     RemoveOldBadges()
     RemoveOldProfilePictures()
+    
 
 
 
 if __name__ == '__main__':
-    sys.exit(CollectGarbage())
+    sys.exit(RemoveOldAudioFiles())
