@@ -25,7 +25,7 @@ interface AuthContextType {
 //This handles the login/logout of the webpapp
 const AuthProvider: React.FC<authProps> = ({children}) => {
     const [adminInitials, setAdminInitials] = useState("");                 //Admin Initials -> for Assigning to comments
-    const [token, setToken] = useState(localStorage.getItem("site") || ""); //Site Token, the meat of authentication.
+    const [token, setToken] = useState(localStorage.getItem("token") || ""); //Site Token, the meat of authentication.
     const navigate = useNavigate();
     //This calls to the backend to attempt to login, on success it returns the adminInitials and a token for site authentication.
     const attemptLogin = async (data: userCredentials) => {

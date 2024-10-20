@@ -50,3 +50,10 @@ class ArchivalEvent(Base):
       TIL_Violation = sqlalchemy.Column(sqlalchemy.Integer, default = 0)
       AdminInitials = sqlalchemy.Column(sqlalchemy.String(length=256))
       Comment = sqlalchemy.Column(sqlalchemy.String(length=256))
+
+# This table stores custom messages + audio files for attendee. This is utilized in the Scanner.
+class AttendeeMessage(Base):
+    __tablename__ = 'AttendeeMessages'
+    ID = sqlalchemy.Column(sqlalchemy.String(length=24), primary_key =True)
+    Message = sqlalchemy.Column(sqlalchemy.String(length=256))
+    audioPath = sqlalchemy.Column(sqlalchemy.String(length=256))

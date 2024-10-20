@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useState} from 'react';
 import {Box,Typography,TextField,Button} from '@mui/material'
-import { useAuth } from "../funcitons/AuthProvider";
+import { useAuth } from "../functions/AuthProvider";
 
 
 //https://dev.to/miracool/how-to-manage-user-authentication-with-react-js-3ic5 Template to build this off of
