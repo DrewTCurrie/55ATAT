@@ -8,8 +8,9 @@ from pydub import AudioSegment
 from APIFuncs import MariaDBapi as api, utils
 
 #Pathing to audioFiles folder
-sys.path.append(os.path.join(sys.path[0], '/audioFiles'))
-defaultAudioFilePath = os.path.join('flaskServer', 'static', 'audioFiles', '0.mp3')
+currentWorkingDirectory = os.path.abspath(os.getcwd())
+sys.path.append(os.path.join(currentWorkingDirectory, 'flaskServer', 'static', '/audioFiles'))
+defaultAudioFilePath = os.path.join(currentWorkingDirectory, 'flaskServer', 'static', 'audioFiles', '0.mp3')
 #--------------- Attendee Handling -----------------------------------------------------
 
 #--------------- Message Handling -----------------------------------------------------
@@ -59,9 +60,10 @@ def getAttendeeAudio(attendeeID):
     if query is not None:
         #Truncate file path for usage
         urlFullFilePath = query.audioPath
-        urlFilePath = urlFullFilePath.replace(r"flaskServer\static"+"\\", "")
+        print("URL FULL FILE PATH:" + urlFullFilePath)
+        urlFilePath = urlFullFilePath.replace(r"/home/55ATAT/55ATAT/flaskServer/static/", "")
         #replace backslashes with forward slashes for url.
-        urlFilePath = urlFilePath.replace('\\', '/')
+        print("RETURN URL: " + urlFilePath)
         #Create a URL for the file path to service to flask server
         audioURL = url_for('static', filename=urlFilePath,_external=True)
         Session.close()
@@ -191,9 +193,11 @@ def getDefaultSuccessAudio():
     if defaultEntry:
         #Truncate file path for usage
         urlFullFilePath = defaultEntry.audioPath
-        urlFilePath = urlFullFilePath.replace(r"flaskServer\static"+"\\", "")
+        print("URLFULLFILEPATH: " + urlFullFilePath)
+        urlFilePath = urlFullFilePath.replace(r"/home/55ATAT/55ATAT/flaskServer/static/", "")
         #replace backslashes with forward slashes for url.
-        urlFilePath = urlFilePath.replace('\\', '/')
+        #urlFilePath = urlFilePath.replace('\\', '/')
+        print("RETURN URL: " + urlFilePath)
         #Create a URL for the file path to service to flask server
         audioURL = url_for('static', filename=urlFilePath,_external=True)
         Session.close()
@@ -215,7 +219,8 @@ def getFailureAudio():
 def resetDefaults():
     #Default Messages/Audio
     defaultMessage = "Welcome to PTC"
-    defaultAudioPath = os.path.join('flaskServer', 'static', 'audioFiles', 'defaultSuccessMaster.wav')
+    defaultAudioPath = os.path.join(currentWorkingDirectory, 'flaskServer', 'static', 'audioFiles', 'defaultSuccessMaster.wav')
+    print("DEFAULT PATH: " + defaultAudioFilePath)
     #flaskServer / static / audioFiles / defaultSuccessMaster.wav
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
@@ -240,13 +245,17 @@ def resetDefaults():
 #NOTE: This requires ffmpeg to be installed to run, use (sudo apt-get install ffmpeg) on Linux
 
 def convertAudio(attendeeID,audioFile):
+    print(audioFile)
     #Create an output filepath using attendeeID
     # Create file name with UserID
     file_extension = '.mp3'  # Get the file extension
     new_filename = f"{attendeeID}{file_extension}"
     #Assign file path to staic folder
-    AudioFilePath = os.path.join('..','flaskServer', 'static', 'audioFiles', new_filename)
-    #Read File from File path.
+    #Updated pathing
+    print("CURRENT WORKING DIRECTORY: " + currentWorkingDirectory)
+    AudioFilePath = os.path.join(currentWorkingDirectory, 'flaskServer', 'static', 'audioFiles', new_filename)
+    print("AUDIO FILE PATH :" + AudioFilePath)
+
     audioToConvert = AudioSegment.from_file(audioFile)
     #Create a new file for output
     file = open(AudioFilePath, 'w+')
