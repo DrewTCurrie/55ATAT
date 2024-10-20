@@ -206,11 +206,11 @@ function ClientModal({onClose}: modalProps){
 
     return(
     <Fragment>
-        <Button onClick={handleClickOpen} >Create New Account </Button>
+        <Button onClick={handleClickOpen} >Create New Attendee </Button>
         <Dialog
             open={open}
             onClose={handleClose}>
-            <DialogTitle align="center">Create New Account</DialogTitle>
+            <DialogTitle align="center">Create New Attendee</DialogTitle>
             {!displayBadge ? //CHeck if displayBadge is ready, then display badge.
             <Grid2>
               <Grid2

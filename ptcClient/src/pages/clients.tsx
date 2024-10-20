@@ -113,7 +113,7 @@ return (
       <Box sx={{ flex: 1}}/>
       <Box sx={{flex: 1, backgroundColor: 'gray', padding: 2 }}>
         <Typography variant="h6" color='white'>
-          Clients
+          Attendees
         </Typography>
       <ButtonGroup orientation="vertical" variant='contained'>
         <ClientModal onClose={handleModalClose}/>
