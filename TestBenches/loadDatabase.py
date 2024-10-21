@@ -10,10 +10,61 @@ import sqlalchemy
 import uuid
 
 sys.path.append(os.path.join(sys.path[0], '/home/55ATAT/55ATAT'))
-sys.path.append(os.path.join(sys.path[0], '/home/55ATAT/55ATAT/APIFuncs'))
+sys.path.append(os.path.join(sys.path[0], '/home/55ATAT/55ATAT/flaskServer'))
 
 from APIFuncs import MariaDBapi as api
 from APIFuncs import utils
+
+
+#Create list of possible reasons for being absent
+
+absent_reasons = [
+    "Client reported illness or medical emergency.",
+    "Client had a family emergency or crisis.",
+    "Client was scheduled for surgery or a procedure.",
+    "Client experienced personal health issues.",
+    "Client faced unexpected transportation problems.",
+    "Client was caring for a sick family member.",
+    "Client attended a funeral or memorial service.",
+    "Client had vacation or travel plans.",
+    "Client took a mental health day.",
+    "Client's child had a school event or emergency.",
+    "Client encountered weather-related issues, such as snow.",
+    "Client had a job interview or career opportunity.",
+    "Client was involved in moving or relocation tasks.",
+    "Client experienced a home repair emergency.",
+    "Client had a court appearance or legal obligations.",
+    "Client attended a professional development workshop.",
+    "Client had volunteer commitments or events.",
+    "Client was at a dental appointment or treatment.",
+    "Client was grocery shopping for the family.",
+    "Client observed a religious holiday."
+]
+
+til_reasons = [
+    "Client arrived late due to traffic congestion.",
+    "Client had a last-minute appointment that ran over time.",
+    "Client encountered unexpected public transportation delays.",
+    "Client was delayed by a family emergency.",
+    "Client's previous appointment ran longer than expected.",
+    "Client had difficulty finding parking.",
+    "Client experienced personal health issues that delayed their arrival.",
+    "Client was unable to locate the clinic on time.",
+    "Client had to assist a family member before coming.",
+    "Client miscalculated travel time and arrived late.",
+    "Client needed to pick up a prescription before the appointment.",
+    "Client was involved in a prior commitment that ran over.",
+    "Client experienced issues with their vehicle.",
+    "Client received a call or message that required immediate attention.",
+    "Client left early due to feeling unwell during the session.",
+    "Client had a childcare issue that required them to leave.",
+    "Client needed to attend to a work-related emergency.",
+    "Client received an unexpected phone call during the session.",
+    "Client felt overwhelmed and decided to leave early.",
+    "Client had to meet someone urgently after the appointment.",
+    "Client experienced a personal crisis that prompted an early exit."
+]
+
 
 
 # Todo, create a way to load attendance events associated with an attendee
@@ -55,15 +106,31 @@ def create_attendees_and_events():
             AttendeeInitials=AttendeeJSON['AttendeeInitials']
         )
         Session.add(NewAttendee)
-        #Make 10 attendance events for each attendee starting from today
-        for i in range(10):
+        #Make 30 attendance events for each attendee starting from today
+        for i in range(31):
             date = datetime.datetime.now()
             mst = pytz.timezone('America/Denver')
             date = mst.localize(date)
-            EventID = RandomID.randint(100000000, 999999999)
+            comment = 'N/A' #Set default comment
+            absent = False #Set default value
+            tilViolation = False #Set default value
+
+            #Make some randomly TAIL
+            tailViolation = bool(random.getrandbits(1))
+            if tailViolation:
+                #randomly make some absents
+                absent = bool(random.getrandbits(1))
+                if absent:
+                    comment = random.choice(absent_reasons)
+                elif tailViolation:
+                    comment = random.choice(til_reasons)
+                    tilViolation = True
+                else:
+                    comment = 'N/A'
+
             NewAttendanceEvent = api.AttendanceEvent(EventUUID=uuid.uuid4(), ID=newUserID, AttendeeInitials=AttendeeJSON['AttendeeInitials'],
-                                                     Timestamp=(date - datetime.timedelta(days=i)), Absent=False, TIL_Violation=0,
-                                                     AdminInitials="N/A", Comment="N/A")
+                                                     Timestamp=(date - datetime.timedelta(days=i)), Absent=absent, TIL_Violation=tilViolation,
+                                                     AdminInitials="N/A", Comment=comment)
             Session.add(NewAttendanceEvent)
     Session.commit()
     Session.close()
