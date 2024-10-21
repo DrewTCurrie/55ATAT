@@ -68,7 +68,10 @@ def RemoveOldAudioFiles():
         elif CustomAudio == 'defaultSuccessMaster.wav':
             print("Ignoring " + CustomAudio + "as it is a default audio file.")
         elif CustomAudio == '.gitkeep':
-            print("Ignoring .gitkeep as it is not an audio file and is requried for system operation.")      
+            print("Ignoring .gitkeep as it is not an audio file and is requried for system operation.")   
+        elif CustomAudio == '.gitignore':
+            print("Ignoring .gitignore as it is not an audio file and is requried for system operation.")   
+
         else: 
             if os.path.isfile(path+CustomAudio):
                 print("DELETING" + path+CustomAudio)

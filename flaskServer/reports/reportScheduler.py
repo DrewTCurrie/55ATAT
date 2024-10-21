@@ -33,7 +33,9 @@ def weekly_reports(app, mail):
 
 def monthly_reports(app, mail):
     print("Montly report generation called.")
-    fileName = generateReport.generate_spreadsheet(start_date=(datetime.now() - timedelta(weeks= 4)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+    today = datetime.now()
+    First_Day_Of_The_Month = today.replace(day = 1, hour = 0, minute = 0, second = 0, microsecond = 0)
+    fileName = generateReport.generate_spreadsheet(start_date=(First_Day_Of_The_Month.strftime("%Y-%m-%dT%H:%M:%S.%fZ")))
     mailer.SendMonthlyReport(app, mail, fileName)
     print(fileName)
     
