@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../functions/AuthProvider';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import MenuIcon from '@mui/icons-material/Menu';
-import { Height } from '@mui/icons-material';
 const navItems = [
   {text: 'Scanner', link: '/'},
   {text: 'Events', link:'/events'},
@@ -87,7 +86,8 @@ export default function Sidebar() {
             }}]
           }
           open={open}
-          onClose={toggleDrawer(false)}>
+          onClose={toggleDrawer(false)}
+        >
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h6" sx={{ my: 2 }}>
               PTC
@@ -134,6 +134,20 @@ export default function Sidebar() {
                 }
                 </List>
             </Box>
+          </Box>
+          <Divider/>
+          <Box
+          sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+          }}>
+            <IconButton onClick={toggleDrawer(false)}>
+              <Typography variant="body1" >
+                Close Sidebar
+              </Typography>
+              <ChevronRightIcon/>
+            </IconButton>
           </Box>
         </Drawer>
       </Box>
