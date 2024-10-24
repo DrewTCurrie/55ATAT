@@ -44,15 +44,20 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=12)  #12 hours
 jwt = JWTManager(app)
 
 #Add Pathing for external folders
-sys.path.append(os.path.join(sys.path[0], '/xlsx'))
-sys.path.append(os.path.join(sys.path[0], '/profileImage'))
+# sys.path.append(os.path.join(sys.path[0], '/xlsx'))
+# sys.path.append(os.path.join(sys.path[0], '/profileImage'))
 image_folder = 'flaskServer/profileImage'
+#Get current working directory
+currentWorkingDirectory = os.path.abspath(os.getcwd())
+print(currentWorkingDirectory)
+
 
 #--Mailing service. Needed for automatic report mailing --------------------------------------------------
 #Setup the mail app with hidden information
 #mailerCredentials.SetupCredentials(app)
 #Create mail app after setup
 #mail = Mail(app)
+
 
 #--Schedule funciton. Needs to stay in the main flask app ----------------------------------------------
 def ScheduleManager():
@@ -82,7 +87,7 @@ def generate_report():
     #Checking if file exists for a minute before throwing an error.
     start_time = time.time()
     while time.time() - start_time < 60:
-        if os.path.isfile('/home/55ATAT/55ATAT/flaskServer/xlsx/' + fileName):
+        if os.path.isfile(currentWorkingDirectory + '/flaskServer/xlsx/' + fileName):
             print('found file')
             return make_response(jsonify(fileName), 200)
         time.sleep(1)

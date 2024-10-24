@@ -29,9 +29,7 @@ from sqlalchemy.orm import declarative_base
 #Using absolute pathing seems to work but relative pathing break. Not really sure why.
 #We'll have to figureo out why this is
 #TO-DO: Figure out why relative pathing breaks python includes only on the RaspberryPi
-sys.path.append(os.path.join(sys.path[0], '/home/55ATAT/55ATAT'))
-sys.path.append(os.path.join(sys.path[0], '/home/55ATAT/55ATAT/APIFuncs'))
-
+currentWorkingDirectory = os.path.abspath(os.getcwd())
 from APIFuncs import MariaDBapi as api
 from APIFuncs import utils
 
@@ -86,7 +84,7 @@ def create_spreadsheet(params):
     #Initialize Spreadsheet
     #Create Excel file with meta data
     fileName = ('attendanceReport'+datetime.datetime.now().strftime("%m%d%H%M")+'.xlsx')
-    workbook = xlsxwriter.Workbook('/home/55ATAT/55ATAT/flaskServer/xlsx/'+fileName)
+    workbook = xlsxwriter.Workbook(currentWorkingDirectory + '/flaskServer/xlsx/'+fileName)
     worksheet = workbook.add_worksheet()
 
     #WORKBOOK FORMATS

@@ -10,6 +10,8 @@ from APIFuncs import utils
 
 
 # Helper function to generate a QR code, generates QR code based on ID so that it remains the same if needing to be regenerated.
+currentWorkingDirectory = os.path.abspath(os.getcwd())
+
 def generate_qr_code(userID, filename):
     ptclogo = Image.open(
         os.path.join('flaskServer', 'static', 'BadgeTemplates', 'Template_ptclogo.png'))  #TODO: add ptclogo to center of QR code.
@@ -30,7 +32,7 @@ def generate_qr_code(userID, filename):
 def add_text_to_image(img_path, text, output_path, position, font_size=50):
     img = Image.open(img_path).convert("RGBA")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("APIFuncs/Arial.ttf", font_size)
+    font = ImageFont.truetype("flaskServer/APIFuncs/Arial.ttf", font_size)
     # Split the text into multiple lines
     lines = text.split('\n')
     y = position[1]

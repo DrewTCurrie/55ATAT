@@ -59,11 +59,11 @@ def getAttendeeAudio(attendeeID):
     query = Session.query(api.AttendeeMessage).filter_by(ID=attendeeID).first()
     if query is not None:
         #Truncate file path for usage
-        urlFullFilePath = query.audioPath
-        print("URL FULL FILE PATH:" + urlFullFilePath)
-        urlFilePath = urlFullFilePath.replace(r"/home/55ATAT/55ATAT/flaskServer/static/", "")
-        #replace backslashes with forward slashes for url.
-        urlFilePath = urlFilePath.replace('\\', '/')
+        urlFilePath = query.audioPath
+        # print("URL FULL FILE PATH:" + urlFullFilePath)
+        # urlFilePath = urlFullFilePath.replace(r"/home/55ATAT/55ATAT/flaskServer/static/", "")
+        # #replace backslashes with forward slashes for url.
+        # urlFilePath = urlFilePath.replace('\\', '/')
         print("RETURN URL: " + urlFilePath)
         #Create a URL for the file path to service to flask server
         audioURL = url_for('static', filename=urlFilePath,_external=True)
@@ -81,14 +81,14 @@ def resetAttendee(attendeeID):
 
     #Default Messages/Audio
     defaultMessage = "Welcome to PTC"
-    defaultAudioPath = os.path.join('flaskServer', 'static', 'audioFiles', 'defaultSuccessMaster.wav')
+    defaultAudioPath = os.path.join(currentWorkingDirectory + 'flaskServer', 'static', 'audioFiles', 'defaultSuccessMaster.wav')
 
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
     Session = sqlalchemy.orm.sessionmaker()
     Session.configure(bind=api.engine)
     Session = Session()
-    audioFilePath = convertAudio('0', defaultAudioPath)
+    audioFilePath = convertAudio(attendeeID, defaultAudioPath)
     defaultEntry = Session.query(api.AttendeeMessage).filter_by(ID=attendeeID).first()
     if defaultEntry:
         defaultEntry.Message = defaultMessage
@@ -193,10 +193,10 @@ def getDefaultSuccessAudio():
     defaultEntry = Session.query(api.AttendeeMessage).filter_by(ID='0').first()
     if defaultEntry:
         #Truncate file path for usage
-        urlFullFilePath = defaultEntry.audioPath
-        print("URLFULLFILEPATH: " + urlFullFilePath)
-        urlFilePath = urlFullFilePath.replace(r"/home/55ATAT/55ATAT/flaskServer/static/", "")
-        #replace backslashes with forward slashes for url.
+        urlFilePath = os.path.normpath(defaultEntry.audioPath)
+        # print("URLFULLFILEPATH: " + urlFullFilePath)
+        # urlFilePath = urlFullFilePath.replace(r"/home/55ATAT/55ATAT/flaskServer/static/", "")
+        # #replace backslashes with forward slashes for url.
         urlFilePath = urlFilePath.replace('\\', '/')
         print("RETURN URL: " + urlFilePath)
         #Create a URL for the file path to service to flask server
@@ -210,7 +210,7 @@ def getDefaultSuccessAudio():
 def getFailureAudio():
     failurePath = os.path.join('audioFiles', '1.mp3')
     urlFilePath = failurePath.replace('\\', '/')
-    audioURL = url_for('static', filename=urlFilePath,_external=True)
+    audioURL = url_for('static', filename=urlFilePath, _external=True)
     return audioURL
 
 
@@ -254,7 +254,7 @@ def convertAudio(attendeeID,audioFile):
     #Assign file path to staic folder
     #Updated pathing
     print("CURRENT WORKING DIRECTORY: " + currentWorkingDirectory)
-    AudioFilePath = os.path.join(currentWorkingDirectory, 'flaskServer', 'static', 'audioFiles', new_filename)
+    AudioFilePath = os.path.join(currentWorkingDirectory + 'flaskServer', 'static', 'audioFiles', new_filename)
     print("AUDIO FILE PATH :" + AudioFilePath)
 
     audioToConvert = AudioSegment.from_file(audioFile)
@@ -264,7 +264,8 @@ def convertAudio(attendeeID,audioFile):
     audioToConvert.export(AudioFilePath, format="mp3")
     file.close()
 
-    return AudioFilePath
+    exportAudioPath = os.path.join('audioFiles', new_filename)
+    return exportAudioPath
 
 
 if __name__ == '__main__':
