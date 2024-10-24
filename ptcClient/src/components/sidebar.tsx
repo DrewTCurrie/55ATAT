@@ -1,24 +1,28 @@
-import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
+import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography } from '@mui/material';
 import React from 'react';
 import { useState, useEffect} from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../functions/AuthProvider';
-
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import MenuIcon from '@mui/icons-material/Menu';
 const navItems = [
   {text: 'Scanner', link: '/'},
   {text: 'Events', link:'/events'},
   {text: 'Attendees', link:'/clients'},
 ];
 
+//This looks to get the window size on load of the side bar, and adjusts it as such.
 const useWindowSize = () => {
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
+    height: window.innerHeight
   });
 
   useEffect(() => {
     const handleResize = () => {
       setWindowSize({
         width: window.innerWidth,
+        height: window.innerHeight
       });
     };
 
@@ -31,29 +35,59 @@ const useWindowSize = () => {
   return windowSize;
 };
 
-
 export default function Sidebar() {
-  const {width} = useWindowSize();
+  //Set the drawer width as 15% of the window.
+  const {width, height} = useWindowSize();
   const drawerWidth = width * .15;
+  const drawerHeight = height * .08;
 
+  //Add open/closing logic
+  const [open, setOpen] = useState(false);
+  const toggleDrawer = (newOpen: boolean) => () => {
+    setOpen(newOpen);
+  }
 
   //Initialize authProvider as auth for Admin Initials
   const auth = useAuth();
 
   return(
-      <Box>
+      <Box sx={{mb: 4}}>
+        <AppBar position="fixed" sx={{maxHeight: drawerHeight}}>
+          <Toolbar>
+            <IconButton
+              aria-label="open drawer"
+              onClick={toggleDrawer(true)}
+              edge='start'
+              sx={[
+                {
+                  mr: 2,
+                },
+                open && { display: 'none' },
+              ]}
+            >
+              <MenuIcon sx={{color: 'white'}}/>
+              <Typography variant="body1" sx={{ ml: "1rem", color:'white'}}>
+                Open Sidebar
+              </Typography>
+            </IconButton>
+            <Box sx={{flexGrow: 1}}/>
+            <Typography variant="h6" noWrap component="div">
+              Peach Tree Pediatric Attendance Tracker
+            </Typography>
+          </Toolbar>
+        </AppBar>
         <Drawer
-          variant="permanent"
-          sx={{
+          sx={[{
             width: drawerWidth,
             flexShrink: 0,
             '& .MuiDrawer-paper': {
               width: drawerWidth,
               boxSizing: 'border-box',
-            },
-          }}
+            }}]
+          }
+          open={open}
+          onClose={toggleDrawer(false)}
         >
-
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h6" sx={{ my: 2 }}>
               PTC
@@ -100,6 +134,20 @@ export default function Sidebar() {
                 }
                 </List>
             </Box>
+          </Box>
+          <Divider/>
+          <Box
+          sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+          }}>
+            <IconButton onClick={toggleDrawer(false)}>
+              <Typography variant="body1" >
+                Close Sidebar
+              </Typography>
+              <ChevronRightIcon/>
+            </IconButton>
           </Box>
         </Drawer>
       </Box>

@@ -17,9 +17,9 @@ import SettingsProvider from './functions/SettingsProvider'
 function App() {
   return (
     <AuthProvider>
-      <Box sx={{display: 'flex'}}>
+      <Box>
         <Sidebar/>
-          <Routes>
+        <Routes>
           <Route path='' element={<SettingsProvider><Scanner/></SettingsProvider>}/>
           <Route path='login' element={<Login/>}/>
           <Route element={<ProtectedRoute/>}>
