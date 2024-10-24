@@ -78,7 +78,6 @@ export default function Sidebar() {
           </Toolbar>
         </AppBar>
         <Drawer
-          variant="persistent"
           sx={[{
             width: drawerWidth,
             flexShrink: 0,
@@ -88,21 +87,7 @@ export default function Sidebar() {
             }}]
           }
           open={open}
-        >
-          <Box
-          sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-          }}>
-            <IconButton onClick={toggleDrawer(false)}>
-              <Typography variant="body1" >
-                Close Sidebar
-              </Typography>
-              <ChevronRightIcon/>
-            </IconButton>
-          </Box>
-          <Divider />
+          onClose={toggleDrawer(false)}>
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h6" sx={{ my: 2 }}>
               PTC
