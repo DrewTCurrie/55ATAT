@@ -24,6 +24,7 @@ function ClientModal({onClose}: modalProps){
       setUsername('')
       setPwd('')
       setBadgeURLs(null)
+      handleAutoCompleteChange('roleAutoComplete', [])
       //Close modal
       setOpen(false);
       setDisplayBadge(false)
