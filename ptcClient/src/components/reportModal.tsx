@@ -21,6 +21,7 @@ function ReportModal(){
     const handleClose = () => {
       handleAutoCompleteChange('roleAutoComplete', [])
       handleAutoCompleteChange('nameAutoComplete', [])
+      handleAutoCompleteChange('eventTypeAutoComplete', [])
       setIsChecked({
         nameCheckbox: false,
         roleCheckbox: false,
