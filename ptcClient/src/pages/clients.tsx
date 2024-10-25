@@ -1,9 +1,8 @@
 import { Container, Box, Typography, ButtonGroup} from '@mui/material';
-import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useState, useEffect, useCallback } from 'react'
-import { ColDef, GridSizeChangedEvent, ICellRendererParams } from 'ag-grid-community';
+import { ColDef, ICellRendererParams } from 'ag-grid-community';
 import * as React from 'react';
 import ClientModal from '../components/clientModal';
 import EditAttendee from '../components/editAttendee';
@@ -20,12 +19,18 @@ interface IRow {
 function Clients() {
   // Column Definitions: Defines the columns to be displayed.
   const [colDefs] = useState<ColDef[]>([
-  { field: "ID" },
+  { field: "ID",
+   },
   { field: "Initials" },
-  { field: "Roles" },
+  { field: "Roles",
+    flex: 1,
+   },
   { field: "Edit",
     headerName: 'Edit',
-    flex: 1,
+    lockPosition: 'right',
+    minWidth: 80,
+    maxWidth: 80,
+    
     cellRenderer: (params: ICellRendererParams<IRow, number>) => {
       const ID = params.data?.ID ?? "";
       const Initials = params.data?.Initials ?? "";
@@ -34,7 +39,9 @@ function Clients() {
     } 
   },
   { field: "Delete",
-    flex: 1,
+    minWidth: 90,
+    maxWidth: 90,
+    lockPosition: 'right',
     cellRenderer: (params: ICellRendererParams<IRow,number>) => {
       const ID = params.data?.ID ?? "";
       const Initials = params.data?.Initials ?? "";

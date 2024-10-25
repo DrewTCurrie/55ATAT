@@ -4,7 +4,7 @@ import "ag-grid-community/styles/ag-theme-material.css";
 import * as React from "react"; 
 import { Box, TextField } from '@mui/material';
 import { useCallback, useRef, useEffect, useState } from 'react';
-import { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community'
+import { ColDef, GridApi, GridOptions, GridReadyEvent } from 'ag-grid-community'
 
 
 //Table Interface
@@ -60,6 +60,14 @@ const Table = <T extends unknown>({ rowData, colDefs }: AgGridWrapperProps<T>) =
     const tableWidth = width * .80;
     const tableHeight = height *.65;
 
+    const getRowStyle: GridOptions['getRowStyle'] = (params: any) => {
+      // Apply alternating row colors
+      if (params.node.rowIndex % 2 === 0) {
+          return { background: '#f3f3f3' }; // Light gray for even rows
+      }
+      return undefined; // Default for odd rows (white)
+  };
+
     return (
       <>
         <Box
@@ -96,6 +104,7 @@ const Table = <T extends unknown>({ rowData, colDefs }: AgGridWrapperProps<T>) =
                       columnDefs={colDefs}
                       onGridReady={onGridReady}
                       enableCellTextSelection
+                      getRowStyle={getRowStyle}
                 />
                 </div>
           </Box>

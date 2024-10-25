@@ -1,5 +1,4 @@
 import { Container, Box, Typography, Button, ButtonGroup} from '@mui/material';
-import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useCallback, useEffect, useState } from 'react'
@@ -34,18 +33,29 @@ function Events() {
         hide: true
        },
       { field: "Initials",
-        flex: 1,
         filter: true
        },
       { field: "Timestamp",
-        flex: 4,
+        sort: "desc",
         cellRenderer: (params: ICellRendererParams<IRow,number>) => {
           const date = new Date(params.data?.Timestamp ?? "")
           return date.toLocaleString();
         }
        },
-      { field: "Absent",
+      { field: "Comment",
         flex: 1,
+        wrapText: true,
+        autoHeight: true,
+        cellRenderer: (params: ICellRendererParams<IRow, number>) => {
+          if(params.data?.Comment === "N/A"){
+            return '';
+          } else {
+            return params.data?.Comment;
+          }
+        }
+      },
+      { field: "Absent",
+        maxWidth: 90,
         cellRenderer: (params: ICellRendererParams<IRow, number>) => {
           if (params.data?.Absent === false) {
             return <Typography sx={{my:'.3rem'}}>No</Typography>;
@@ -56,7 +66,7 @@ function Events() {
       },
       { field: "TIL_Violation",
         headerName: 'TIL',
-        flex: 1,
+        maxWidth: 80,
         cellRenderer: (params: ICellRendererParams<IRow, number>) => {
           if (params.data?.TIL_Violation === false) {
             return <Typography sx={{my:'.3rem'}}>No</Typography>;
@@ -67,7 +77,8 @@ function Events() {
       },
       { field: "Edit",
         headerName: 'Edit',
-        flex: 1,
+        minWidth: 80,
+        maxWidth: 80,
         cellRenderer: (params: ICellRendererParams<IRow, number>) => {
           const EventID = params.data?.EventID ?? ""; 
           const Initials = params.data?.Initials ?? "";
@@ -80,7 +91,8 @@ function Events() {
         } 
       },
       { field: "Delete",
-        flex: 1,
+        minWidth: 90,
+        maxWidth: 90,
         cellRenderer: (params: ICellRendererParams<IRow,number>) => {
           const EventID = params.data?.EventID ?? "";
           const Initials = params.data?.Initials ?? "";
@@ -89,9 +101,6 @@ function Events() {
         }
       },
       { field: "AdminInitials",
-        hide: true
-      },
-      { field: "Comment",
         hide: true
       }
     ]);
@@ -163,7 +172,7 @@ function Events() {
           <Box sx={{ display: 'flex', p: '5px', mt: '1.5rem'}}>
             <Box sx={{ flex: 1, backgroundColor: 'gray', padding: '2px', mx: '.4rem' }}>
               <Typography variant="h6" color='white'>
-                Reports
+                New Event
               </Typography>
               <ButtonGroup orientation="vertical" variant='contained'>
                 <NewEvent onClose={handleModalClose}/>

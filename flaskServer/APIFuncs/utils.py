@@ -16,7 +16,7 @@ from APIFuncs import JSONHandler as jsonhandler
 import sqlalchemy
 from sqlalchemy import delete, select, inspect
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta
 import random
 from sqlalchemy.ext.declarative import declarative_base
 import sys
@@ -382,14 +382,14 @@ def getIDfromInitials(AttendeeInitials):
     return query.ID
 
 
-def getEvents(numEvents):
+def getLastWeekOfEvents():
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
     Session = sqlalchemy.orm.sessionmaker()
     Session.configure(bind=api.engine)
     Session = Session()
     #Query for last numEvents from the database
-    query = Session.query(api.AttendanceEvent).order_by(api.AttendanceEvent.Timestamp.desc()).limit(numEvents).all()
+    query = Session.query(api.AttendanceEvent).filter(api.AttendanceEvent.Timestamp >= datetime.now() - timedelta(days=7)).all()
     #Put query data into dictionary to be returned as JSON to webpage
     eventList = []
     for row in query:
