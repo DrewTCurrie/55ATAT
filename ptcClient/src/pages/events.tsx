@@ -10,9 +10,10 @@ import axios from 'axios';
 import NewEvent from '../components/newEventModal';
 import DeleteEvent from '../components/deleteEvent';
 import EditEvent from '../components/editEvent';
+import Table from '../components/table';
 
 
-interface IRow {
+export interface IRow {
   EventID: string,
   ID: string,
   Initials: string,
@@ -33,14 +34,15 @@ function Events() {
         hide: true
        },
       { field: "Initials",
-        flex: 1
+        flex: 1,
+        filter: true
        },
       { field: "Timestamp",
         flex: 4,
-        // cellRenderer: (params: ICellRendererParams<IRow,number>) => {
-        //   const date = new Date(params.data?.Timestamp ?? "")
-        //   return date;
-        // }
+        cellRenderer: (params: ICellRendererParams<IRow,number>) => {
+          const date = new Date(params.data?.Timestamp ?? "")
+          return date.toLocaleString();
+        }
        },
       { field: "Absent",
         flex: 1,
@@ -176,15 +178,7 @@ function Events() {
                 flexGrow: 1,
                 bgcolor: 'background.paper',
               }}>
-              <div
-                className="ag-theme-quartz"
-                style={{ height: 750, width: '125vh' }} // the Data Grid will fill the size of the parent container
-              >
-                <AgGridReact
-                    rowData={rowData}
-                    columnDefs={colDefs}
-              />
-              </div>
+              <Table rowData={rowData} colDefs={colDefs}/>
               <NewEvent onClose={handleModalClose}></NewEvent>
           </Box>
         </Container>

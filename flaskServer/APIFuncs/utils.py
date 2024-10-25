@@ -360,11 +360,13 @@ def getAllAttendees():
     query = Session.query(api.Attendee).all()
     # Creating results by parsing each entry into JSON
     attendeeList = []
+    # Get role list
+    roles = getRoles()
     for row in query:
         attendeeList.append({
             'ID': row.ID,
             'Initials': row.AttendeeInitials,
-            'Roles': getAttendeeRole(row.ID)
+            'Roles': [col for col in roles if getattr(row, col) is True]
         })
     Session.close()
     return attendeeList
