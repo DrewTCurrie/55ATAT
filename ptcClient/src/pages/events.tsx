@@ -159,10 +159,17 @@ function Events() {
     },[]);
     
     return (
-      <Container sx={{display: 'block', height: '100vh', width: '175vh'}}>
-          <Box sx={{ display: 'flex', p: 1 }}>
-            <Box sx={{ flex: 1}}/>
-            <Box sx={{flex: 1, backgroundColor: 'gray', padding: 2 }}>
+      <Container>
+          <Box sx={{ display: 'flex', p: '5px', mt: '1.5rem'}}>
+            <Box sx={{ flex: 1, backgroundColor: 'gray', padding: '2px', mx: '.4rem' }}>
+              <Typography variant="h6" color='white'>
+                Reports
+              </Typography>
+              <ButtonGroup orientation="vertical" variant='contained'>
+                <NewEvent onClose={handleModalClose}/>
+              </ButtonGroup>
+            </Box>
+            <Box sx={{flex: 1, backgroundColor: 'gray', padding: '2px', mx: '.4rem' }}>
               <Typography variant="h6" color='white'>
                 Reports
               </Typography>
@@ -179,7 +186,6 @@ function Events() {
                 bgcolor: 'background.paper',
               }}>
               <Table rowData={rowData} colDefs={colDefs}/>
-              <NewEvent onClose={handleModalClose}></NewEvent>
           </Box>
         </Container>
       );

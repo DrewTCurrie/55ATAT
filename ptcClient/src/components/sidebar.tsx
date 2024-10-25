@@ -51,7 +51,7 @@ export default function Sidebar() {
   const auth = useAuth();
 
   return(
-      <Box sx={{mb: 4}}>
+      <Box >
         <AppBar position="fixed" sx={{maxHeight: drawerHeight}}>
           <Toolbar>
             <IconButton
