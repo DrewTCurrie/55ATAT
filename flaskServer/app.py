@@ -6,7 +6,11 @@ from flask import Flask, Blueprint, render_template, send_from_directory, reques
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, JWTManager
 
-from reports import generateReport, reportScheduler
+from reports import generateReport
+#Used only for SPD Testing now:
+from reports import reportScheduler
+
+
 from APIFuncs import utils
 from APIFuncs import MariaDBapi
 from APIFuncs import badgeGenerator
@@ -14,6 +18,9 @@ from APIFuncs import auth
 import sys
 import os
 import time
+
+#Background tasks shecuduler for weekly and monthly tasks
+import backgroundScheduler
 
 #Flask mailing system 
 from flask_mail import Mail, Message
@@ -42,15 +49,20 @@ image_folder = 'flaskServer/profileImage'
 
 #--Mailing service. Needed for automatic report mailing --------------------------------------------------
 #Setup the mail app with hidden information
-mailerCredentials.SetupCredentials(app)
+#mailerCredentials.SetupCredentials(app)
 #Create mail app after setup
-mail = Mail(app)
+#mail = Mail(app)
 
 #--Schedule funciton. Needs to stay in the main flask app ----------------------------------------------
 def ScheduleManager():
     while 1:
         schedule.run_pending()
         time.sleep(5)
+
+def backgroundTasks():
+    print("Checking for background tasks")
+    with app.app_context(): 
+        backgroundScheduler.TaskScheduler(app, mail)
 
 
 #----------Web Routes ------------------------------------------------------------------------------------
@@ -283,19 +295,23 @@ def login():
 @app.route('/')
 def index():
     #TODO: Remove generating reports on route for testing only!
-    reportScheduler.weekly_reports(app, mail)
-    time.sleep(30)
-    reportScheduler.monthly_reports(app, mail)
+    #reportScheduler.weekly_reports(app, mail)
+    #time.sleep(30)
+    #reportScheduler.monthly_reports(app, mail)
     return render_template('index.html')
 
 
 if __name__ == '__main__':
-    print("Flask Server started from app.py")
-    app.run(host='0.0.0.0', port=5000, debug=False)
-
-
+    print("Starting Flask Server")
+    print("Setting up mail service")
+    #--Mailing service. Needed for automatic report mailing --------------------------------------------------
+    #Setup the mail app with hidden information
+    mailerCredentials.SetupCredentials(app)
+    #Create mail app after setup
+    mail = Mail(app)
+    print("Starting background scheduler")
     #---------Scheduled Processes-----------------------------------------------------------------------------
-    schedule.every().day.at("21:00").do(reportScheduler.CheckReportsSchedule(app, mail))
+    schedule.every().day.at("21:00").do(backgroundTasks)
     #schedule.every(60).seconds.do(reportScheduler.CheckReportsSchedule)
 
     #This may not be the most effecient way to run this code however I cannot find a more effecient way to run 
@@ -304,4 +320,7 @@ if __name__ == '__main__':
     #It is more effecient than the original polling of like every second
     ScheduleMangerThread = Thread(target=ScheduleManager)
     ScheduleMangerThread.start()
+
+    print("Starting flask webserver")
+    app.run(host='0.0.0.0', port=5000, debug=False)
 
