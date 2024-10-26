@@ -30,7 +30,7 @@ def generate_qr_code(userID, filename):
 def add_text_to_image(img_path, text, output_path, position, font_size=50):
     img = Image.open(img_path).convert("RGBA")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("APIFuncs/Arial.ttf", font_size)
+    font = ImageFont.truetype("flaskServer/APIFuncs/Arial.ttf", font_size)
     # Split the text into multiple lines
     lines = text.split('\n')
     y = position[1]
@@ -60,7 +60,8 @@ def embed_user_image(base_img_path, user_img_path, output_path, user_img_size, u
 def generate_badge(userID):
     #Query User Details:
     attendeeInfo = utils.getAttendee(userID)
-    if attendeeInfo.Employee | attendeeInfo.Administrator:
+    employeeRoles = utils.getEmployeeRoles()
+    if any(getattr(attendeeInfo, col, False) is True for col in employeeRoles) or attendeeInfo.Administrator:
         address = "1091 Stoneridge Dr, Bozeman, MT 59718"
         phone = "(406)-624-6599"
         initials = attendeeInfo.AttendeeInitials

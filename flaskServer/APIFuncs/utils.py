@@ -84,7 +84,16 @@ def getRoles():
 
     return role_columns
 
-
+def getEmployeeRoles():
+    # Create Sql Alchemy Session
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    # Get all columns
+    columns = inspect(api.Attendee).columns
+    #Parse columns for "Employee"
+    employee_columns = [col.name for col in columns if 'Employee' in col.name]
+    return employee_columns
 def NewAttendanceEvent(UserID):
     # Take User ID and create an attendance event in the "CurrentAttendanceEvents" table 
     # This function is generally going to be called by the Attendee Interface Sub-System 
