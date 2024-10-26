@@ -320,6 +320,7 @@ function ClientModal({onClose}: modalProps){
                           rotation={rotation}
                           aspect={1}
                           cropShape="round"
+                          restrictPosition={false}
                           onCropChange={setCrop}
                           onZoomChange={setZoom}
                           onCropComplete={handleCropComplete}
