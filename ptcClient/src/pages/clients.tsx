@@ -20,8 +20,13 @@ function Clients() {
   // Column Definitions: Defines the columns to be displayed.
   const [colDefs] = useState<ColDef[]>([
   { field: "ID",
+    filter: true
    },
-  { field: "Initials" },
+  { field: "Initials",
+    filter: true,
+    minWidth: 120,
+    maxWidth: 120
+   },
   { field: "Roles",
     flex: 1,
    },
