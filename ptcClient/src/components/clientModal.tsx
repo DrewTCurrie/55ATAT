@@ -6,8 +6,8 @@ import { getCroppedImg } from "../functions/cropUtils";
 
 //Interface so modals know what to expect from the badgeURLs.
 interface badgeRespone {
-  front: String,
-  back?: String
+  front: string,
+  back?: string
 }
 
 interface modalProps {
@@ -205,46 +205,74 @@ function ClientModal({onClose}: modalProps){
     * Print handler, will create a new window with only the pictures to print.
     */
     const handlePrint = () => {
-      const printWindow = window.open('','_blank');
-      if(printWindow){
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Print</title>
-            </head>
-            <style>
-              @media print {
-                body {
-                  margin: 0;
-                  padding: 0;
-                }
-                .page {
-                  page-break-after: always; /* Ensure each image goes to a new page */
-                  text-align: center;
-                }
-                img {
-                  max-width: 100%;
-                  height: 100%;
-                  display: block;
-                  margin: 0 auto;
-                }
-              }
-            </style>
-            <body>
-              <div class="page">
-                <img src="${badgeURLs?.front}" alt="Output 1" />
-              </div>
-              ${badgeURLs?.back ? (`
-              <div class="page">
-                <img src=${badgeURLs.back} alt="Output 2" />
-              </div>
-              `):''}
-            </body>
-          </html>`);
-      printWindow.document.close();
-      printWindow.print();
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+          const frontImage = new Image();
+          const backImage = new Image();
+          frontImage.src = badgeURLs?.front || '';
+          backImage.src = badgeURLs?.back || '';
+
+          // Function to handle print when images are loaded
+          const onImagesLoaded = () => {
+              printWindow.document.write(`
+                  <html>
+                      <head>
+                          <title>Print</title>
+                          <style>
+                              @media print {
+                                  body {
+                                      margin: 0;
+                                      padding: 0;
+                                  }
+                                  .page {
+                                      page-break-after: always; /* Ensure each image goes to a new page */
+                                      text-align: center;
+                                  }
+                                  img {
+                                      max-width: 100%;
+                                      height: 100%; /* Maintain aspect ratio */
+                                      display: block;
+                                      margin: 0 auto;
+                                  }
+                              }
+                          </style>
+                      </head>
+                      <body>
+                          <div class="page">
+                              <img src="${frontImage.src}" alt="Output 1" />
+                          </div>
+                          ${badgeURLs?.back ? `
+                          <div class="page">
+                              <img src="${backImage.src}" alt="Output 2" />
+                          </div>
+                          ` : ''}
+                      </body>
+                  </html>
+              `);
+              printWindow.document.close();
+              printWindow.print();
+          };
+
+          // Check if both images are loaded
+          let loadedImagesCount = 0;
+
+          const imageLoadHandler = () => {
+              loadedImagesCount += 1;
+              if (loadedImagesCount === 1 || ( backImage.src && loadedImagesCount === 2)) {
+                onImagesLoaded();
+            }
+          };
+
+          // Add event listeners for image load
+          frontImage.onload = imageLoadHandler;
+          backImage.onload = imageLoadHandler;
+
+          // If the back image is empty (undefined or null), trigger the load handler directly
+          if (!backImage.src) {
+              imageLoadHandler();
+          }
       }
-    }
+  };
 
     //Making the output images more viewable
     const scrollableContentStyle = {
