@@ -29,6 +29,7 @@ function Clients() {
    },
   { field: "Roles",
     flex: 1,
+    filter: true,
    },
   { field: "Edit",
     headerName: 'Edit',
