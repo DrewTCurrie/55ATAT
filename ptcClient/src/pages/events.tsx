@@ -33,7 +33,9 @@ function Events() {
         hide: true
        },
       { field: "Initials",
-        filter: true
+        filter: true,
+        minWidth: 120,
+        maxWidth: 120
        },
       { field: "Timestamp",
         sort: "desc",
