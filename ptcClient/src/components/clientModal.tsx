@@ -1,6 +1,8 @@
-import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Stack, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Slider, Stack, TextField, Typography } from "@mui/material";
 import { Fragment, useEffect, useState } from "react";
 import * as React from "react";
+import Cropper, { Area, Point } from "react-easy-crop";
+import { getCroppedImg } from "../functions/cropUtils";
 
 //Interface so modals know what to expect from the badgeURLs.
 interface badgeRespone {
@@ -10,6 +12,14 @@ interface badgeRespone {
 
 interface modalProps {
   onClose: () => void,
+}
+
+function readFile(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.addEventListener('load', () => resolve(reader.result as string), false)
+    reader.readAsDataURL(file)
+  })
 }
 
 function ClientModal({onClose}: modalProps){
@@ -27,6 +37,7 @@ function ClientModal({onClose}: modalProps){
       //Close modal
       setOpen(false);
       setDisplayBadge(false)
+      setImageSrc('')
     };
 
     //Hook for handling the modal loading (waiting for input)
@@ -77,37 +88,75 @@ function ClientModal({onClose}: modalProps){
     /*
     * Hook and handler to get file for employee picture
     */
-    const [file, setFile] = useState<File>()
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if(file){
         const fileType = file.type;
         if(fileType.startsWith('image/')){
           console.log(file);
-          setFile(file);
+          let imageDataUrl = await readFile(file)
+          setImageSrc(imageDataUrl)
         }
       }
     }
+    /**
+     *  Image Cropping Handler
+     * 
+     */
+    const [imageSrc, setImageSrc] = useState<string>('')
+    const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [rotation, setRotation] = useState(0)
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+    const [croppedImage, setCroppedImage] = useState<File | null>()
+    const handleCropComplete = (_croppedArea: Area, croppedAreaPixels: Area) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    };
+
+    /**
+     * This handles creating the adjusted image for submission
+     */
+    const showCroppedImage = async () => {
+      try {
+        const croppedImage = await getCroppedImg(
+          imageSrc,
+          croppedAreaPixels,
+          rotation
+        )
+        console.log('donee', { croppedImage })
+        setCroppedImage(croppedImage)
+        console.log(croppedImage)
+        return croppedImage
+
+      } catch (e) {
+        console.error(e)
+        return null
+      }
+    }
+
     /*
      * Account Creation Handler, calls createAccount, then uses the ID to create an administrator and a badge
      */
     const createAccount = async () => {
-      //Set Loading to True to disable button
+      //Set Loading to True to disable button 
       setLoading(true)
-      //Create form data for accountData
-      const accountData = new FormData();
-      accountData.append('name',name);
-      accountData.append('roles',JSON.stringify(autoCompleteVal.roleAutoComplete))
-      //Check if a file exists, if true append.
-      if(file){
-        accountData.append('file', file)
-      }
-      const account = {
-        method: 'POST',
-        body: accountData
-      }
       //Attempt to create an Account
       try {
+        //Get Cropped Image
+        const croppedImage = await showCroppedImage(); 
+        //Create form data for accountData
+        const accountData = new FormData();
+        accountData.append('name',name);
+        accountData.append('roles',JSON.stringify(autoCompleteVal.roleAutoComplete))
+        //Check if a file exists, if true append.
+        if(croppedImage){
+          accountData.append('file', croppedImage)
+        }
+        const account = {
+          method: 'POST',
+          body: accountData
+        }
+
         const response = await fetch(`/api/createAccount`, account)
         if (!response.ok) {
           throw new Error('Error creating account');
@@ -198,10 +247,17 @@ function ClientModal({onClose}: modalProps){
     }
 
     //Making the output images more viewable
-    const scrollableContentStyle: React.CSSProperties = {
-      maxHeight: '400px', // Set a max height for the scrollable area
-      overflowY: 'auto', // Enable vertical scrolling
-      marginBottom: '16px', // Space between images and buttons
+    const scrollableContentStyle = {
+      display: 'flex', // Use flexbox to align items
+      justifyContent: 'center', // Center images horizontally
+      alignItems: 'center', // Align images vertically
+      overflow: 'hidden', // Prevent scrolling
+    };
+
+    const imageStyle = {
+      maxWidth: '50%', // Each image takes up half the width of the container
+      height: 'auto', // Maintain aspect ratio
+      margin: '0 10px', // Optional: add space between images
     };
 
     return(
@@ -214,6 +270,7 @@ function ClientModal({onClose}: modalProps){
             {!displayBadge ? //CHeck if displayBadge is ready, then display badge.
             <Grid2>
               <Grid2
+                position="relative"
                 display="flex" 
                 flexDirection="column" 
                 alignItems="center" 
@@ -247,6 +304,61 @@ function ClientModal({onClose}: modalProps){
                     <Box sx={{alignContent:'left',mb:'.6rem',mx:'.8rem'}}>
                       <label htmlFor="user_image">Upload Your Image:</label>
                     </Box>
+                    {imageSrc && <>
+                      <Box
+                        sx={{
+                          position: "relative",
+                          width: "100%",
+                          height: 300,
+                          background: "#333",
+                        }}
+                      >
+                        <Cropper
+                          image={imageSrc}
+                          crop={crop}
+                          zoom={zoom}
+                          rotation={rotation}
+                          aspect={1}
+                          cropShape="round"
+                          onCropChange={setCrop}
+                          onZoomChange={setZoom}
+                          onCropComplete={handleCropComplete}
+                          onRotationChange={setRotation}
+                        />
+                      </Box>
+                      <Box>
+                        <Box>
+                          <Typography
+                            variant="overline"
+                          >
+                            Zoom
+                          </Typography>
+                          <Slider
+                            value={zoom}
+                            min={1}
+                            max={3}
+                            step={0.1}
+                            aria-labelledby="Zoom"
+                            onChange={(_e, zoom) => setZoom(zoom as number)}
+                          />
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="overline"
+                          >
+                            Rotation
+                          </Typography>
+                          <Slider
+                            value={rotation}
+                            min={0}
+                            max={360}
+                            step={1}
+                            aria-labelledby="Rotation"
+                            onChange={(_e, rotation) => setRotation(rotation as number)}
+                          />
+                      </Box>
+                      </Box>
+                    </>}
                     <Box sx={{mb:'.6rem',mx:'.8rem'}}>
                       <input 
                       type="file" 
@@ -303,11 +415,11 @@ function ClientModal({onClose}: modalProps){
             </Grid2> 
             : // BEGIN OTHER TERNARY
             <Grid2>
-              <div //Image Content
+              <Box //Image Content
               style={scrollableContentStyle}>
                 {badgeURLs?.front ? (
                   <> 
-                    <img src={`${badgeURLs.front}`} //Change to production evniroment name for flask server eventually
+                    <img src={`${badgeURLs.front}?${new Date().getTime()}`} style={imageStyle}
                     />
                   </>
                 ):(
@@ -316,20 +428,20 @@ function ClientModal({onClose}: modalProps){
                 {badgeURLs?.back ? (
                   <>
                     <img 
-                    src={`${badgeURLs.back}`}  //Change to production evniroment name for flask server eventually 
+                    src={`${badgeURLs.back}?${new Date().getTime()}`} style={imageStyle}
                     />
                   </>
                 ):(
                   <></>
                 )} 
-              </div>
+              </Box>
               <Stack 
                 direction="row"
                 display="flex" 
                 alignItems="center" 
                 justifyContent="center"
                 spacing={4}
-                sx={{mb:'.6rem'}}>
+                sx={{mb:'.6rem', mt: '1rem'}}>
                 <Button 
                   variant='outlined'
                   onClick={handlePrint}>
