@@ -30,8 +30,6 @@ def RemoveOldBadges():
     for BadgeArtifact in BadgeGenerationFileList:
         if BadgeArtifact == "BadgeTemplates":
             print("Ignoring badge templates")
-        elif BadgeArtifcat == "ptclogo.png":
-            print("Ignoring PTC Logo as it is required.")
         elif BadgeArtifact == "audioFiles":
             print("Ignoring audioFiles directory. This will be cleaned up in a seperate function.")
         elif BadgeArtifact == ".gitignore":

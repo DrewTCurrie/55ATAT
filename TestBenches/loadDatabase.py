@@ -86,7 +86,7 @@ def create_attendees_and_events():
     Session = Session()
 
     #Generate a bunch of Attendees
-    for i in range(10):
+    for i in range(100):
         AttendeeJSON = create_attendees()
         RandomID = random.SystemRandom()
         newUserID = "PTCBZN-" + str(RandomID.randint(10000000000, 99999999999))
@@ -107,7 +107,7 @@ def create_attendees_and_events():
         )
         Session.add(NewAttendee)
         #Make 30 attendance events for each attendee starting from today
-        for i in range(10):
+        for i in range(31):
             date = datetime.datetime.now()
             mst = pytz.timezone('America/Denver')
             date = mst.localize(date)

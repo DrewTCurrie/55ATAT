@@ -402,8 +402,7 @@ if __name__ == '__main__':
     #It is more effecient than the original polling of like every second
     ScheduleMangerThread = Thread(target=ScheduleManager)
     ScheduleMangerThread.start()
-    currentWorkingDirectory = os.path.abspath(os.getcwd())
-    print(currentWorkingDirectory)
+
     print("Starting flask webserver")
     app.run(host='0.0.0.0', port=5000, debug=False)
 
