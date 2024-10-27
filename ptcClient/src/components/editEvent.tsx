@@ -226,7 +226,6 @@ export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL
                     disabled={loading}
                     onClick={createEvent}
                     sx={{backgroundColor: '#6d9fb2' }}>
-                    onClick={createEvent}>
                         {loading ? 'Loading' : 'Submit Event'}
                 </Button>
                 <Button

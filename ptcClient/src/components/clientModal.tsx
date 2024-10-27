@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Slider, Stack, TextField, Typography } from "@mui/material";
 import { Fragment, useEffect, useState } from "react";
 import * as React from "react";
 import Cropper, { Area, Point } from "react-easy-crop";
