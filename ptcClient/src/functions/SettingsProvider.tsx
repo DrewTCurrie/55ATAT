@@ -14,17 +14,17 @@ interface SettingsContextType {
     attendeeMessage: string,
     defaultAudio: string,
     attendeeAudio: string,
-    setAttendeeMessage: (attendeeID: string, message: string) => void,
+    setAttendeeMessage: (attendeeID: string, message: string) => Promise<void>,
     getAttendeeMessage: (attendeeID: string) => void,
     getDefaultMessage: () => void,
-    setDefaultMessage: (message: string) => void,
-    resetAttendee: (attendeeID: string) => void,
+    setDefaultMessage: (message: string) => Promise<void>,
+    resetAttendee: (attendeeID: string) => Promise<void>,
     setAttendeeAudio: (attendeeID: string, audioFile: File) => Promise<void>,
     getAttendeeAudio: (attendeeID: string) => void,
     getDefaultAudio: () => void,
-    setDefaultAudio: (audioFile: File) => void,
+    setDefaultAudio: (audioFile: File) => Promise<void>,
     getFailureAudio: () => void,
-    resetDefaults: () => void,
+    resetDefaults: () => Promise<void>,
     setDMessage: (message: string) => void,
     setAMessage: (message: string) => void,
     setDAudio: (audioURL: string) => void,
@@ -220,7 +220,7 @@ const SettingsProvider: React.FC<settingsProps> = ({children}) => {
 
     const resetDefaults = async () => {
         try{
-            fetch(`/api/resetDefaults`)
+            await fetch(`/api/resetDefaults`)
             setFetchedDmesg(false)
         } catch(e){
             console.log("Error reseting Defaults", e)
