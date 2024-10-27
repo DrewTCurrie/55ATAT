@@ -150,7 +150,11 @@ function ReportModal(){
 
     return(
     <Fragment>
-        <Button onClick={handleClickOpen} >Generate Custom Report</Button>
+        <Button variant='contained' sx={{mb: '.2rem', backgroundColor: '#6d9fb2'}} onClick={handleClickOpen} >
+          <Typography variant="body1" color='white'>
+            Generate Custom Report
+          </Typography>
+        </Button>
         <Dialog
           open={open}
           onClose={handleClose}>
@@ -228,6 +232,7 @@ function ReportModal(){
               <Button 
                 variant='contained'
                 onClick={generateReport}
+                sx={{backgroundColor: '#6d9fb2' }}
                 disabled={loading}>
                   Submit
                 </Button>

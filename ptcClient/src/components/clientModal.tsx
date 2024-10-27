@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Slider, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Stack, TextField, Typography } from "@mui/material";
 import { Fragment, useEffect, useState } from "react";
 import * as React from "react";
 import Cropper, { Area, Point } from "react-easy-crop";
@@ -291,7 +291,9 @@ function ClientModal({onClose}: modalProps){
 
     return(
     <Fragment>
-        <Button onClick={handleClickOpen} >Create New Attendee </Button>
+        <Button onClick={handleClickOpen} sx={{backgroundColor: '#6d9fb2'}} >
+          <Typography variant="body1">Create New Attendee</Typography>
+        </Button>
         <Dialog
             open={open}
             onClose={handleClose}>
@@ -430,15 +432,17 @@ function ClientModal({onClose}: modalProps){
                 spacing={4}
                 sx={{mb:'.6rem'}}>
                 <Button 
-                  variant='outlined'
+                  variant='contained'
                   onClick={createAccount}
-                  disabled={loading}>
+                  disabled={loading}
+                  sx={{backgroundColor: '#6d9fb2' }}>
                   {!loading ? 'Submit' : 'Loading'}
                 </Button>
                 <Button
                   variant='contained'
                   onClick={() => {handleClose(); onClose()}}
-                  disabled={loading}>
+                  disabled={loading}
+                  sx={{backgroundColor: '#e59999' }}>
                   Close
                 </Button>
               </Stack>
@@ -473,14 +477,16 @@ function ClientModal({onClose}: modalProps){
                 spacing={4}
                 sx={{mb:'.6rem', mt: '1rem'}}>
                 <Button 
-                  variant='outlined'
-                  onClick={handlePrint}>
+                  variant='contained'
+                  onClick={handlePrint}
+                  sx={{backgroundColor: '#6DB260' }}>
                     Print
                 </Button>
                 <Button
                   variant='contained'
                   onClick={() => {handleClose(); onClose()}}
-                  disabled={loading}>
+                  disabled={loading}
+                  sx={{backgroundColor: '#e59999' }}>
                   Close
                 </Button>
               </Stack>
