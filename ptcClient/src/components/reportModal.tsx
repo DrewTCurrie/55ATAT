@@ -21,6 +21,12 @@ function ReportModal(){
     const handleClose = () => {
       handleAutoCompleteChange('roleAutoComplete', [])
       handleAutoCompleteChange('nameAutoComplete', [])
+      handleAutoCompleteChange('eventTypeAutoComplete', [])
+      setIsChecked({
+        nameCheckbox: false,
+        roleCheckbox: false,
+        eventTypeCheckBox: false,
+      });
       setStartDate(dayjs())
       setEndDate(dayjs())
       setOpen(false);
