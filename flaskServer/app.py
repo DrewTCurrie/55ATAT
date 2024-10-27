@@ -82,7 +82,7 @@ def generate_report():
     #Checking if file exists for a minute before throwing an error.
     start_time = time.time()
     while time.time() - start_time < 60:
-        if os.path.isfile('/home/55ATAT/55ATAT/flaskServer/xlsx/' + fileName):
+        if os.path.isfile('flaskServer/xlsx/' + fileName):
             print('found file')
             return make_response(jsonify(fileName), 200)
         time.sleep(1)
@@ -117,7 +117,7 @@ def getAttendeeInitialsAndID():
 #This endpoint returns the 50 most recent attendance events for usage in the webpage table. This can be expanded based on testing.
 @app.route('/api/getRecentEvents', methods=['GET'])
 def getRecentEvents():
-    return make_response(jsonify(utils.getEvents(50)), 200)
+    return make_response(jsonify(utils.getLastWeekOfEvents()), 200)
 
 
 #This endpoint takes a userID, and creates an attendance event with it

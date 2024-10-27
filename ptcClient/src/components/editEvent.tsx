@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, FormControlLabel, Grid2, IconButton, Stack, TextField } from '@mui/material';
+import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, FormControlLabel, Grid2, IconButton, Stack, TextField, Typography } from '@mui/material';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -23,7 +23,7 @@ interface modalProps{
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL,AdminInitials,Comment}:modalProps){
+export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL,Comment}:modalProps){
     //Handling the open and closing of edit modal
     const [open, setOpen] = useState(false);
     const handleClickOpen = () => {
@@ -51,6 +51,7 @@ export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL
         onClose();
         //Close modal and reset submission
         setEventSubmitted(false);
+        setEventFailed(false)
         setOpen(false);
     }
     //Hook for selecting a user name from autocomplete
@@ -114,6 +115,7 @@ export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL
     const auth = useAuth();
     //Hook to check for event submission
     const [eventSubmitted, setEventSubmitted] = useState(false)
+    const [eventFailed, setEventFailed] = useState(false)
     const createEvent = async () => {        
         //Set Loading to True to disable button
         setLoading(true)
@@ -138,9 +140,12 @@ export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL
               throw new Error('Error creating event');
             } else {
                 setEventSubmitted(true)
+                setEventFailed(false)
                 setLoading(false)
             }
         } catch(e){
+            setEventFailed(true)
+            setEventSubmitted(false)
             console.error("Error creating event",e)
             setLoading(false)
         }
@@ -217,18 +222,29 @@ export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL
             spacing={4}
             sx={{mb:'.6rem',mt:'.4rem',mx:'.4rem'}}>
                 <Button 
-                    variant='outlined'
+                    variant='contained'
                     disabled={loading}
+                    onClick={createEvent}
+                    sx={{backgroundColor: '#6d9fb2' }}>
                     onClick={createEvent}>
-                        {loading ? 'Loading' : eventSubmitted ? 'Event Edited Successfully' : 'Submit Event'}
+                        {loading ? 'Loading' : 'Submit Event'}
                 </Button>
                 <Button
                     variant='contained'
                     onClick={() => {handleClose(); onClose()}}
-                    disabled={loading}>
+                    disabled={loading}
+                    sx={{backgroundColor: '#E59999'}}>
                         Close
                 </Button>
             </Stack>
+            <Box sx={{
+                display: "flex", 
+                alignItems:"center" ,
+                justifyContent:"center",
+            }}>
+            {eventSubmitted ? <Typography color="green">Event Submitted Successfully</Typography> : ""}
+            {eventFailed ? <Typography color="red">Event Submitted Unsuccessfully</Typography> : ""}
+            </Box>
         </Dialog>
         </>
     )

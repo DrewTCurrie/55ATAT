@@ -46,16 +46,26 @@ function Settings() {
      */
     //This will handle the submission of a default message.
     const submitDefaultMessage = async () => {
-        setLoading(true)
-        settings?.setDefaultMessage(settings?.defaultMessage)
-        setLoading(false)
+        try{
+            setLoading(true)
+            await settings?.setDefaultMessage(settings?.defaultMessage)
+        } catch(e){
+            console.error("Error Submitting Default Audio:", e)
+        } finally {
+            setLoading(false)
+        }
         
     }
     //This resets the default settings
-    const resetDefaults = () =>{
-        setLoading(true)
-        settings?.resetDefaults()
-        setLoading(false)
+    const resetDefaults = async () =>{
+        try{
+            setLoading(true)
+            await settings?.resetDefaults()
+        } catch(e){
+            console.error("Error Submitting Default Audio:", e)
+        } finally {
+            setLoading(false)
+        }
     }
 
     //This handles the uploading of files to the webpage
@@ -86,12 +96,17 @@ function Settings() {
     }
 
     //This will handle the submission of default audioFile
-    const submitDefaultAudio = () => {
-        setLoading(true)
-        if(selectedFile){
-            settings?.setDefaultAudio(selectedFile)
+    const submitDefaultAudio = async () => {
+        try{
+            setLoading(true)
+            if(selectedFile){
+            await settings?.setDefaultAudio(selectedFile)
+            }
+        } catch(e){
+            console.error("Error Submitting Default Audio:", e)
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
     }
 
     /**
@@ -115,21 +130,32 @@ function Settings() {
     }
 
     //This will handle the submission of a attendee message
-    const submitAttendeeMessage = () => {
-        setLoading(true)
-        if(selectedAttendee){
-            settings?.setAttendeeMessage(selectedAttendee.ID, settings?.attendeeMessage)
-        }    
-        setLoading(false)
+    const submitAttendeeMessage = async () => {
+        try{
+            setLoading(true)
+            if(selectedAttendee){
+              await settings?.setAttendeeMessage(selectedAttendee.ID, settings?.attendeeMessage)
+            }   
+        } catch(e){
+            console.error("Error Reseting attendee:", e)
+        } finally {
+            setLoading(false)
+        }
+
     }
     //This will handle the reseting of an attendee
-    const resetAttendee = () =>{
-        setLoading(true)
-        console.log(selectedAttendee)
-        if(selectedAttendee){
-            settings?.resetAttendee(selectedAttendee.ID)
+    const resetAttendee = async () =>{
+        try{
+            setLoading(true)
+            console.log(selectedAttendee)
+            if(selectedAttendee){
+                await settings?.resetAttendee(selectedAttendee.ID)
+            }
+        } catch(e){
+            console.error("Error Reseting attendee:", e)
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
     }
 
     //This handles the uploading of attendee audio to the webpage
@@ -218,9 +244,8 @@ function Settings() {
                         <Button
                             type="submit"
                             variant="contained"
-                            color="primary"
                             fullWidth
-                            sx={{ mb:'.4rem' }}
+                            sx={{ mb:'.4rem', backgroundColor: '#6d9fb2'}}
                             disabled={loading}
                             onClick={submitDefaultMessage}
                         >
@@ -258,9 +283,8 @@ function Settings() {
                                 <Button 
                                     variant="contained"
                                     component="span"
-                                    color="secondary"
                                     fullWidth
-                                    sx={{ my:'.2rem' }}
+                                    sx={{ my:'.2rem', backgroundColor: '#E8BA63'}}
                                     disabled={loading}>
                                     Select Audio File
                                 </Button>
@@ -269,9 +293,8 @@ function Settings() {
                                 <Button
                                 type="submit"
                                 variant="contained"
-                                color="primary"
                                 fullWidth
-                                sx={{ my:'.2rem' }}
+                                sx={{ my:'.2rem', backgroundColor: '#6d9fb2' }}
                                 disabled={loading}
                                 onClick={submitDefaultAudio}
                                 >
@@ -283,7 +306,7 @@ function Settings() {
                             variant="contained"
                             color="error"
                             fullWidth
-                            sx={{ my:'.2rem' }}
+                            sx={{ my:'.2rem', backgroundColor:'#E59999', }}
                             disabled={loading}
                             onClick={resetDefaults}
                         >
@@ -330,7 +353,7 @@ function Settings() {
                             variant="contained"
                             color="primary"
                             fullWidth
-                            sx={{ my:'.4rem' }}
+                            sx={{ my:'.4rem', backgroundColor: '#6d9fb2' }}
                             disabled={loading}
                             onClick={submitAttendeeMessage}
                         >
@@ -367,7 +390,7 @@ function Settings() {
                                     component="span"
                                     color="secondary"
                                     fullWidth
-                                    sx={{ my:'.2rem' }}
+                                    sx={{ my:'.2rem', backgroundColor: '#E8BA63' }}
                                     disabled={loading}>
                                     Select Audio File
                                 </Button>
@@ -378,7 +401,7 @@ function Settings() {
                                 variant="contained"
                                 color="primary"
                                 fullWidth
-                                sx={{ my:'.2rem' }}
+                                sx={{ my:'.2rem', backgroundColor: '#6d9fb2' }}
                                 disabled={loading}
                                 onClick={submitAttendeeAudio}
                                 >
@@ -390,7 +413,7 @@ function Settings() {
                             variant="contained"
                             color="error"
                             fullWidth
-                            sx={{ my:'.4rem' }}
+                            sx={{ my:'.4rem', backgroundColor:'#E59999'}}
                             disabled={loading}
                             onClick={resetAttendee}
                         >

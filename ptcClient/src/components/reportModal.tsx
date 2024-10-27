@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, Stack, TextField, Typography } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Fragment, useEffect, useState } from "react";
@@ -21,8 +21,16 @@ function ReportModal(){
     const handleClose = () => {
       handleAutoCompleteChange('roleAutoComplete', [])
       handleAutoCompleteChange('nameAutoComplete', [])
+      handleAutoCompleteChange('eventTypeAutoComplete', [])
+      setIsChecked({
+        nameCheckbox: false,
+        roleCheckbox: false,
+        eventTypeCheckBox: false,
+      });
       setStartDate(dayjs())
       setEndDate(dayjs())
+      setEventFailed(false)
+      setEventSubmitted(false)
       setOpen(false);
     };
     //Get the Roles in the database, and present them in autocomplete boxes
@@ -94,9 +102,13 @@ function ReportModal(){
         [name]: newValue,
       }));
     }
-
+    const [loading, setLoading] = useState(false);
+    //Hook to check for event submission
+    const [eventSubmitted, setEventSubmitted] = useState(false)
+    const [eventFailed, setEventFailed] = useState(false)
     const generateReport = async () => {
       //JSON for a quick report, (7 days back)
+      setLoading(true)
       const report = { 
           method: 'POST',
           headers: {'Content-Type': 'application/json',},
@@ -110,7 +122,7 @@ function ReportModal(){
       //Try 
       console.log(report)
       try {
-        const response = await fetch(`/api/generateReport`, report).then(
+        await fetch(`/api/generateReport`, report).then(
           res => res.json()
         ).then(
            data => {
@@ -125,14 +137,24 @@ function ReportModal(){
             })
           }
         );
+        setEventFailed(false)
+        setEventSubmitted(true)
       } catch(e: any){
+        setEventFailed(true)
+        setEventSubmitted(false)
         console.log(e.message);
+      } finally {
+        setLoading(false)
       }
     };
 
     return(
     <Fragment>
-        <Button onClick={handleClickOpen} >Generate Custom Report</Button>
+        <Button variant='contained' sx={{mb: '.2rem', backgroundColor: '#6d9fb2'}} onClick={handleClickOpen} >
+          <Typography variant="body1" color='white'>
+            Generate Custom Report
+          </Typography>
+        </Button>
         <Dialog
           open={open}
           onClose={handleClose}>
@@ -200,10 +222,28 @@ function ReportModal(){
                 minDate={startDate}
                 />
             </LocalizationProvider>
-            <Box display="center" sx={{mb:'.5rem'}}>
+            <Stack 
+            direction="row"
+            display="flex" 
+            alignItems="center" 
+            justifyContent="center"
+            spacing={4}
+            sx={{mb:'.6rem',mt:'.4rem',mx:'.4rem'}}>
               <Button 
                 variant='contained'
-                onClick={generateReport}>Submit</Button>
+                onClick={generateReport}
+                sx={{backgroundColor: '#6d9fb2' }}
+                disabled={loading}>
+                  Submit
+                </Button>
+            </Stack>
+            <Box sx={{
+                display: "flex", 
+                alignItems:"center" ,
+                justifyContent:"center",
+            }}>
+            {eventSubmitted ? <Typography color="green">Report Generated Successfully</Typography> : ""}
+            {eventFailed ? <Typography color="red">Report Generated Unsuccessfully</Typography> : ""}
             </Box>
         </Dialog>
     </Fragment>
