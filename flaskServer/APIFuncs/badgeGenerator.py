@@ -30,7 +30,8 @@ def generate_qr_code(userID, filename):
 def add_text_to_image(img_path, text, output_path, position, font_size=50):
     img = Image.open(img_path).convert("RGBA")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("APIFuncs/Arial.ttf", font_size)
+    os.path.join('flaskServer', 'APIFuncs')
+    font = ImageFont.truetype("/home/55ATAT/55ATAT/flaskServer/APIFuncs/Arial.ttf", font_size)  
     # Split the text into multiple lines
     lines = text.split('\n')
     y = position[1]
