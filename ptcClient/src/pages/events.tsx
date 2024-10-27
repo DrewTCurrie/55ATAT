@@ -1,5 +1,4 @@
 import { Container, Box, Typography, Button, ButtonGroup} from '@mui/material';
-import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useCallback, useEffect, useState } from 'react'
@@ -10,9 +9,10 @@ import axios from 'axios';
 import NewEvent from '../components/newEventModal';
 import DeleteEvent from '../components/deleteEvent';
 import EditEvent from '../components/editEvent';
+import Table from '../components/table';
 
 
-interface IRow {
+export interface IRow {
   EventID: string,
   ID: string,
   Initials: string,
@@ -33,17 +33,31 @@ function Events() {
         hide: true
        },
       { field: "Initials",
-        flex: 1
+        filter: true,
+        minWidth: 120,
+        maxWidth: 120
        },
       { field: "Timestamp",
-        flex: 4,
-        // cellRenderer: (params: ICellRendererParams<IRow,number>) => {
-        //   const date = new Date(params.data?.Timestamp ?? "")
-        //   return date;
-        // }
+        sort: "desc",
+        cellRenderer: (params: ICellRendererParams<IRow,number>) => {
+          const date = new Date(params.data?.Timestamp ?? "")
+          return date.toLocaleString();
+        }
        },
-      { field: "Absent",
+      { field: "Comment",
         flex: 1,
+        wrapText: true,
+        autoHeight: true,
+        cellRenderer: (params: ICellRendererParams<IRow, number>) => {
+          if(params.data?.Comment === "N/A"){
+            return '';
+          } else {
+            return params.data?.Comment;
+          }
+        }
+      },
+      { field: "Absent",
+        maxWidth: 90,
         cellRenderer: (params: ICellRendererParams<IRow, number>) => {
           if (params.data?.Absent === false) {
             return <Typography sx={{my:'.3rem'}}>No</Typography>;
@@ -54,7 +68,7 @@ function Events() {
       },
       { field: "TIL_Violation",
         headerName: 'TIL',
-        flex: 1,
+        maxWidth: 80,
         cellRenderer: (params: ICellRendererParams<IRow, number>) => {
           if (params.data?.TIL_Violation === false) {
             return <Typography sx={{my:'.3rem'}}>No</Typography>;
@@ -65,7 +79,8 @@ function Events() {
       },
       { field: "Edit",
         headerName: 'Edit',
-        flex: 1,
+        minWidth: 80,
+        maxWidth: 80,
         cellRenderer: (params: ICellRendererParams<IRow, number>) => {
           const EventID = params.data?.EventID ?? ""; 
           const Initials = params.data?.Initials ?? "";
@@ -78,7 +93,8 @@ function Events() {
         } 
       },
       { field: "Delete",
-        flex: 1,
+        minWidth: 90,
+        maxWidth: 90,
         cellRenderer: (params: ICellRendererParams<IRow,number>) => {
           const EventID = params.data?.EventID ?? "";
           const Initials = params.data?.Initials ?? "";
@@ -87,9 +103,6 @@ function Events() {
         }
       },
       { field: "AdminInitials",
-        hide: true
-      },
-      { field: "Comment",
         hide: true
       }
     ]);
@@ -157,10 +170,17 @@ function Events() {
     },[]);
     
     return (
-      <Container sx={{display: 'block', height: '100vh', width: '175vh'}}>
-          <Box sx={{ display: 'flex', p: 1 }}>
-            <Box sx={{ flex: 1}}/>
-            <Box sx={{flex: 1, backgroundColor: 'gray', padding: 2 }}>
+      <Container>
+          <Box sx={{ display: 'flex', p: '5px', mt: '1.5rem'}}>
+            <Box sx={{ flex: 1, backgroundColor: 'gray', padding: '2px', mx: '.4rem' }}>
+              <Typography variant="h6" color='white'>
+                New Event
+              </Typography>
+              <ButtonGroup orientation="vertical" variant='contained'>
+                <NewEvent onClose={handleModalClose}/>
+              </ButtonGroup>
+            </Box>
+            <Box sx={{flex: 1, backgroundColor: 'gray', padding: '2px', mx: '.4rem' }}>
               <Typography variant="h6" color='white'>
                 Reports
               </Typography>
@@ -176,16 +196,7 @@ function Events() {
                 flexGrow: 1,
                 bgcolor: 'background.paper',
               }}>
-              <div
-                className="ag-theme-quartz"
-                style={{ height: 750, width: '125vh' }} // the Data Grid will fill the size of the parent container
-              >
-                <AgGridReact
-                    rowData={rowData}
-                    columnDefs={colDefs}
-              />
-              </div>
-              <NewEvent onClose={handleModalClose}></NewEvent>
+              <Table rowData={rowData} colDefs={colDefs}/>
           </Box>
         </Container>
       );

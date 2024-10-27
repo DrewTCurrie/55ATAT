@@ -135,18 +135,19 @@ export default function NewEvent({onClose}:modalProps){
             display="flex" 
             alignItems="center" 
             sx={{
-                maxWidth: '8rem',
-                border: '1px solid blue',
-                padding: '8px',            
-                borderRadius: '4px'        
-              }}>
-            <IconButton 
-                color="primary"
-                onClick={handleClickOpen}
-                aria-label='new attendance event'>
+                width: '100%',
+                backgroundColor: 'primary.main',          
+                borderRadius: '4px',
+                cursor: 'pointer', // Change cursor to pointer
+                '&:hover': {
+                    backgroundColor: 'primary.dark', // Change color on hover if desired
+                },        
+              }}
+              >
+            <Button onClick={handleClickOpen}>
                 <AddIcon />
                 <Typography variant="body1">New Event</Typography>
-            </IconButton>
+            </Button>
         </Box>
         <Dialog
         open={open}

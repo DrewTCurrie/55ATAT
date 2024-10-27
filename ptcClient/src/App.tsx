@@ -6,7 +6,6 @@ import { Routes, Route } from 'react-router-dom'
 import { Box } from '@mui/material'
 import React from 'react'
 import Scanner from './pages/scanner'
-import Table from './components/table'
 
 import Login from './pages/login'
 import AuthProvider from './functions/AuthProvider'
@@ -17,9 +16,9 @@ import SettingsProvider from './functions/SettingsProvider'
 function App() {
   return (
     <AuthProvider>
-      <Box sx={{display: 'flex'}}>
+      <Box>
         <Sidebar/>
-          <Routes>
+        <Routes>
           <Route path='' element={<SettingsProvider><Scanner/></SettingsProvider>}/>
           <Route path='login' element={<Login/>}/>
           <Route element={<ProtectedRoute/>}>
