@@ -12,9 +12,9 @@ from APIFuncs import utils
 # Helper function to generate a QR code, generates QR code based on ID so that it remains the same if needing to be regenerated.
 def generate_qr_code(userID, filename):
     ptclogo = Image.open(
-        os.path.join('flaskServer', 'static', 'BadgeTemplates', 'Template_ptclogo.png'))  #TODO: add ptclogo to center of QR code.
+        os.path.join('flaskServer', 'static', 'BadgeTemplates', 'Logo.png')).convert("RGBA")
     qr = qrcode.QRCode(
-        version=1,
+        version=2,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
         box_size=10,
         border=4,
@@ -22,7 +22,28 @@ def generate_qr_code(userID, filename):
     qr.add_data(userID)
     qr.make(fit=True)
 
-    img = qr.make_image(fill='black', back_color='white')
+    img = qr.make_image(fill='black', back_color='white').convert('RGBA')
+
+    # Resize the logo to fit in the center of the QR code
+    qr_width, qr_height = img.size
+    basewidth = int(qr_width / 4.8)  # Adjust the size of the logo
+    wpercent = (basewidth / float(ptclogo.size[0]))
+    hsize = int((float(ptclogo.size[1]) * float(wpercent)))
+    ptclogo = ptclogo.resize((basewidth, hsize))
+
+    # Create a circular mask
+    mask = Image.new("L", ptclogo.size, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((2, 2, ptclogo.size[0] - 2, ptclogo.size[1] - 2), fill=255)
+
+    # Create a new image for ptclogo with a white background
+    white_background = Image.new("RGBA", ptclogo.size, "white")  # White background
+    white_background.paste(ptclogo, (0, 0), ptclogo)  # Use ptclogo as the mask
+    white_background.putalpha(mask)
+
+    logo_position = ((qr_width - ptclogo.size[0]) // 2, (qr_height - ptclogo.size[1]) // 2)
+    img.paste(white_background, logo_position, white_background)
+
     img.save(filename)
 
 
@@ -30,7 +51,7 @@ def generate_qr_code(userID, filename):
 def add_text_to_image(img_path, text, output_path, position, font_size=50):
     img = Image.open(img_path).convert("RGBA")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("APIFuncs/Arial.ttf", font_size)
+    font = ImageFont.truetype("flaskServer/APIFuncs/Arial.ttf", font_size)
     # Split the text into multiple lines
     lines = text.split('\n')
     y = position[1]
@@ -60,7 +81,8 @@ def embed_user_image(base_img_path, user_img_path, output_path, user_img_size, u
 def generate_badge(userID):
     #Query User Details:
     attendeeInfo = utils.getAttendee(userID)
-    if attendeeInfo.Employee | attendeeInfo.Administrator:
+    employeeRoles = utils.getEmployeeRoles()
+    if any(getattr(attendeeInfo, col, False) is True for col in employeeRoles) or attendeeInfo.Administrator:
         address = "1091 Stoneridge Dr, Bozeman, MT 59718"
         phone = "(406)-624-6599"
         initials = attendeeInfo.AttendeeInitials
