@@ -86,7 +86,7 @@ def create_spreadsheet(params):
     #Initialize Spreadsheet
     #Create Excel file with meta data
     fileName = ('attendanceReport'+datetime.datetime.now().strftime("%m%d%H%M")+'.xlsx')
-    workbook = xlsxwriter.Workbook('/home/55ATAT/55ATAT/flaskServer/xlsx/'+fileName)
+    workbook = xlsxwriter.Workbook('flaskServer/xlsx/'+fileName)
     worksheet = workbook.add_worksheet()
 
     #WORKBOOK FORMATS
@@ -128,6 +128,11 @@ def create_spreadsheet(params):
         'align': 'center',
         'valign': 'vcenter'
     })
+    not_scheduled = workbook.add_format({
+        'bg_color': '#d9d9d9',
+        'align': 'center',
+        'valign': 'vcenter'
+    })
 
     # Merge and format the main title
     worksheet.merge_range('C1:S1', 'Peach Tree Client Attendance Tracker', header_format)
@@ -166,11 +171,6 @@ def create_spreadsheet(params):
         #Write starting from C, populating every other.
         worksheet.write(1, (i * 2) + 2, key, format_key)
         worksheet.write(2, (i * 2) + 2, desc, format_desc)
-
-    # Note section
-    worksheet.merge_range('X2:AA3',
-                          'Note: \nIf a client’s attendance is close to lower limit, and they have been called off many times, their actual attendance ratio should be calculated manually',
-                          note_format)
 
     #Get Date List from Class
     date_list = params.generate_date_range()

@@ -130,9 +130,10 @@ function Events() {
         };
       }
     )
-
+    const [loading, setLoading] = useState(false)
     const generateQuickReport = async () => {
       //JSON for a quick report, (7 days back), Python will autofill information.
+      setLoading(true)
       const quickReport = { 
           method: 'POST',
           headers: {'Content-Type': 'application/json',},
@@ -144,7 +145,7 @@ function Events() {
       //Try 
       console.log(quickReport)
       try {
-        const response = await fetch(`/api/generateReport`, quickReport,).then(
+        await fetch(`/api/generateReport`, quickReport,).then(
           res => res.json()
         ).then(
            data => {
@@ -161,6 +162,8 @@ function Events() {
         );
       } catch(e: any){
         console.log(e.message);
+      } finally {
+        setLoading(false)
       }
     };
 

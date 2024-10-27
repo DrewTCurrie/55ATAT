@@ -78,15 +78,16 @@ export default function Scanner(){
             if(internalSubmit){
               settings?.getAttendeeMessage(scanData)
               settings?.getAttendeeAudio(scanData)
+              playAudio()
               //This waits for 1 second, before re-enabling
               await new Promise(f => setTimeout(f, 1000))
-              playAudio()
+             
             }
             if(internalFail){
               settings?.getFailureAudio()
               //This waits for 1 second, before re-enabling
-              await new Promise(f => setTimeout(f, 1000))
               playAudio()
+              await new Promise(f => setTimeout(f, 1000))
             }
             setLoading(false)
             closeMessages()

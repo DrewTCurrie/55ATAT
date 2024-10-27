@@ -37,6 +37,7 @@ export default function NewEvent({onClose}:modalProps){
         onClose();
         //Close modal and reset submission
         setEventSubmitted(false);
+        setEventFailed(false)
         setOpen(false);
     }
     //Hook for selecting a user name from autocomplete
@@ -99,6 +100,7 @@ export default function NewEvent({onClose}:modalProps){
     const [loading, setLoading] = useState(false);
     //Hook to check for event submission
     const [eventSubmitted, setEventSubmitted] = useState(false)
+    const [eventFailed, setEventFailed] = useState(false)
     const createEvent = async () => {
         //Set Loading to True to disable button
         setLoading(true)
@@ -122,9 +124,12 @@ export default function NewEvent({onClose}:modalProps){
               throw new Error('Error creating event');
             } else {
                 setEventSubmitted(true)
+                setEventFailed(false)
                 setLoading(false)
             }
         } catch(e){
+            setEventFailed(true)
+            setEventSubmitted(false)
             console.error("Error creating event",e)
             setLoading(false)
         }
@@ -218,7 +223,7 @@ export default function NewEvent({onClose}:modalProps){
                     sx={{backgroundColor: '#6d9fb2' }}
                     disabled={loading || eventSubmitted}
                     onClick={createEvent}>
-                        {loading ? 'Loading' : eventSubmitted ? 'Event Created Successfully' : 'Submit Event'}
+                        {loading ? 'Loading' : 'Edit Event'}
                 </Button>
                 <Button
                     variant='contained'
@@ -228,6 +233,14 @@ export default function NewEvent({onClose}:modalProps){
                         Close
                 </Button>
             </Stack>
+            <Box sx={{
+                display: "flex", 
+                alignItems:"center" ,
+                justifyContent:"center",
+            }}>
+            {eventSubmitted ? <Typography color="green">Event Submitted Successfully</Typography> : ""}
+            {eventFailed ? <Typography color="red">Event Submitted Unsuccessfully</Typography> : ""}
+            </Box>
         </Dialog>
         </>
     )
