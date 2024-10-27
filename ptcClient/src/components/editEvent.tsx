@@ -217,15 +217,17 @@ export default function EditEvent({onClose,EventID,Initials,Timestamp,Absent,TIL
             spacing={4}
             sx={{mb:'.6rem',mt:'.4rem',mx:'.4rem'}}>
                 <Button 
-                    variant='outlined'
+                    variant='contained'
                     disabled={loading}
-                    onClick={createEvent}>
+                    onClick={createEvent}
+                    sx={{backgroundColor: '#6d9fb2' }}>
                         {loading ? 'Loading' : eventSubmitted ? 'Event Edited Successfully' : 'Submit Event'}
                 </Button>
                 <Button
                     variant='contained'
                     onClick={() => {handleClose(); onClose()}}
-                    disabled={loading}>
+                    disabled={loading}
+                    sx={{backgroundColor: '#E59999'}}>
                         Close
                 </Button>
             </Stack>

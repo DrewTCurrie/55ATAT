@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, FormControlLabel, Grid2, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, Card, Checkbox, Dialog, DialogTitle, FormControlLabel, Grid2, IconButton, Stack, TextField, Typography } from '@mui/material';
 import * as React from 'react';
 import AddIcon from '@mui/icons-material/Add'
 import { useEffect, useState } from 'react';
@@ -144,7 +144,7 @@ export default function NewEvent({onClose}:modalProps){
                 },        
               }}
               >
-            <Button onClick={handleClickOpen}>
+            <Button onClick={handleClickOpen} sx={{backgroundColor: '#6d9fb2'}}>
                 <AddIcon />
                 <Typography variant="body1">New Event</Typography>
             </Button>
@@ -214,7 +214,8 @@ export default function NewEvent({onClose}:modalProps){
             spacing={4}
             sx={{mb:'.6rem',mt:'.4rem',mx:'.4rem'}}>
                 <Button 
-                    variant='outlined'
+                    variant='contained'
+                    sx={{backgroundColor: '#6d9fb2' }}
                     disabled={loading || eventSubmitted}
                     onClick={createEvent}>
                         {loading ? 'Loading' : eventSubmitted ? 'Event Created Successfully' : 'Submit Event'}
@@ -222,7 +223,8 @@ export default function NewEvent({onClose}:modalProps){
                 <Button
                     variant='contained'
                     onClick={() => {handleClose(); onClose()}}
-                    disabled={loading}>
+                    disabled={loading}
+                    sx={{backgroundColor: '#E59999'}}>
                         Close
                 </Button>
             </Stack>

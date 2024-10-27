@@ -218,9 +218,8 @@ function Settings() {
                         <Button
                             type="submit"
                             variant="contained"
-                            color="primary"
                             fullWidth
-                            sx={{ mb:'.4rem' }}
+                            sx={{ mb:'.4rem', backgroundColor: '#6d9fb2'}}
                             disabled={loading}
                             onClick={submitDefaultMessage}
                         >
@@ -258,9 +257,8 @@ function Settings() {
                                 <Button 
                                     variant="contained"
                                     component="span"
-                                    color="secondary"
                                     fullWidth
-                                    sx={{ my:'.2rem' }}
+                                    sx={{ my:'.2rem', backgroundColor: '#E8BA63'}}
                                     disabled={loading}>
                                     Select Audio File
                                 </Button>
@@ -269,9 +267,8 @@ function Settings() {
                                 <Button
                                 type="submit"
                                 variant="contained"
-                                color="primary"
                                 fullWidth
-                                sx={{ my:'.2rem' }}
+                                sx={{ my:'.2rem', backgroundColor: '#6d9fb2' }}
                                 disabled={loading}
                                 onClick={submitDefaultAudio}
                                 >
@@ -283,7 +280,7 @@ function Settings() {
                             variant="contained"
                             color="error"
                             fullWidth
-                            sx={{ my:'.2rem' }}
+                            sx={{ my:'.2rem', backgroundColor:'#E59999', }}
                             disabled={loading}
                             onClick={resetDefaults}
                         >
@@ -330,7 +327,7 @@ function Settings() {
                             variant="contained"
                             color="primary"
                             fullWidth
-                            sx={{ my:'.4rem' }}
+                            sx={{ my:'.4rem', backgroundColor: '#6d9fb2' }}
                             disabled={loading}
                             onClick={submitAttendeeMessage}
                         >
@@ -367,7 +364,7 @@ function Settings() {
                                     component="span"
                                     color="secondary"
                                     fullWidth
-                                    sx={{ my:'.2rem' }}
+                                    sx={{ my:'.2rem', backgroundColor: '#E8BA63' }}
                                     disabled={loading}>
                                     Select Audio File
                                 </Button>
@@ -378,7 +375,7 @@ function Settings() {
                                 variant="contained"
                                 color="primary"
                                 fullWidth
-                                sx={{ my:'.2rem' }}
+                                sx={{ my:'.2rem', backgroundColor: '#6d9fb2' }}
                                 disabled={loading}
                                 onClick={submitAttendeeAudio}
                                 >
@@ -390,7 +387,7 @@ function Settings() {
                             variant="contained"
                             color="error"
                             fullWidth
-                            sx={{ my:'.4rem' }}
+                            sx={{ my:'.4rem', backgroundColor:'#E59999'}}
                             disabled={loading}
                             onClick={resetAttendee}
                         >

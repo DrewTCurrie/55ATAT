@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, TextField, Typography } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Fragment, useEffect, useState } from "react";
@@ -138,7 +138,11 @@ function ReportModal(){
 
     return(
     <Fragment>
-        <Button onClick={handleClickOpen} >Generate Custom Report</Button>
+        <Button variant='contained' sx={{mb: '.2rem', backgroundColor: '#6d9fb2'}} onClick={handleClickOpen} >
+          <Typography variant="body1" color='white'>
+            Generate Custom Report
+          </Typography>
+        </Button>
         <Dialog
           open={open}
           onClose={handleClose}>
@@ -209,7 +213,8 @@ function ReportModal(){
             <Box display="center" sx={{mb:'.5rem'}}>
               <Button 
                 variant='contained'
-                onClick={generateReport}>Submit</Button>
+                onClick={generateReport}
+                sx={{backgroundColor: '#6d9fb2' }}>Submit</Button>
             </Box>
         </Dialog>
     </Fragment>

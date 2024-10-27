@@ -52,7 +52,7 @@ export default function Sidebar() {
 
   return(
       <Box >
-        <AppBar position="fixed" sx={{maxHeight: drawerHeight}}>
+        <AppBar position="fixed" sx={{maxHeight: drawerHeight, backgroundColor: '#D47554'}}>
           <Toolbar>
             <IconButton
               aria-label="open drawer"
@@ -80,6 +80,7 @@ export default function Sidebar() {
           sx={[{
             width: drawerWidth,
             flexShrink: 0,
+            backgroundColor: '#FCF9F4',
             '& .MuiDrawer-paper': {
               width: drawerWidth,
               boxSizing: 'border-box',
@@ -88,8 +89,8 @@ export default function Sidebar() {
           open={open}
           onClose={toggleDrawer(false)}
         >
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ my: 2 }}>
+          <Box sx={{ textAlign: 'center', backgroundColor: '#D47554' }}>
+            <Typography variant="h5" sx={{ my: 2,color:'white' }}>
               PTC
             </Typography>
             <Divider />

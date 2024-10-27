@@ -135,7 +135,7 @@ export default function Scanner(){
             />
             <Button
               variant="contained"
-              sx={{minWidth:300,my:'.4rem'}}
+              sx={{minWidth:300,my:'.4rem',backgroundColor:'#6d9fb2'}}
               disabled={loading}
               onClick={handleSubmit}>
               {loading ? 'Loading' :  'Submit Event'}</Button>

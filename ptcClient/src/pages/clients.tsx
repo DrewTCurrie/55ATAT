@@ -1,4 +1,4 @@
-import { Container, Box, Typography, ButtonGroup} from '@mui/material';
+import { Container, Box, Typography, ButtonGroup, Card} from '@mui/material';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useState, useEffect, useCallback } from 'react'
@@ -90,14 +90,14 @@ return (
 <Container>
     <Box sx={{ display: 'flex', p: '5px' }}>
       <Box sx={{ flex: 1}}/>
-      <Box sx={{ flex: 1, backgroundColor: 'gray', padding: '2px', mx: '.4rem' }}>
+      <Card sx={{ flex: 1, backgroundColor: '#D47554', padding: '2px', mx: '.4rem' }}>
         <Typography variant="h6" color='white'>
           Attendees
         </Typography>
       <ButtonGroup orientation="vertical" variant='contained'>
         <ClientModal onClose={handleModalClose}/>
       </ButtonGroup>
-      </Box>
+      </Card>
     </Box>
     <Table rowData={rowData} colDefs={colDefs}/>
   </Container>

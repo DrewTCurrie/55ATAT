@@ -81,15 +81,17 @@ export default function DeleteEvent({onClose,ID,Initials,Timestamp}: modalProps)
                         </Typography>
                         :
                         <Button 
-                            variant='outlined'
+                            variant='contained'
                             onClick={deleteAccount}
-                            disabled={loading}>
+                            disabled={loading}
+                            sx={{backgroundColor: '#6d9fb2' }}>
                             {!loading ? 'Delete' : 'Loading'}
                         </Button>}
                         <Button
                         variant='contained'
                         onClick={() =>{handleClose(); onClose()}}
-                        disabled={loading}>
+                        disabled={loading}
+                        sx={{backgroundColor: '#e59999' }}>
                         Close
                         </Button>
                     </Stack>

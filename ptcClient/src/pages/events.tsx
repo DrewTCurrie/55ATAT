@@ -1,4 +1,4 @@
-import { Container, Box, Typography, Button, ButtonGroup} from '@mui/material';
+import { Container, Box, Typography, Button, ButtonGroup, Card, Stack} from '@mui/material';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useCallback, useEffect, useState } from 'react'
@@ -172,23 +172,31 @@ function Events() {
     return (
       <Container>
           <Box sx={{ display: 'flex', p: '5px', mt: '1.5rem'}}>
-            <Box sx={{ flex: 1, backgroundColor: 'gray', padding: '2px', mx: '.4rem' }}>
+            <Card sx={{ flex: 1, backgroundColor: '#D47554', padding: '2px', mx: '.4rem' }}>
               <Typography variant="h6" color='white'>
                 New Event
               </Typography>
               <ButtonGroup orientation="vertical" variant='contained'>
                 <NewEvent onClose={handleModalClose}/>
               </ButtonGroup>
-            </Box>
-            <Box sx={{flex: 1, backgroundColor: 'gray', padding: '2px', mx: '.4rem' }}>
+            </Card>
+            <Card sx={{flex: 1, backgroundColor: '#D47554', padding: '2px', mx: '.4rem' }}>
               <Typography variant="h6" color='white'>
                 Reports
               </Typography>
-            <ButtonGroup orientation="vertical" variant='contained'>
-              <Button sx={{marginBottom:.5}} onClick={generateQuickReport}>Generate Quick Report (1 Week)</Button>
+            <Stack 
+            direction="column"
+            display="flex" 
+            alignItems="center" 
+            justifyContent="center">
+              <Button variant='contained' sx={{mb: '.2rem', backgroundColor: '#6d9fb2'}} onClick={generateQuickReport}>
+                <Typography variant="body1" color='white'>
+                Generate Quick Report (1 Week)
+                </Typography>
+              </Button>
               <ReportModal/>
-            </ButtonGroup>
-            </Box>
+            </Stack>
+            </Card>
           </Box>
           <Box
               sx={{

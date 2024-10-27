@@ -318,24 +318,27 @@ interface modalProps{
                 alignItems="center" 
                 justifyContent="center"
                 spacing={4}
-                sx={{mb:'.6rem'}}>
+                sx={{mb:'.6rem', mx: '.2rem' }}>
                     <Button
                     variant='contained'
                     color='success'
                     disabled={loading}
-                    onClick={loadBadge}>
+                    onClick={loadBadge}
+                    sx={{backgroundColor: '#6DB260' }}>
                         Regenerate Badge
                     </Button>
                     <Button 
-                    variant='outlined'
+                    variant='contained'
                     disabled={loading}
-                    onClick={editAccount}>
+                    onClick={editAccount}
+                    sx={{backgroundColor: '#6d9fb2' }}>
                         {!loading ? 'Submit Edit' : 'Loading'}
                     </Button>
                     <Button
                     variant='contained'
                     onClick={() => {handleClose(); onClose()}}
-                    disabled={loading}>
+                    disabled={loading}
+                    sx={{backgroundColor: '#e59999' }}>
                         Close
                     </Button>
                 </Stack>
@@ -371,20 +374,23 @@ interface modalProps{
                 sx={{mb:'.6rem'}}>
                 <Button 
                 variant='outlined'
-                onClick={handlePrint}>
+                onClick={handlePrint}
+                sx={{backgroundColor: '#6DB260' }}>
                     Print
                 </Button>
                 <Button
                 variant='contained'
                 onClick={handleBack}
-                disabled={loading}>
+                disabled={loading}
+                sx={{backgroundColor: '#6d9fb2' }}>
                 Back
                 </Button>
                 <Button
                 variant='contained'
                 color='error'
                 onClick={() => {handleClose(); onClose()}}
-                disabled={loading}>
+                disabled={loading}
+                sx={{backgroundColor: '#e59999' }}>
                   Close
                 </Button>
               </Stack>
