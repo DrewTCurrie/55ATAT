@@ -2,6 +2,7 @@ import { Autocomplete, Box, Button, Divider, TextField, Typography } from '@mui/
 import React, {useEffect, useRef, useState} from 'react'
 import { useSettings } from '../functions/SettingsProvider';
 import { AudioPlayer } from '../components/audioPlayer';
+import ResetMessages from '../components/resetMessages';
 
 interface Attendee {
     ID: string;
@@ -421,6 +422,7 @@ function Settings() {
                         </Button>
                         </Box>
                         : ''}
+                        <ResetMessages/>
                     </Box>    
                 </Box>
             </Box>
