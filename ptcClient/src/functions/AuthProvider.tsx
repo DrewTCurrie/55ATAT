@@ -1,4 +1,4 @@
-import { useContext, createContext, useState, ReactNode } from 'react'
+import { useContext, createContext, useState, ReactNode, useEffect } from 'react'
 import * as React from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -45,6 +45,7 @@ const AuthProvider: React.FC<authProps> = ({children}) => {
                 setAdminInitials(data.adminInitials)
                 setToken(data.userToken);
                 localStorage.setItem('token',data.userToken)
+                localStorage.setItem('initials',data.adminInitials)
                 navigate('/events')
                 return;
             } else {
@@ -58,10 +59,19 @@ const AuthProvider: React.FC<authProps> = ({children}) => {
             }
         }
     };
+    //This gets adminInitials from local storage.
+    useEffect(() => {
+        const initials = localStorage.getItem('initials')
+        if(initials){
+            setAdminInitials(initials)
+        }
+    },[adminInitials])
+
     const logOut = () => {
         setAdminInitials("");
         setToken("")
         localStorage.removeItem('token')
+        localStorage.removeItem('initials')
         navigate('/login')
     };
 
