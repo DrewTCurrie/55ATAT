@@ -26,15 +26,14 @@ def generate_qr_code(userID, filename):
 
     # Resize the logo to fit in the center of the QR code
     qr_width, qr_height = img.size
-    basewidth = int(qr_width / 4.8)  # Adjust the size of the logo
-    wpercent = (basewidth / float(ptclogo.size[0]))
-    hsize = int((float(ptclogo.size[1]) * float(wpercent)))
-    ptclogo = ptclogo.resize((basewidth, hsize))
-
-    # Create a circular mask
+    logo_size = 50
+    xmin = ymin = int((qr_width / 2) - (logo_size / 2))
+    xmax = ymax = int((qr_width / 2) + (logo_size / 2))
+    ptclogo = ptclogo.resize((xmax-xmin, ymax-ymin))
+    # Create a rectangular mask
     mask = Image.new("L", ptclogo.size, 0)
     draw = ImageDraw.Draw(mask)
-    draw.ellipse((2, 2, ptclogo.size[0] - 2, ptclogo.size[1] - 2), fill=255)
+    draw.rectangle((0, 0, ptclogo.size[0]+4, ptclogo.size[1]+6), fill=255)
 
     # Create a new image for ptclogo with a white background
     white_background = Image.new("RGBA", ptclogo.size, "white")  # White background
@@ -164,4 +163,4 @@ def generate_badge(userID):
 
 
 if __name__ == '__main__':
-    generate_badge('PTCBZN-14740603386')
+    generate_badge('PTCBZN-10099262496')
