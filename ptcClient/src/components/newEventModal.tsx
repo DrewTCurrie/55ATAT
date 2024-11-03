@@ -223,7 +223,7 @@ export default function NewEvent({onClose}:modalProps){
                     sx={{backgroundColor: '#6d9fb2' }}
                     disabled={loading || eventSubmitted}
                     onClick={createEvent}>
-                        {loading ? 'Loading' : 'Edit Event'}
+                        {loading ? 'Loading' : 'Submit Event'}
                 </Button>
                 <Button
                     variant='contained'
