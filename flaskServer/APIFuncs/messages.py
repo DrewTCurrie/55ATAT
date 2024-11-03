@@ -6,6 +6,7 @@ from flask import url_for
 from pydub import AudioSegment
 
 from APIFuncs import MariaDBapi as api, utils
+from sqlalchemy import delete
 
 #Pathing to audioFiles folder
 currentWorkingDirectory = os.path.abspath(os.getcwd())
@@ -238,6 +239,24 @@ def resetDefaults():
         Session.add(newDefault)
     Session.commit()
     Session.close()
+
+# This function clears the entire messages database and restores the default value.
+def resetEverything():
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    # Query for the attendee message table, delete it all
+    query = Session.query(api.AttendeeMessage).all()
+    if query is not None:
+        Session.execute(delete(api.AttendeeMessage))
+    Session.commit()
+    Session.close()
+    #Recreate default entry
+    resetDefaults()
+
+
 
 #--------------- Audio File Conversion -----------------------------------------------------
 # This ensures that all audio files are of the same type.

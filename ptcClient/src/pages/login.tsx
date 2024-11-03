@@ -81,6 +81,7 @@ export default function Login(){
             margin="normal"
             value={credentials.username}
             onChange={handleChnage}
+            autoComplete="off"
             required
           />
           <TextField
@@ -92,6 +93,7 @@ export default function Login(){
             margin="normal"
             value={credentials.password}
             onChange={handleChnage}
+            autoComplete="off"
             required
           />
           <Button

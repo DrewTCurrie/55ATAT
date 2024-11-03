@@ -132,6 +132,7 @@ export default function Scanner(){
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             autoFocus
+            autoComplete='off'
             inputRef={inputRef}
             />
             <Button

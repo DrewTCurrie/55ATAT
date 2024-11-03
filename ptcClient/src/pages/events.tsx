@@ -174,7 +174,7 @@ function Events() {
     
     return (
       <Container>
-          <Box sx={{ display: 'flex', p: '5px', mt: '1.5rem'}}>
+          <Box sx={{ display: 'flex', p: '5px', mt: '7%'}}>
             <Card sx={{ flex: 1, backgroundColor: '#D47554', padding: '2px', mx: '.4rem' }}>
               <Typography variant="h6" color='white'>
                 New Event

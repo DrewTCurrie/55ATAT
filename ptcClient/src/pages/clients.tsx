@@ -88,7 +88,7 @@ const handleModalClose = useCallback(() => {
 //Render Page
 return (
 <Container>
-    <Box sx={{ display: 'flex', p: '5px' }}>
+    <Box sx={{ display: 'flex', p: '5px', mt:'7%' }}>
       <Box sx={{ flex: 1}}/>
       <Card sx={{ flex: 1, backgroundColor: '#D47554', padding: '2px', mx: '.4rem' }}>
         <Typography variant="h6" color='white'>

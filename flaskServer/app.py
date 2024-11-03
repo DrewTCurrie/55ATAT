@@ -302,6 +302,13 @@ def login():
 
 #--------------- Settings Routes -----------------------------------------------------
 
+#reset every message
+@app.route('/api/resetEverything',methods=['GET'])
+def resetEverything():
+    messages.resetEverything()
+    return make_response(jsonify({"response": "Success"}), 200)
+
+
 #---------------Default Messages Routes -----------------------------------------------------
 @app.route('/api/getDefaultMessage',methods=['GET'])
 def getDefaultMessage():

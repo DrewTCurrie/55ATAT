@@ -37,9 +37,8 @@ const useWindowSize = () => {
 
 export default function Sidebar() {
   //Set the drawer width as 15% of the window.
-  const {width, height} = useWindowSize();
+  const {width} = useWindowSize();
   const drawerWidth = width * .15;
-  const drawerHeight = height * .08;
 
   //Add open/closing logic
   const [open, setOpen] = useState(false);
@@ -51,8 +50,8 @@ export default function Sidebar() {
   const auth = useAuth();
 
   return(
-      <Box >
-        <AppBar position="fixed" sx={{maxHeight: drawerHeight, backgroundColor: '#D47554'}}>
+      <Box>
+        <AppBar position="fixed" sx={{maxHeight: 'auto', backgroundColor: '#D47554'}}>
           <Toolbar>
             <IconButton
               aria-label="open drawer"
