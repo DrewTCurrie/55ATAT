@@ -331,7 +331,7 @@ def filter_events(name=None, role=None, eventTypes=None, start_date=None, end_da
         timeFilters.append(api.AttendanceEvent.Timestamp >= start_date)
     else:
         #if no start_date, create one for one week ago
-        timeFilters.append(api.AttendanceEvent.Timestamp >= (datetime.datetime.now().replace(hour=0,minute=0,second=0, microsecond=0) - datetime.timedelta(days=7)))
+        timeFilters.append(api.AttendanceEvent.Timestamp >= (datetime.datetime.now().replace(hour=0,minute=0,second=0, microsecond=0) - datetime.timedelta(days=6)))
 
     #End Date Filter
     if end_date is not None and end_date != "Invalid Date":
