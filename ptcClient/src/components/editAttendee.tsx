@@ -115,6 +115,8 @@ function readFile(file: File): Promise<string> {
     const [badgeURLs, setBadgeURLs] =  useState<badgeRespone | null>();
     //Calls the backend to get a user's badge
     const loadBadge = async () => {
+        //Attempt to Edit the account prior to regenerating badge.
+        await editAccount()
         //Attempt to generate a badge for the user.
         const badgeDetails = {
             method: 'POST',

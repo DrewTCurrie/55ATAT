@@ -75,7 +75,7 @@ class report_params:
             self.attendance_data[event.AttendeeInitials].append(event)
             #Query for Roles by ID
             user_row = Session.query(api.Attendee).filter(
-                api.Attendee.AttendeeInitials == event.AttendeeInitials).one_or_none()
+                api.Attendee.ID == event.ID).one_or_none()
             #Checks to see if boolean columns in user_row are true, appends to user roles.
             if user_row is not None:
                 userRoles = [col for col in roles if getattr(user_row, col) == 1]
@@ -95,6 +95,14 @@ def create_spreadsheet(params):
         'bold': True,
         'font_color': 'black',
         'align': 'center',
+        'valign': 'vcenter',
+        'bg_color': '#D3D3D3',  # light gray background
+        'border': 1
+    })
+    date_format = workbook.add_format({
+        'bold': True,
+        'font_color': 'black',
+        'align': 'left',
         'valign': 'vcenter',
         'bg_color': '#D3D3D3',  # light gray background
         'border': 1
@@ -181,7 +189,7 @@ def create_spreadsheet(params):
 
     # Write the dates (e.g., 1, 2, 3, etc.)
     dates = [date.strftime('%d') for date in date_list]
-    worksheet.write_row('C5', dates, header_format)
+    worksheet.write_row('C5', dates, date_format)
 
     #Add Column Headers for "type" and "client"
     worksheet.write('A5', "Type", header_format)
@@ -190,7 +198,7 @@ def create_spreadsheet(params):
     # Adjust column widths
     worksheet.set_column('A:A', 10)
     worksheet.set_column('B:B', 15)
-    worksheet.set_column(2, len(date_list) if len(dates) > 18 else 18, 5)
+    worksheet.set_column(2, len(date_list) if len(dates) > 18 else 18, 6)
 
     #Populate with Database Data.
     for index, events in enumerate(params.attendance_data.items()):
@@ -224,14 +232,16 @@ def create_spreadsheet(params):
 
         #Write Attendee Initials
         worksheet.write(index + 5, 1, events[0])
-
+        filled_columns = {}
         #Write Attendance Data
         for event in events[1]:
             #Convert DB Timestamp into Datetime Object
             event_date = event.Timestamp
+            #Track Written to Columns
             #Iterate and add to worksheet.
             for colIndex, date in enumerate(date_list):
                 if event_date.date() == date.date():
+                    filled_columns[colIndex] = True
                     if event.Absent == True:
                         worksheet.write(index + 5, colIndex + 2, "A", unapproved_cancel_format)
                         worksheet.write_comment(index + 5, colIndex + 2, f"{event.AdminInitials}\n{event.Comment}",
@@ -243,6 +253,14 @@ def create_spreadsheet(params):
                     else:
                         worksheet.write(index + 5, colIndex + 2, "P", present_format)
 
+        #Fill remaining blank spots with 'X' for not scheduled.
+        for colIndex, date in enumerate(date_list):
+            if colIndex not in filled_columns:
+                worksheet.write(index + 5, colIndex + 2, "X", not_scheduled)
+    endrow = index +5
+    endCol = colIndex+2
+    #Set autofilter for names + roles column.
+    worksheet.autofilter(4, 0, endrow, endCol)
     # Close the workbook
     workbook.close()
     return fileName
@@ -313,7 +331,7 @@ def filter_events(name=None, role=None, eventTypes=None, start_date=None, end_da
         timeFilters.append(api.AttendanceEvent.Timestamp >= start_date)
     else:
         #if no start_date, create one for one week ago
-        timeFilters.append(api.AttendanceEvent.Timestamp >= (datetime.datetime.now() - datetime.timedelta(days=7)))
+        timeFilters.append(api.AttendanceEvent.Timestamp >= (datetime.datetime.now().replace(hour=0,minute=0,second=0, microsecond=0) - datetime.timedelta(days=6)))
 
     #End Date Filter
     if end_date is not None and end_date != "Invalid Date":
@@ -321,7 +339,7 @@ def filter_events(name=None, role=None, eventTypes=None, start_date=None, end_da
         timeFilters.append(api.AttendanceEvent.Timestamp <= end_date)
     else:
         #if no end_date create one for now.
-        timeFilters.append(api.AttendanceEvent.Timestamp <= datetime.datetime.now())
+        timeFilters.append(api.AttendanceEvent.Timestamp <= datetime.datetime.now().replace(hour=23, minute=59, second=59, microsecond=999999))
 
     #Write filters to query
     if filters:
