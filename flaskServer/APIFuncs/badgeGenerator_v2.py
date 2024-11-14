@@ -11,7 +11,7 @@ import qrcode.image.svg
 #import QRcode styling packages
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
-from qrcode.image.styles.colormasks import RadialGradiantColorMask
+from qrcode.image.styles.colormasks import ImageColorMask  #RadialGradiantColorMask
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -37,18 +37,21 @@ def generate_qr_code(userID, filename):
                 image_factory=StyledPilImage,
                 error_correction=qrcode.constants.ERROR_CORRECT_H,
                 border=0,
-                box_size=30,            #Must be a factor of 10, larger takes longer to process. 30 Seems to be a good spot between time to complete and resolution when printed
+                box_size=10,            #Must be a factor of 10, larger takes longer to process. 30 Seems to be a good spot between time to complete and resolution when printed
                 version=3,
                 )
 
         customQR.add_data(userID)
+        #RadialGradiantColorMask(back_color=(255, 255, 255)
         attendeeQR = customQR.make_image(
                 module_drawer=RoundedModuleDrawer(), 
                 eye_drawer=RoundedModuleDrawer(),
-                color_mask=RadialGradiantColorMask(back_color=(255, 255, 255), 
+                color_mask=ImageColorMask(color_mask_path=os.path.join('flaskServer', 'APIFuncs', 'QRCodeBackgroundGradient.png')), 
                 center_color=(SUNSHINE), 
-                edge_color=(PEACH)),
-                embeded_image_path=os.path.join('flaskServer', 'APIFuncs', 'PTClogo.png'))
+                edge_color=(PEACH),
+                embeded_image_path=os.path.join('flaskServer', 'APIFuncs', 'PTClogo.png')
+        )
+        
         attendeeQR.save(filename)
         image=attendeeQR
         # transform image to RGBA
