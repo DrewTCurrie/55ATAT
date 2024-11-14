@@ -9,6 +9,11 @@ interface badgeRespone {
   front: string,
   back?: string
 }
+//Interface for badge outputs
+interface ImageDetails {
+  url: string;
+  filename: string;
+}
 
 interface modalProps {
   onClose: () => void,
@@ -205,75 +210,36 @@ function ClientModal({onClose}: modalProps){
     /*
     * Print handler, will create a new window with only the pictures to print.
     */
-    const handlePrint = () => {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-          const frontImage = new Image();
-          const backImage = new Image();
-          frontImage.src = badgeURLs?.front || '';
-          backImage.src = badgeURLs?.back || '';
-
-          // Function to handle print when images are loaded
-          const onImagesLoaded = () => {
-              printWindow.document.write(`
-                  <html>
-                      <head>
-                          <title>Print</title>
-                          <style>
-                              @media print {
-                                  body {
-                                      margin: 0;
-                                      padding: 0;
-                                  }
-                                  .page {
-                                      page-break-after: always; /* Ensure each image goes to a new page */
-                                      text-align: center;
-                                  }
-                                  img {
-                                      max-width: 100%;
-                                      height: 100%; /* Maintain aspect ratio */
-                                      display: block;
-                                      margin: 0 auto;
-                                  }
-                              }
-                          </style>
-                      </head>
-                      <body>
-                          <div class="page">
-                              <img src="${frontImage.src}" alt="Output 1" />
-                          </div>
-                          ${badgeURLs?.back ? `
-                          <div class="page">
-                              <img src="${backImage.src}" alt="Output 2" />
-                          </div>
-                          ` : ''}
-                      </body>
-                  </html>
-              `);
-              printWindow.document.close();
-              printWindow.print();
-          };
-
-          // Check if both images are loaded
-          let loadedImagesCount = 0;
-
-          const imageLoadHandler = () => {
-              loadedImagesCount += 1;
-              if (loadedImagesCount === 1 || ( backImage.src && loadedImagesCount === 2)) {
-                onImagesLoaded();
-            }
-          };
-
-          // Add event listeners for image load
-          frontImage.onload = imageLoadHandler;
-          backImage.onload = imageLoadHandler;
-
-          // If the back image is empty (undefined or null), trigger the load handler directly
-          if (!backImage.src) {
-              imageLoadHandler();
-          }
+    const handlePrint = async () => {
+      const urls = [];
+      if (badgeURLs?.front) urls.push({ url: badgeURLs.front, filename: 'front_image.png' });
+      if (badgeURLs?.back) urls.push({ url: badgeURLs.back, filename: 'back_image.png' });
+    
+      // Function to fetch and download each image as a Blob
+      const downloadImage = async ({ url, filename }: ImageDetails) => {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+          
+          const blob = await response.blob();
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.setAttribute('download',`${filename}`);
+          document.body.appendChild(link);
+          link.click();
+    
+          // Revoke the object URL after the download
+          URL.revokeObjectURL(link.href);
+        } catch (error) {
+          console.error(`Failed to download ${filename}:`, error);
+        }
+      };
+    
+      // Download each image in the list
+      for (const image of urls) {
+        await downloadImage(image);
       }
-  };
+    };
 
     //Making the output images more viewable
     const scrollableContentStyle = {
@@ -480,7 +446,7 @@ function ClientModal({onClose}: modalProps){
                   variant='contained'
                   onClick={handlePrint}
                   sx={{backgroundColor: '#6DB260' }}>
-                    Print
+                    Download
                 </Button>
                 <Button
                   variant='contained'
