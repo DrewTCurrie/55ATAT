@@ -13,7 +13,7 @@ from reports import reportScheduler
 
 from APIFuncs import utils
 from APIFuncs import MariaDBapi
-from APIFuncs import badgeGenerator
+from APIFuncs import badgeGenerator_v2 as badgeGenerator
 from APIFuncs import auth
 from APIFuncs import messages
 import sys

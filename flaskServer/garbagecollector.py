@@ -31,9 +31,9 @@ def RemoveOldBadges():
         if BadgeArtifact == "BadgeTemplates":
             print("Ignoring badge templates")
         elif BadgeArtifact == "audioFiles":
-            print("Ignoring audioFiles directory. This will be cleaned up in a seperate function.")
+            print("Ignoring audioFiles directory. This will be cleaned up in a separate function.")
         elif BadgeArtifact == ".gitignore":
-            print("Keeping" + BadgeArtifact + "as it is not an artifact of creating a badege and is required for system operation.")
+            print("Keeping" + BadgeArtifact + "as it is not an artifact of creating a badge and is required for system operation.")
         else:
             if os.path.isfile(path+BadgeArtifact):
                 os.remove(path+BadgeArtifact)

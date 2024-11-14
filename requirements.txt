@@ -18,9 +18,10 @@ WTForms==3.1.2
 XlsxWriter==3.2.0
 schedule==1.2.2
 pillow~=10.4.0
-qrcode~=6.1
+qrcode== 7.4
 pydub~=0.25.1
 PyJWT==2.9.0
 flask-jwt-extended==4.6.0
 pydub==0.25.1
 flask-mail~=0.10.0
+numpy==2.1.3
