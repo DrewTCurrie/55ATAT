@@ -1,13 +1,13 @@
-import { Container, Box, Typography, ButtonGroup} from '@mui/material';
-import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
+import { Container, Box, Typography, ButtonGroup, Card} from '@mui/material';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useState, useEffect, useCallback } from 'react'
-import { ColDef, GridSizeChangedEvent, ICellRendererParams } from 'ag-grid-community';
+import { ColDef, ICellRendererParams } from 'ag-grid-community';
 import * as React from 'react';
 import ClientModal from '../components/clientModal';
 import EditAttendee from '../components/editAttendee';
 import DeleteAttendee from '../components/deleteAttendee';
+import Table from '../components/table';
 
 //This tells the table to know what datatypes to expect
 interface IRow {
@@ -19,12 +19,24 @@ interface IRow {
 function Clients() {
   // Column Definitions: Defines the columns to be displayed.
   const [colDefs] = useState<ColDef[]>([
-  { field: "ID" },
-  { field: "Initials" },
-  { field: "Roles" },
+  { field: "ID",
+    filter: true
+   },
+  { field: "Initials",
+    filter: true,
+    minWidth: 120,
+    maxWidth: 120
+   },
+  { field: "Roles",
+    flex: 1,
+    filter: true,
+   },
   { field: "Edit",
     headerName: 'Edit',
-    flex: 1,
+    lockPosition: 'right',
+    minWidth: 80,
+    maxWidth: 80,
+    
     cellRenderer: (params: ICellRendererParams<IRow, number>) => {
       const ID = params.data?.ID ?? "";
       const Initials = params.data?.Initials ?? "";
@@ -33,7 +45,9 @@ function Clients() {
     } 
   },
   { field: "Delete",
-    flex: 1,
+    minWidth: 90,
+    maxWidth: 90,
+    lockPosition: 'right',
     cellRenderer: (params: ICellRendererParams<IRow,number>) => {
       const ID = params.data?.ID ?? "";
       const Initials = params.data?.Initials ?? "";
@@ -66,41 +80,6 @@ useEffect(()=> {
   }
 )
 
-//This function is used to set the size of the table to take as much room as possible, and adjust with window size
-const onGridSizeChanged = useCallback(
-  (params: GridSizeChangedEvent) => {
-    // get the current grids width
-    var gridWidth = document.querySelector(".ag-body-viewport")!.clientWidth;
-    // keep track of which columns to hide/show
-    var columnsToShow = [];
-    var columnsToHide = [];
-    // iterate over all columns (visible or not) and work out
-    // now many columns can fit (based on their minWidth)
-    var totalColsWidth = 0;
-    var allColumns = params.api.getColumns();
-    if (allColumns && allColumns.length > 0) {
-      for (var i = 0; i < allColumns.length; i++) {
-        var column = allColumns[i];
-        totalColsWidth += column.getMinWidth();
-        if (totalColsWidth > gridWidth) {
-          columnsToHide.push(column.getColId());
-        } else {
-          columnsToShow.push(column.getColId());
-        }
-      }
-    }
-    // show/hide columns based on current grid width
-    params.api.setColumnsVisible(columnsToShow, true);
-    params.api.setColumnsVisible(columnsToHide, false);
-    // wait until columns stopped moving and fill out
-    // any available space to ensure there are no gaps
-    window.setTimeout(() => {
-      params.api.sizeColumnsToFit();
-    }, 10);
-  },
-  [window],
-);
-
 //When a modal closes, reload the table.
 const handleModalClose = useCallback(() => {
   fetchRowData();
@@ -108,37 +87,19 @@ const handleModalClose = useCallback(() => {
 
 //Render Page
 return (
-<Container sx={{ display: 'flex', flexDirection: 'column', height: '100vh', minWidth: '100%' }}>
-    <Box sx={{ display: 'flex', p: 1 }}>
+<Container>
+    <Box sx={{ display: 'flex', p: '5px', mt:'7%' }}>
       <Box sx={{ flex: 1}}/>
-      <Box sx={{flex: 1, backgroundColor: 'gray', padding: 2 }}>
+      <Card sx={{ flex: 1, backgroundColor: '#D47554', padding: '2px', mx: '.4rem' }}>
         <Typography variant="h6" color='white'>
-          Clients
+          Attendees
         </Typography>
       <ButtonGroup orientation="vertical" variant='contained'>
         <ClientModal onClose={handleModalClose}/>
       </ButtonGroup>
-      </Box>
+      </Card>
     </Box>
-    <Box
-        sx={{
-          flexGrow: 1,         
-          display: 'flex',     
-          flexDirection: 'column',
-          bgcolor: 'background.paper',
-        }}>
-        <div
-          className="ag-theme-quartz"
-          //TODO: Make webpage take as much screenspace as possible for ease of viewing
-          style={{ height: 750, width: '125vh' }} // the Data Grid will fill the size of the parent container
-        >
-          <AgGridReact
-              rowData={rowData}
-              columnDefs={colDefs}
-              onGridSizeChanged={onGridSizeChanged}
-        />
-        </div>
-    </Box>
+    <Table rowData={rowData} colDefs={colDefs}/>
   </Container>
   );
 }

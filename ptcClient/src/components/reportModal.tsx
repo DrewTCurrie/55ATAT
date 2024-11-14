@@ -1,9 +1,15 @@
-import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, Stack, TextField, Typography } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Fragment, useEffect, useState } from "react";
 import * as React from "react"; 
 import axios from 'axios'
+import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 function ReportModal(){
     //Open React Hook
@@ -13,9 +19,21 @@ function ReportModal(){
       setOpen(true);
     };
     const handleClose = () => {
+      handleAutoCompleteChange('roleAutoComplete', [])
+      handleAutoCompleteChange('nameAutoComplete', [])
+      handleAutoCompleteChange('eventTypeAutoComplete', [])
+      setIsChecked({
+        nameCheckbox: false,
+        roleCheckbox: false,
+        eventTypeCheckBox: false,
+      });
+      setStartDate(dayjs())
+      setEndDate(dayjs())
+      setEventFailed(false)
+      setEventSubmitted(false)
       setOpen(false);
     };
-
+    //Get the Roles in the database, and present them in autocomplete boxes
     const [roles, setRoles] = useState([]);
     const [hasFetchedRoles, setHasFetchedRoles] = useState(false)
     useEffect(()=> {
@@ -32,7 +50,7 @@ function ReportModal(){
         };
         fetchRoles();
     }})
-
+    //Get names (attendee initials) in the database, and present them for choice.
     const [names, setNames] = useState([]);
     const [hasFetchedNames, setHasFetchedNames] = useState(false)
     useEffect(()=> {
@@ -50,14 +68,18 @@ function ReportModal(){
         fetchNames();
     }})
 
+    //Setup the couple attendance event types.
+    const eventTypes = [ 'Present', 'Absent','TIL'];
+
     //Date Hooks
-    const [startDate, setStartDate]=useState(null);
-    const [endDate, setEndDate]=useState(null);
+    const [startDate, setStartDate]=useState(dayjs());
+    const [endDate, setEndDate]=useState(dayjs());
     
     //Checkbox hook, identifies which checkbox then changes it
     const [isChecked, setIsChecked] = useState<{ [key: string]: boolean }>({
       nameCheckbox: false,
       roleCheckbox: false,
+      eventTypeCheckBox: false,
     });
     //Checkbox Handler
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,8 +92,9 @@ function ReportModal(){
 
     //Autocomplete Hook, works the same as the Checkbox, but with different value content.
     const [autoCompleteVal, setAutoCompleteVal] =  useState<{[key: string]: any}>({
-      nameAutoComplete: null,
-      roleAutoComplete: null
+      nameAutoComplete: [],
+      roleAutoComplete: [],
+      eventTypeAutoComplete: [],
     });
     const handleAutoCompleteChange = (name: string, newValue: any) => {
       setAutoCompleteVal((prevState) => ({
@@ -79,22 +102,27 @@ function ReportModal(){
         [name]: newValue,
       }));
     }
-
+    const [loading, setLoading] = useState(false);
+    //Hook to check for event submission
+    const [eventSubmitted, setEventSubmitted] = useState(false)
+    const [eventFailed, setEventFailed] = useState(false)
     const generateReport = async () => {
       //JSON for a quick report, (7 days back)
+      setLoading(true)
       const report = { 
           method: 'POST',
           headers: {'Content-Type': 'application/json',},
           body: JSON.stringify({
             "name": autoCompleteVal.nameAutoComplete,
             "role": autoCompleteVal.roleAutoComplete,
-            "startDate": startDate,
-            "endDate": endDate
+            "eventType": autoCompleteVal.eventTypeAutoComplete,
+            "startDate": startDate.tz("America/Denver").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
+            "endDate": endDate.tz("America/Denver").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]")
           })}
       //Try 
       console.log(report)
       try {
-        const response = await fetch(`/api/generateReport`, report).then(
+        await fetch(`/api/generateReport`, report).then(
           res => res.json()
         ).then(
            data => {
@@ -109,17 +137,24 @@ function ReportModal(){
             })
           }
         );
-        if(!response.ok){
-          throw new Error(`Error: ${response.statusText}`);
-        }  
+        setEventFailed(false)
+        setEventSubmitted(true)
       } catch(e: any){
+        setEventFailed(true)
+        setEventSubmitted(false)
         console.log(e.message);
+      } finally {
+        setLoading(false)
       }
     };
 
     return(
     <Fragment>
-        <Button onClick={handleClickOpen} >Generate Custom Report</Button>
+        <Button variant='contained' sx={{mb: '.2rem', backgroundColor: '#6d9fb2'}} onClick={handleClickOpen} >
+          <Typography variant="body1" color='white'>
+            Generate Custom Report
+          </Typography>
+        </Button>
         <Dialog
           open={open}
           onClose={handleClose}>
@@ -130,6 +165,7 @@ function ReportModal(){
               checked={isChecked.nameCheckbox}
               onChange={handleCheckboxChange}/>
             <Autocomplete 
+              multiple
               key="nameAutoComplete"
               sx={{ width: 300 }}
               options={names} 
@@ -144,6 +180,7 @@ function ReportModal(){
               checked={isChecked.roleCheckbox}
               onChange={handleCheckboxChange}/>
             <Autocomplete
+              multiple
               key="roleAutoComplete" 
               sx={{ width: 300 }}
               options={roles} 
@@ -152,12 +189,27 @@ function ReportModal(){
               value={autoCompleteVal.roleAutoComplete}
               renderInput={(params) => <TextField {...params} label="Role" />}/>
           </Box>
+          <Box display="flex" sx={{mb:'.6rem',mx:'.8rem'}}>
+            <Checkbox 
+              name="eventTypeCheckBox"
+              checked={isChecked.eventTypeCheckBox}
+              onChange={handleCheckboxChange}/>
+            <Autocomplete
+              multiple
+              key="roleAutoComplete" 
+              sx={{ width: 300 }}
+              options={eventTypes} 
+              disabled={!isChecked.eventTypeCheckBox} 
+              onChange={(_name: any, newValue: any) => handleAutoCompleteChange('eventTypeAutoComplete', newValue)}
+              value={autoCompleteVal.eventTypeAutoComplete}
+              renderInput={(params) => <TextField {...params} label="Event Type" />}/>
+          </Box>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker 
                 label="Start Date" 
                 sx={{mb:'.5rem',mx:'.8rem'}}
                 value={startDate}
-                onChange={(newDate: any)=> setStartDate(newDate)}
+                onChange={(newDate: any)=> setStartDate(dayjs(newDate).startOf('day'))}
                 maxDate={endDate}
                 />
             </LocalizationProvider>
@@ -166,14 +218,32 @@ function ReportModal(){
                 label="End Date" 
                 sx={{mb:'.5rem',mx:'.8rem'}} 
                 value={endDate}
-                onChange={(newDate: any)=> setEndDate(newDate)}
+                onChange={(newDate: any)=> setEndDate(dayjs(newDate).endOf('day'))}
                 minDate={startDate}
                 />
             </LocalizationProvider>
-            <Box display="center" sx={{mb:'.5rem'}}>
+            <Stack 
+            direction="row"
+            display="flex" 
+            alignItems="center" 
+            justifyContent="center"
+            spacing={4}
+            sx={{mb:'.6rem',mt:'.4rem',mx:'.4rem'}}>
               <Button 
                 variant='contained'
-                onClick={generateReport}>Submit</Button>
+                onClick={generateReport}
+                sx={{backgroundColor: '#6d9fb2' }}
+                disabled={loading}>
+                  Submit
+                </Button>
+            </Stack>
+            <Box sx={{
+                display: "flex", 
+                alignItems:"center" ,
+                justifyContent:"center",
+            }}>
+            {eventSubmitted ? <Typography color="green">Report Generated Successfully</Typography> : ""}
+            {eventFailed ? <Typography color="red">Report Generated Unsuccessfully</Typography> : ""}
             </Box>
         </Dialog>
     </Fragment>

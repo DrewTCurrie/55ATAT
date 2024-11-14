@@ -2,10 +2,12 @@ import * as React from 'react'
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import { useEffect, useState } from 'react';
-import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Stack, TextField } from '@mui/material';
+import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Slider, Stack, TextField, Typography } from '@mui/material';
+import Cropper, { Area, Point } from 'react-easy-crop';
+import { getCroppedImg } from '../functions/cropUtils';
 interface badgeRespone {
-    front: String,
-    back?: String
+    front: string,
+    back?: string
   }
 
 interface modalProps{
@@ -14,6 +16,15 @@ interface modalProps{
   Initials: string,
   Roles: string | string[]
 }
+
+function readFile(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.addEventListener('load', () => resolve(reader.result as string), false)
+    reader.readAsDataURL(file)
+  })
+}
+
 
  export default function EditAttendee({onClose,ID,Initials,Roles}: modalProps){
     //Handling the open and closing of edit modal
@@ -35,6 +46,7 @@ interface modalProps{
       //Close modal
       setOpen(false);
       setDisplayBadge(false)
+      setImageSrc('')
     }
     //Hook for handling going back from the print screen
     const handleBack = () => {
@@ -86,13 +98,14 @@ interface modalProps{
     * Hook and handler to get file for employee picture
     */
     const [file, setFile] = useState<File>()
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if(file){
         const fileType = file.type;
         if(fileType.startsWith('image/')){
           console.log(file);
-          setFile(file);
+          let imageDataUrl = await readFile(file)
+          setImageSrc(imageDataUrl)
         }
       }
     }
@@ -102,6 +115,8 @@ interface modalProps{
     const [badgeURLs, setBadgeURLs] =  useState<badgeRespone | null>();
     //Calls the backend to get a user's badge
     const loadBadge = async () => {
+        //Attempt to Edit the account prior to regenerating badge.
+        await editAccount()
         //Attempt to generate a badge for the user.
         const badgeDetails = {
             method: 'POST',
@@ -124,26 +139,63 @@ interface modalProps{
             setLoading(false)
       }
     }
+    /**
+     *  Image Cropping Handler
+     * 
+     */
+        const [imageSrc, setImageSrc] = useState<string>('')
+        const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+        const [zoom, setZoom] = useState(1);
+        const [rotation, setRotation] = useState(0)
+        const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+        const [croppedImage, setCroppedImage] = useState<File | null>()
+        const handleCropComplete = (_croppedArea: Area, croppedAreaPixels: Area) => {
+          setCroppedAreaPixels(croppedAreaPixels);
+        };
+    
+        /**
+         * This handles creating the adjusted image for submission
+         */
+        const showCroppedImage = async () => {
+          try {
+            const croppedImage = await getCroppedImg(
+              imageSrc,
+              croppedAreaPixels,
+              rotation
+            )
+            console.log('donee', { croppedImage })
+            setCroppedImage(croppedImage)
+            console.log(croppedImage)
+            return croppedImage
+    
+          } catch (e) {
+            console.error(e)
+            return null
+          }
+        }
+
     /*
     * Account Editing Handler, calls editAccount, then uses the ID to edit an administrator if either is updated
     */
     const editAccount = async () => {
       //Set Loading to True to disable button
       setLoading(true)
-      //Create form data for accountData
-      const accountData = new FormData();
-      accountData.append('id',ID);
-      accountData.append('name',name);
-      accountData.append('roles',JSON.stringify(autoCompleteVal.roleAutoComplete))
-      //Check if a file exists, if true append.
-      if(file){
-        accountData.append('file', file)
-      }
-      const account = {
-        method: 'POST',
-        body: accountData
-      }
       try{
+        //Get Cropped Image
+        const croppedImage = await showCroppedImage(); 
+        //Create form data for accountData
+        const accountData = new FormData();
+        accountData.append('id',ID);
+        accountData.append('name',name);
+        accountData.append('roles',JSON.stringify(autoCompleteVal.roleAutoComplete))
+        //Check if a file exists, if true append.
+        if(croppedImage){
+          accountData.append('file', croppedImage)
+        }
+        const account = {
+          method: 'POST',
+          body: accountData
+        }
         const response = await fetch(`/api/editAccount`,account);
         if (!response.ok) {
           throw new Error('Error creating account');
@@ -175,52 +227,87 @@ interface modalProps{
     * Print handler, will create a new window with only the pictures to print.
     */
     const handlePrint = () => {
-        const printWindow = window.open('','_blank');
-        if(printWindow){
-            printWindow.document.write(`
-            <html>
-                <head>
-                <title>Print</title>
-                </head>
-                <style>
-                @media print {
-                    body {
-                    margin: 0;
-                    padding: 0;
-                    }
-                    .page {
-                    page-break-after: always; /* Ensure each image goes to a new page */
-                    text-align: center;
-                    }
-                    img {
-                    max-width: 100%;
-                    height: 100%;
-                    display: block;
-                    margin: 0 auto;
-                    }
-                }
-                </style>
-                <body>
-                <div class="page">
-                    <img src="${badgeURLs?.front}" alt="Output 1" />
-                </div>
-                ${badgeURLs?.back ? (`
-                <div class="page">
-                    <img src=${badgeURLs.back} alt="Output 2" />
-                </div>
-                `):''}
-                </body>
-            </html>`);
-        printWindow.document.close();
-        printWindow.print();
-        }
-    }
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+          const frontImage = new Image();
+          const backImage = new Image();
+          frontImage.src = badgeURLs?.front || '';
+          backImage.src = badgeURLs?.back || '';
+
+          // Function to handle print when images are loaded
+          const onImagesLoaded = () => {
+              printWindow.document.write(`
+                  <html>
+                      <head>
+                          <title>Print</title>
+                          <style>
+                              @media print {
+                                  body {
+                                      margin: 0;
+                                      padding: 0;
+                                  }
+                                  .page {
+                                      page-break-after: always; /* Ensure each image goes to a new page */
+                                      text-align: center;
+                                  }
+                                  img {
+                                      max-width: 100%;
+                                      height: 100%; /* Maintain aspect ratio */
+                                      display: block;
+                                      margin: 0 auto;
+                                  }
+                              }
+                          </style>
+                      </head>
+                      <body>
+                          <div class="page">
+                              <img src="${frontImage.src}" alt="Output 1" />
+                          </div>
+                          ${badgeURLs?.back ? `
+                          <div class="page">
+                              <img src="${backImage.src}" alt="Output 2" />
+                          </div>
+                          ` : ''}
+                      </body>
+                  </html>
+              `);
+              printWindow.document.close();
+              printWindow.print();
+          };
+
+          // Check if both images are loaded
+          let loadedImagesCount = 0;
+
+          const imageLoadHandler = () => {
+              loadedImagesCount += 1;
+              if (loadedImagesCount === 1 || ( backImage.src && loadedImagesCount === 2)) {
+                onImagesLoaded();
+            }
+          };
+
+          // Add event listeners for image load
+          frontImage.onload = imageLoadHandler;
+          backImage.onload = imageLoadHandler;
+
+          // If the back image is empty (undefined or null), trigger the load handler directly
+          if (!backImage.src) {
+              imageLoadHandler();
+          }
+      }
+  };
     //Making the output images more viewable
-    const scrollableContentStyle: React.CSSProperties = {
-        maxHeight: '400px', // Set a max height for the scrollable area
-        overflowY: 'auto', // Enable vertical scrolling
-        marginBottom: '16px', // Space between images and buttons
-      };
+    const scrollableContentStyle = {
+      display: 'flex', // Use flexbox to align items
+      justifyContent: 'center', // Center images horizontally
+      alignItems: 'center', // Align images vertically
+      overflow: 'hidden', // Prevent scrolling
+    };
+
+    const imageStyle = {
+      maxWidth: '50%', // Each image takes up half the width of the container
+      height: 'auto', // Maintain aspect ratio
+      margin: '0 10px', // Optional: add space between images
+    };
   
 
     return(
@@ -270,6 +357,62 @@ interface modalProps{
                     <Box sx={{alignContent:'left',mb:'.6rem',mx:'.8rem'}}>
                       <label htmlFor="user_image">Upload Your Image:</label>
                     </Box>
+                    {imageSrc && <>
+                      <Box
+                        sx={{
+                          position: "relative",
+                          width: "100%",
+                          height: 300,
+                          background: "#333",
+                        }}
+                      >
+                        <Cropper
+                          image={imageSrc}
+                          crop={crop}
+                          zoom={zoom}
+                          rotation={rotation}
+                          aspect={1}
+                          cropShape="round"
+                          restrictPosition={false}
+                          onCropChange={setCrop}
+                          onZoomChange={setZoom}
+                          onCropComplete={handleCropComplete}
+                          onRotationChange={setRotation}
+                        />
+                      </Box>
+                      <Box>
+                        <Box>
+                          <Typography
+                            variant="overline"
+                          >
+                            Zoom
+                          </Typography>
+                          <Slider
+                            value={zoom}
+                            min={1}
+                            max={3}
+                            step={0.1}
+                            aria-labelledby="Zoom"
+                            onChange={(_e, zoom) => setZoom(zoom as number)}
+                          />
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="overline"
+                          >
+                            Rotation
+                          </Typography>
+                          <Slider
+                            value={rotation}
+                            min={0}
+                            max={360}
+                            step={1}
+                            aria-labelledby="Rotation"
+                            onChange={(_e, rotation) => setRotation(rotation as number)}
+                          />
+                      </Box>
+                      </Box>
+                    </>}
                     <Box sx={{mb:'.6rem',mx:'.8rem'}}>
                       <input 
                       type="file" 
@@ -318,35 +461,38 @@ interface modalProps{
                 alignItems="center" 
                 justifyContent="center"
                 spacing={4}
-                sx={{mb:'.6rem'}}>
+                sx={{mb:'.6rem', mx: '.2rem' }}>
                     <Button
                     variant='contained'
                     color='success'
                     disabled={loading}
-                    onClick={loadBadge}>
+                    onClick={loadBadge}
+                    sx={{backgroundColor: '#6DB260' }}>
                         Regenerate Badge
                     </Button>
                     <Button 
-                    variant='outlined'
+                    variant='contained'
                     disabled={loading}
-                    onClick={editAccount}>
+                    onClick={editAccount}
+                    sx={{backgroundColor: '#6d9fb2' }}>
                         {!loading ? 'Submit Edit' : 'Loading'}
                     </Button>
                     <Button
                     variant='contained'
                     onClick={() => {handleClose(); onClose()}}
-                    disabled={loading}>
+                    disabled={loading}
+                    sx={{backgroundColor: '#e59999' }}>
                         Close
                     </Button>
                 </Stack>
             </Grid2>
             </>): 
             <Grid2>
-              <div //Image Content
+              <Box //Image Content
               style={scrollableContentStyle}>
                 {badgeURLs?.front ? (
                   <> 
-                    <img src={`${badgeURLs.front}`} //Change to production evniroment name for flask server eventually
+                    <img src={`${badgeURLs.front}?${new Date().getTime()}`} style={imageStyle}
                     />
                   </>
                 ):(
@@ -355,13 +501,13 @@ interface modalProps{
                 {badgeURLs?.back ? (
                   <>
                     <img 
-                    src={`${badgeURLs.back}`}  //Change to production evniroment name for flask server eventually 
+                    src={`${badgeURLs.back}?${new Date().getTime()}`} style={imageStyle}
                     />
                   </>
                 ):(
                   <></>
                 )} 
-              </div>
+              </Box>
               <Stack 
                 direction="row"
                 display="flex" 
@@ -371,20 +517,23 @@ interface modalProps{
                 sx={{mb:'.6rem'}}>
                 <Button 
                 variant='outlined'
-                onClick={handlePrint}>
+                onClick={handlePrint}
+                sx={{backgroundColor: '#6DB260' }}>
                     Print
                 </Button>
                 <Button
                 variant='contained'
                 onClick={handleBack}
-                disabled={loading}>
+                disabled={loading}
+                sx={{backgroundColor: '#6d9fb2' }}>
                 Back
                 </Button>
                 <Button
                 variant='contained'
                 color='error'
                 onClick={() => {handleClose(); onClose()}}
-                disabled={loading}>
+                disabled={loading}
+                sx={{backgroundColor: '#e59999' }}>
                   Close
                 </Button>
               </Stack>

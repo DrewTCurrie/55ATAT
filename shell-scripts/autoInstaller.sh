@@ -9,7 +9,7 @@ MARIADEV="libmariadb-dev"
 PIP="python3-pip"
 PYTHON="python3"
 VENV="virtualenv"
-
+FFMPEG="ffmpeg"
 
 #Check for new updates on github incase there is a change between 
 #clone and install
@@ -47,6 +47,8 @@ printf "Checking for $MARIA dependancies\n\r"
 checkPackage $MARIACONNECTOR
 checkPackage $MARIADEV
 
+printf "Checking for $FFMPEG"
+checkPackage $FFMPEG
 #Check for python3 and python3-pip required for data management backend. 
 #Pip will be used to automatically install the required packages and specific 
 #version of the packages needed to run the python API. Virtual env is needed 

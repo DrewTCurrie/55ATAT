@@ -1,5 +1,4 @@
-import { Container, Box, Typography, Button, ButtonGroup} from '@mui/material';
-import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
+import { Container, Box, Typography, Button, ButtonGroup, Card, Stack} from '@mui/material';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useCallback, useEffect, useState } from 'react'
@@ -10,9 +9,10 @@ import axios from 'axios';
 import NewEvent from '../components/newEventModal';
 import DeleteEvent from '../components/deleteEvent';
 import EditEvent from '../components/editEvent';
+import Table from '../components/table';
 
 
-interface IRow {
+export interface IRow {
   EventID: string,
   ID: string,
   Initials: string,
@@ -33,17 +33,31 @@ function Events() {
         hide: true
        },
       { field: "Initials",
-        flex: 1
+        filter: true,
+        minWidth: 120,
+        maxWidth: 120
        },
       { field: "Timestamp",
-        flex: 4,
-        // cellRenderer: (params: ICellRendererParams<IRow,number>) => {
-        //   const date = new Date(params.data?.Timestamp ?? "")
-        //   return date;
-        // }
+        sort: "desc",
+        cellRenderer: (params: ICellRendererParams<IRow,number>) => {
+          const date = new Date(params.data?.Timestamp ?? "")
+          return date.toLocaleString();
+        }
        },
-      { field: "Absent",
+      { field: "Comment",
         flex: 1,
+        wrapText: true,
+        autoHeight: true,
+        cellRenderer: (params: ICellRendererParams<IRow, number>) => {
+          if(params.data?.Comment === "N/A"){
+            return '';
+          } else {
+            return params.data?.Comment;
+          }
+        }
+      },
+      { field: "Absent",
+        maxWidth: 90,
         cellRenderer: (params: ICellRendererParams<IRow, number>) => {
           if (params.data?.Absent === false) {
             return <Typography sx={{my:'.3rem'}}>No</Typography>;
@@ -54,7 +68,7 @@ function Events() {
       },
       { field: "TIL_Violation",
         headerName: 'TIL',
-        flex: 1,
+        maxWidth: 80,
         cellRenderer: (params: ICellRendererParams<IRow, number>) => {
           if (params.data?.TIL_Violation === false) {
             return <Typography sx={{my:'.3rem'}}>No</Typography>;
@@ -65,7 +79,8 @@ function Events() {
       },
       { field: "Edit",
         headerName: 'Edit',
-        flex: 1,
+        minWidth: 80,
+        maxWidth: 80,
         cellRenderer: (params: ICellRendererParams<IRow, number>) => {
           const EventID = params.data?.EventID ?? ""; 
           const Initials = params.data?.Initials ?? "";
@@ -78,7 +93,8 @@ function Events() {
         } 
       },
       { field: "Delete",
-        flex: 1,
+        minWidth: 90,
+        maxWidth: 90,
         cellRenderer: (params: ICellRendererParams<IRow,number>) => {
           const EventID = params.data?.EventID ?? "";
           const Initials = params.data?.Initials ?? "";
@@ -87,9 +103,6 @@ function Events() {
         }
       },
       { field: "AdminInitials",
-        hide: true
-      },
-      { field: "Comment",
         hide: true
       }
     ]);
@@ -117,9 +130,10 @@ function Events() {
         };
       }
     )
-
+    const [loading, setLoading] = useState(false)
     const generateQuickReport = async () => {
       //JSON for a quick report, (7 days back), Python will autofill information.
+      setLoading(true)
       const quickReport = { 
           method: 'POST',
           headers: {'Content-Type': 'application/json',},
@@ -131,7 +145,7 @@ function Events() {
       //Try 
       console.log(quickReport)
       try {
-        const response = await fetch(`/api/generateReport`, quickReport,).then(
+        await fetch(`/api/generateReport`, quickReport,).then(
           res => res.json()
         ).then(
            data => {
@@ -148,6 +162,8 @@ function Events() {
         );
       } catch(e: any){
         console.log(e.message);
+      } finally {
+        setLoading(false)
       }
     };
 
@@ -157,18 +173,33 @@ function Events() {
     },[]);
     
     return (
-      <Container sx={{display: 'block', height: '100vh', width: '175vh'}}>
-          <Box sx={{ display: 'flex', p: 1 }}>
-            <Box sx={{ flex: 1}}/>
-            <Box sx={{flex: 1, backgroundColor: 'gray', padding: 2 }}>
+      <Container>
+          <Box sx={{ display: 'flex', p: '5px', mt: '7%'}}>
+            <Card sx={{ flex: 1, backgroundColor: '#D47554', padding: '2px', mx: '.4rem' }}>
+              <Typography variant="h6" color='white'>
+                New Event
+              </Typography>
+              <ButtonGroup orientation="vertical" variant='contained'>
+                <NewEvent onClose={handleModalClose}/>
+              </ButtonGroup>
+            </Card>
+            <Card sx={{flex: 1, backgroundColor: '#D47554', padding: '2px', mx: '.4rem' }}>
               <Typography variant="h6" color='white'>
                 Reports
               </Typography>
-            <ButtonGroup orientation="vertical" variant='contained'>
-              <Button sx={{marginBottom:.5}} onClick={generateQuickReport}>Generate Quick Report (1 Week)</Button>
+            <Stack 
+            direction="column"
+            display="flex" 
+            alignItems="center" 
+            justifyContent="center">
+              <Button variant='contained' sx={{mb: '.2rem', backgroundColor: '#6d9fb2'}} onClick={generateQuickReport}>
+                <Typography variant="body1" color='white'>
+                Generate Quick Report (1 Week)
+                </Typography>
+              </Button>
               <ReportModal/>
-            </ButtonGroup>
-            </Box>
+            </Stack>
+            </Card>
           </Box>
           <Box
               sx={{
@@ -176,16 +207,7 @@ function Events() {
                 flexGrow: 1,
                 bgcolor: 'background.paper',
               }}>
-              <div
-                className="ag-theme-quartz"
-                style={{ height: 750, width: '125vh' }} // the Data Grid will fill the size of the parent container
-              >
-                <AgGridReact
-                    rowData={rowData}
-                    columnDefs={colDefs}
-              />
-              </div>
-              <NewEvent onClose={handleModalClose}></NewEvent>
+              <Table rowData={rowData} colDefs={colDefs}/>
           </Box>
         </Container>
       );

@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Checkbox, Dialog, DialogTitle, FormControlLabel, Grid2, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, Card, Checkbox, Dialog, DialogTitle, FormControlLabel, Grid2, IconButton, Stack, TextField, Typography } from '@mui/material';
 import * as React from 'react';
 import AddIcon from '@mui/icons-material/Add'
 import { useEffect, useState } from 'react';
@@ -7,6 +7,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import { useAuth } from '../functions/AuthProvider';
 
 interface modalProps{
     onClose: () => void;
@@ -36,6 +37,7 @@ export default function NewEvent({onClose}:modalProps){
         onClose();
         //Close modal and reset submission
         setEventSubmitted(false);
+        setEventFailed(false)
         setOpen(false);
     }
     //Hook for selecting a user name from autocomplete
@@ -89,15 +91,16 @@ export default function NewEvent({onClose}:modalProps){
         };
         fetchNames();
     }})
-    
+    //Initialize authProvider as auth for Admin Initials
+    const auth = useAuth();
     /**
     * Event Creation handler, this calls createEvent with appropriate information.
     */
     //Hook for handling the modal loading (waiting for input)
     const [loading, setLoading] = useState(false);
-
     //Hook to check for event submission
     const [eventSubmitted, setEventSubmitted] = useState(false)
+    const [eventFailed, setEventFailed] = useState(false)
     const createEvent = async () => {
         //Set Loading to True to disable button
         setLoading(true)
@@ -110,7 +113,8 @@ export default function NewEvent({onClose}:modalProps){
                 date: date.tz("America/Denver").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
                 tail: isChecked.tailCheckbox,
                 absence: isChecked.absentCheckbox,
-                comment: comment
+                comment: comment,
+                adminInitials:(isChecked.tailCheckbox || isChecked.absentCheckbox) && auth?.adminInitials ? auth?.adminInitials : 'N/A'
             })
         }
         //try catch to query backend
@@ -120,9 +124,12 @@ export default function NewEvent({onClose}:modalProps){
               throw new Error('Error creating event');
             } else {
                 setEventSubmitted(true)
+                setEventFailed(false)
                 setLoading(false)
             }
         } catch(e){
+            setEventFailed(true)
+            setEventSubmitted(false)
             console.error("Error creating event",e)
             setLoading(false)
         }
@@ -133,18 +140,19 @@ export default function NewEvent({onClose}:modalProps){
             display="flex" 
             alignItems="center" 
             sx={{
-                maxWidth: '8rem',
-                border: '1px solid blue',
-                padding: '8px',            
-                borderRadius: '4px'        
-              }}>
-            <IconButton 
-                color="primary"
-                onClick={handleClickOpen}
-                aria-label='new attendance event'>
+                width: '100%',
+                backgroundColor: 'primary.main',          
+                borderRadius: '4px',
+                cursor: 'pointer', // Change cursor to pointer
+                '&:hover': {
+                    backgroundColor: 'primary.dark', // Change color on hover if desired
+                },        
+              }}
+              >
+            <Button onClick={handleClickOpen} sx={{backgroundColor: '#6d9fb2'}}>
                 <AddIcon />
                 <Typography variant="body1">New Event</Typography>
-            </IconButton>
+            </Button>
         </Box>
         <Dialog
         open={open}
@@ -211,18 +219,28 @@ export default function NewEvent({onClose}:modalProps){
             spacing={4}
             sx={{mb:'.6rem',mt:'.4rem',mx:'.4rem'}}>
                 <Button 
-                    variant='outlined'
+                    variant='contained'
+                    sx={{backgroundColor: '#6d9fb2' }}
                     disabled={loading || eventSubmitted}
                     onClick={createEvent}>
-                        {loading ? 'Loading' : eventSubmitted ? 'Event Created Successfully' : 'Submit Event'}
+                        {loading ? 'Loading' : 'Submit Event'}
                 </Button>
                 <Button
                     variant='contained'
                     onClick={() => {handleClose(); onClose()}}
-                    disabled={loading}>
+                    disabled={loading}
+                    sx={{backgroundColor: '#E59999'}}>
                         Close
                 </Button>
             </Stack>
+            <Box sx={{
+                display: "flex", 
+                alignItems:"center" ,
+                justifyContent:"center",
+            }}>
+            {eventSubmitted ? <Typography color="green">Event Submitted Successfully</Typography> : ""}
+            {eventFailed ? <Typography color="red">Event Submitted Unsuccessfully</Typography> : ""}
+            </Box>
         </Dialog>
         </>
     )

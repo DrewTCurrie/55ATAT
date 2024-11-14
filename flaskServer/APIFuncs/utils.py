@@ -10,12 +10,13 @@ import collections
 import json
 
 import sqlalchemy.cyextension
+from APIFuncs import auth
 from APIFuncs import MariaDBapi as api
 from APIFuncs import JSONHandler as jsonhandler
 import sqlalchemy
 from sqlalchemy import delete, select, inspect
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta
 import random
 from sqlalchemy.ext.declarative import declarative_base
 import sys
@@ -52,6 +53,23 @@ def getAllUserInitials():
     results = json.dumps([r[0] for r in query])
     return results
 
+def getAllAttendeeInitialsAndIDs():
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #query for all attendees in the attendee table
+    query = Session.query(api.Attendee).all()
+    # Creating results by parsing each entry into JSON
+    attendeeList = []
+    for row in query:
+        attendeeList.append({
+            'ID': row.ID,
+            'Initials': row.AttendeeInitials,
+        })
+    Session.close()
+    return attendeeList
 
 def getRoles():
     # Create Sql Alchemy Session
@@ -66,7 +84,16 @@ def getRoles():
 
     return role_columns
 
-
+def getEmployeeRoles():
+    # Create Sql Alchemy Session
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    # Get all columns
+    columns = inspect(api.Attendee).columns
+    #Parse columns for "Employee"
+    employee_columns = [col.name for col in columns if 'Employee' in col.name]
+    return employee_columns
 def NewAttendanceEvent(UserID):
     # Take User ID and create an attendance event in the "CurrentAttendanceEvents" table 
     # This function is generally going to be called by the Attendee Interface Sub-System 
@@ -90,6 +117,8 @@ def NewAttendanceEvent(UserID):
 
     # Call get Initials function to find the user intials based on the UserID passed in
     UserInitials = GetUserInitials(UserID, NAESession)
+    if(UserInitials == 400):
+        return False
 
     #Get a Date and convert it to the right timezone.
     date = datetime.now()
@@ -101,6 +130,8 @@ def NewAttendanceEvent(UserID):
     # If it suceeds, close the session and return 200 for success. 
     NAESession.add(NewAttendanceEvent)
     NAESession.commit()
+    NAESession.close()
+    return True
 
     #try:
     #   NAESession.add(NewAttendanceEvent)
@@ -255,7 +286,7 @@ def createAdministrator(AdministratorJSON):
     NewAdministrator = api.Administrator(
         ID=AdministratorJSON['ID'],
         UserName=AdministratorJSON['username'],
-        Password=AdministratorJSON['password']  #TODO: Create a function that encrypts + salts this, outside of utils.py
+        Password=auth.encrypt(AdministratorJSON['password'])
     )
     #Add to DB
     NASession.add(NewAdministrator)
@@ -275,13 +306,13 @@ def editAdministrator(editAdministratorJSON):
         if editAdministratorJSON['UserName']:
             admin.UserName = editAdministratorJSON['UserName']
         if editAdministratorJSON['Password']:
-            admin.Password = editAdministratorJSON['Password']
+            admin.Password = auth.encrypt(editAdministratorJSON['Password'])
     else:
         #This shouldn't be happening, as the attendee has to exist in the database to be displayed, but create a new attendee if that is the case
         newAdmin = api.Administrator(
             ID=editAdministratorJSON['ID'],
             UserName=editAdministratorJSON['UserName'],
-            Password=editAdministratorJSON['Password']
+            Password=auth.encrypt(editAdministratorJSON['Password'])
         )
         Session.add(newAdmin)
     Session.commit()
@@ -315,6 +346,17 @@ def getAttendee(AttendeeID):
     Session.close()
     return query
 
+def getIDFromAdministrator(username):
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    #Query for attendee from administrator
+    query = Session.query(api.Administrator).filter_by(UserName=username).first()
+    Session.close()
+    return query.ID
+
 
 #Returns all attendees and data from the database.
 def getAllAttendees():
@@ -327,24 +369,36 @@ def getAllAttendees():
     query = Session.query(api.Attendee).all()
     # Creating results by parsing each entry into JSON
     attendeeList = []
+    # Get role list
+    roles = getRoles()
     for row in query:
         attendeeList.append({
             'ID': row.ID,
             'Initials': row.AttendeeInitials,
-            'Roles': getAttendeeRole(row.ID)
+            'Roles': [col for col in roles if getattr(row, col) is True]
         })
     Session.close()
     return attendeeList
 
+def getIDfromInitials(AttendeeInitials):
+    # Create Sqlalchemy Session
+    api.Base.metadata.create_all(api.engine)
+    Session = sqlalchemy.orm.sessionmaker()
+    Session.configure(bind=api.engine)
+    Session = Session()
+    query = Session.query(api.Attendee).filter_by(AttendeeInitials=AttendeeInitials).first()
+    Session.close()
+    return query.ID
 
-def getEvents(numEvents):
+
+def getLastWeekOfEvents():
     # Create Sqlalchemy Session
     api.Base.metadata.create_all(api.engine)
     Session = sqlalchemy.orm.sessionmaker()
     Session.configure(bind=api.engine)
     Session = Session()
     #Query for last numEvents from the database
-    query = Session.query(api.AttendanceEvent).order_by(api.AttendanceEvent.Timestamp.desc()).limit(numEvents).all()
+    query = Session.query(api.AttendanceEvent).filter(api.AttendanceEvent.Timestamp >= datetime.now() - timedelta(days=7)).all()
     #Put query data into dictionary to be returned as JSON to webpage
     eventList = []
     for row in query:
@@ -394,7 +448,7 @@ def createEventFromWeb(eventData):
         Timestamp=date,
         Absent=eventData.get('absence'),
         TIL_Violation=eventData.get('tail'),
-        AdminInitials="N/A",  #TODO: Unimplemented, will be added with log.
+        AdminInitials=eventData.get('adminInitials'),
         Comment=eventData.get('comment'))
 
     #Add NewAttendanceEvent to the database.
@@ -432,7 +486,7 @@ def editEvent(eventData):
         eventToEdit.Timestamp = date
         eventToEdit.Absent = eventData.get('absence')
         eventToEdit.TIL_Violation = eventData.get('tail')
-        eventToEdit.AdminInitials = "N/A"
+        eventToEdit.AdminInitials = eventData.get('adminInitials')
         eventToEdit.Comment = eventData.get('comment')
     else:
         editedEvent = api.AttendanceEvent(
@@ -442,7 +496,7 @@ def editEvent(eventData):
             Timestamp=date,
             Absent=eventData.get('absence'),
             TIL_Violation=eventData.get('tail'),
-            AdminInitials="N/A",
+            AdminInitials=eventData.get('adminInitials'),
             Comment=eventData.get('comment')
         )
         Session.add(editedEvent)

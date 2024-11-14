@@ -12,9 +12,9 @@ from APIFuncs import utils
 # Helper function to generate a QR code, generates QR code based on ID so that it remains the same if needing to be regenerated.
 def generate_qr_code(userID, filename):
     ptclogo = Image.open(
-        os.path.join('flaskServer', 'static', 'ptclogo.png'))  #TODO: add ptclogo to center of QR code.
+        os.path.join('flaskServer', 'static', 'BadgeTemplates', 'Logo.png')).convert("RGBA")
     qr = qrcode.QRCode(
-        version=1,
+        version=2,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
         box_size=10,
         border=4,
@@ -22,7 +22,27 @@ def generate_qr_code(userID, filename):
     qr.add_data(userID)
     qr.make(fit=True)
 
-    img = qr.make_image(fill='black', back_color='white')
+    img = qr.make_image(fill='black', back_color='white').convert('RGBA')
+
+    # Resize the logo to fit in the center of the QR code
+    qr_width, qr_height = img.size
+    logo_size = 50
+    xmin = ymin = int((qr_width / 2) - (logo_size / 2))
+    xmax = ymax = int((qr_width / 2) + (logo_size / 2))
+    ptclogo = ptclogo.resize((xmax-xmin, ymax-ymin))
+    # Create a rectangular mask
+    mask = Image.new("L", ptclogo.size, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.rectangle((0, 0, ptclogo.size[0]+4, ptclogo.size[1]+6), fill=255)
+
+    # Create a new image for ptclogo with a white background
+    white_background = Image.new("RGBA", ptclogo.size, "white")  # White background
+    white_background.paste(ptclogo, (0, 0), ptclogo)  # Use ptclogo as the mask
+    white_background.putalpha(mask)
+
+    logo_position = ((qr_width - ptclogo.size[0]) // 2, (qr_height - ptclogo.size[1]) // 2)
+    img.paste(white_background, logo_position, white_background)
+
     img.save(filename)
 
 
@@ -30,7 +50,7 @@ def generate_qr_code(userID, filename):
 def add_text_to_image(img_path, text, output_path, position, font_size=50):
     img = Image.open(img_path).convert("RGBA")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("APIFuncs/Arial.ttf", font_size)
+    font = ImageFont.truetype("flaskServer/APIFuncs/Arial.ttf", font_size)
     # Split the text into multiple lines
     lines = text.split('\n')
     y = position[1]
@@ -60,7 +80,8 @@ def embed_user_image(base_img_path, user_img_path, output_path, user_img_size, u
 def generate_badge(userID):
     #Query User Details:
     attendeeInfo = utils.getAttendee(userID)
-    if attendeeInfo.Employee | attendeeInfo.Administrator:
+    employeeRoles = utils.getEmployeeRoles()
+    if any(getattr(attendeeInfo, col, False) is True for col in employeeRoles) or attendeeInfo.Administrator:
         address = "1091 Stoneridge Dr, Bozeman, MT 59718"
         phone = "(406)-624-6599"
         initials = attendeeInfo.AttendeeInitials
@@ -71,7 +92,7 @@ def generate_badge(userID):
         formatted_phone = f"Phone: {phone}"
 
         # Add name, "Employee", phone, and address to EmployeeFront
-        front_img_path = os.path.join('flaskServer', 'static', 'EmployeeFront.png')
+        front_img_path = os.path.join('flaskServer', 'static', 'BadgeTemplates', 'Template_EmployeeFront.png')
         front_output_path = os.path.join('flaskServer', 'static', 'EmployeeFrontWithDetails.png')
         add_text_to_image(
             front_img_path,
@@ -85,7 +106,7 @@ def generate_badge(userID):
         if os.path.isfile(os.path.join('flaskServer', 'profileImage', f'{userID}.png')):
             user_image_path = os.path.join('flaskServer', 'profileImage', f'{userID}.png')
         else:
-            user_image_path = os.path.join('flaskServer', 'static', 'ptclogo.png')
+            user_image_path = os.path.join('flaskServer', 'static', 'BadgeTemplates', 'Template_ptclogo.png')
         embed_user_image(front_output_path, user_image_path, front_output_path, user_img_size=(360, 360),
                          user_img_position=(114, 165))
 
@@ -95,7 +116,7 @@ def generate_badge(userID):
         generate_qr_code(qr_data, qr_filename)
 
         # Combine QR code with EmployeeBack and add details
-        back_img_path = os.path.join('flaskServer', 'static', 'EmployeeBack.png')
+        back_img_path = os.path.join('flaskServer', 'static', 'BadgeTemplates', 'Template_EmployeeBack.png')
         back_output_path = os.path.join('flaskServer', 'static', 'EmployeeBackWithQR.png')
         back_img = Image.open(back_img_path).convert("RGBA")
         qr_img = Image.open(qr_filename).resize((400, 400))
@@ -115,7 +136,7 @@ def generate_badge(userID):
         formatted_service = "\n".join(service_lines)
 
         # Add initials and service details to NonEmployeeFront
-        front_img_path = os.path.join('flaskServer', 'static', 'NonEmployeeFront.png')
+        front_img_path = os.path.join('flaskServer', 'static', 'BadgeTemplates',  'Template_NonEmployeeFront.png')
         front_output_path = os.path.join('flaskServer', 'static', 'NonEmployeeFrontWithDetails.png')
 
         add_text_to_image(
@@ -142,4 +163,4 @@ def generate_badge(userID):
 
 
 if __name__ == '__main__':
-    generate_badge('PTCBZN-14740603386')
+    generate_badge('PTCBZN-10099262496')
