@@ -6,6 +6,7 @@ from flask import Flask, Blueprint, render_template, send_from_directory, reques
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, JWTManager
 
+from reports import generateArchivalReport
 from reports import generateReport
 #Used only for SPD Testing now:
 from reports import reportScheduler
@@ -88,6 +89,18 @@ def generate_report():
         time.sleep(1)
     return make_response("Error: File not found", 404)
 
+
+@app.route('/api/generateArchivalReport', methods=['GET', 'POST'])
+def generate_archive_report():
+    filename = generateArchivalReport.generate_spreadsheet()
+    # Checking if file exists for a minute before throwing an error.
+    start_time = time.time()
+    while time.time() - start_time < 60:
+        if os.path.isfile('flaskServer/xlsx/' + filename):
+            print('found file')
+            return make_response(jsonify(filename), 200)
+        time.sleep(1)
+    return make_response("Error: File not found", 404)
 
 @app.route('/api/download/<path:filename>', methods=['GET', 'POST'])
 def download_file(filename):
