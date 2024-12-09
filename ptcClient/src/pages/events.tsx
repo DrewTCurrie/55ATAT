@@ -167,6 +167,31 @@ function Events() {
       }
     };
 
+    const generateArchivalReport = async () => {
+        setLoading(true)
+        try{
+          await fetch(`/api/generateArchivalReport`).then(
+            res => res.json()
+          ).then(
+            data => {
+              axios.get(`/api/download/${data}`,{responseType: 'blob'}
+              ).then((downloadRes) => {
+                const url = window.URL.createObjectURL(new Blob([downloadRes.data]));
+                const link = document.createElement('a');
+                link.href=url;
+                link.setAttribute('download',`${data}`);
+                document.body.appendChild(link);
+                link.click();
+              })
+            }
+          )
+        } catch(e: any){
+          console.log(e.message);
+        } finally {
+          setLoading(false)
+        }
+    }
+
     //When a modal closes, reload the table.
     const handleModalClose = useCallback(() => {
       fetchRowData();
@@ -198,6 +223,11 @@ function Events() {
                 </Typography>
               </Button>
               <ReportModal/>
+              <Button variant='contained' sx={{mb: '.2rem', backgroundColor: '#E59999'}} onClick={generateArchivalReport}>
+                <Typography variant="body1" color='white'>
+                Generate Archival Report
+                </Typography>
+              </Button>
             </Stack>
             </Card>
           </Box>

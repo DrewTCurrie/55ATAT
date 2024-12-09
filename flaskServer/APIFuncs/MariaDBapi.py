@@ -47,7 +47,7 @@ class ArchivalEvent(Base):
       AttendeeInitials = sqlalchemy.Column(sqlalchemy.String(length=256))
       Timestamp = sqlalchemy.Column(sqlalchemy.TIMESTAMP, default=datetime.now())
       Absent = sqlalchemy.Column(sqlalchemy.Boolean, default = False)
-      TIL_Violation = sqlalchemy.Column(sqlalchemy.Integer, default = 0)
+      TIL_Violation = sqlalchemy.Column(sqlalchemy.Integer, default = False)
       AdminInitials = sqlalchemy.Column(sqlalchemy.String(length=256))
       Comment = sqlalchemy.Column(sqlalchemy.String(length=256))
 
