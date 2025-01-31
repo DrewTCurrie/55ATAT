@@ -35,7 +35,7 @@ function ClientModal(){
       if(open && !hasFetchedRoles) {
         const fetchRoles = async () => {
           try {
-            const response = await fetch(`http://localhost:5000/api/getRoles`);
+            const response = await fetch(`/api/getRoles`);
             const data = await response.json();
             setRoles(data);
             setHasFetchedRoles(true)
@@ -104,7 +104,7 @@ function ClientModal(){
       }
       //Attempt to create an Account
       try {
-        const response = await fetch(`http://localhost:5000/api/createAccount`, account)
+        const response = await fetch(`/api/createAccount`, account)
         if (!response.ok) {
           throw new Error('Error creating account');
         }
