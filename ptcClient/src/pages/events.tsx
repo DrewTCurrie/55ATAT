@@ -157,7 +157,7 @@ function Events() {
     },[]);
     
     return (
-      <Container sx={{display: 'block', height: '100vh', width: '85vh'}}>
+      <Container sx={{display: 'block', height: '100vh', width: '175vh'}}>
           <Box sx={{ display: 'flex', p: 1 }}>
             <Box sx={{ flex: 1}}/>
             <Box sx={{flex: 1, backgroundColor: 'gray', padding: 2 }}>
@@ -178,7 +178,7 @@ function Events() {
               }}>
               <div
                 className="ag-theme-quartz"
-                style={{ height: 500, width: '80vh' }} // the Data Grid will fill the size of the parent container
+                style={{ height: 750, width: '125vh' }} // the Data Grid will fill the size of the parent container
               >
                 <AgGridReact
                     rowData={rowData}
