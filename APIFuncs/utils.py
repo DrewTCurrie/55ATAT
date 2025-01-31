@@ -423,7 +423,7 @@ def editEvent(eventData):
         date = datetime.strptime(eventData.get('date'), "%Y-%m-%dT%H:%M:%S.%fZ")
 
     #Query Database for Event, overwrite entry
-    eventToEdit = Session.query(api.AttendanceEvent).filter_by(EventUUID=eventData.get('eventid')).first()
+    eventToEdit = Session.query(api.AttendanceEvent).filter_by(EventUUID=uuid.UUID(eventData.get('eventid'))).first()
     if eventToEdit:
         eventToEdit.ID = attendeeID
         eventToEdit.Initials = initials
@@ -455,7 +455,7 @@ def deleteEvent(EventID):
     Session.configure(bind=api.engine)
     Session = Session()
     # Query for attendance Events with input eventID
-    query = Session.query(api.AttendanceEvent).filter_by(EventUUID=EventID).first()
+    query = Session.query(api.AttendanceEvent).filter_by(EventUUID=uuid.UUID(EventID)).first()
     # Delete query result
     if query is not None:
         Session.delete(query)
