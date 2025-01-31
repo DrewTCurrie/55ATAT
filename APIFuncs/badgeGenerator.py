@@ -6,7 +6,7 @@ import qrcode
 from PIL import Image, ImageDraw, ImageFont
 from flask import render_template, jsonify, url_for
 
-import utils
+from APIFuncs import utils
 
 
 # Helper function to generate a QR code, generates QR code based on ID so that it remains the same if needing to be regenerated.
@@ -60,7 +60,7 @@ def embed_user_image(base_img_path, user_img_path, output_path, user_img_size, u
 def generate_badge(userID):
     #Query User Details:
     attendeeInfo = utils.getAttendee(userID)
-    if attendeeInfo.Employee:
+    if attendeeInfo.Employee | attendeeInfo.Administrator:
         address = "1091 Stoneridge Dr, Bozeman, MT 59718"
         phone = "(406)-624-6599"
         initials = attendeeInfo.AttendeeInitials

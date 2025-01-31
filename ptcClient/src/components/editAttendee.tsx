@@ -1,24 +1,32 @@
-import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Stack, TextField } from "@mui/material";
-import { Fragment, useEffect, useState } from "react";
-import * as React from "react";
-
-//Interface so modals know what to expect from the badgeURLs.
+import * as React from 'react'
+import EditIcon from '@mui/icons-material/Edit';
+import IconButton from '@mui/material/IconButton';
+import { useEffect, useState } from 'react';
+import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, Stack, TextField } from '@mui/material';
 interface badgeRespone {
-  front: String,
-  back?: String
+    front: String,
+    back?: String
+  }
+
+interface modalProps{
+  onClose: () => void;
+  ID: string,
+  Initials: string,
+  Roles: string | string[]
 }
 
-interface modalProps {
-  onClose: () => void,
-}
-
-function ClientModal({onClose}: modalProps){
-  //handling the opening and closing of the modal.
+ export default function EditAttendee({onClose,ID,Initials,Roles}: modalProps){
+    //Handling the open and closing of edit modal
     const [open, setOpen] = useState(false);
     const handleClickOpen = () => {
+      //Autofill details from the table
+      handleAutoCompleteChange('roleAutoComplete',Roles)
+      setName(Initials)
       setOpen(true);
     };
     const handleClose = () => {
+      //Refresh Table
+      onClose()
       //Clear all values in form
       setName('')
       setUsername('')
@@ -27,7 +35,11 @@ function ClientModal({onClose}: modalProps){
       //Close modal
       setOpen(false);
       setDisplayBadge(false)
-    };
+    }
+    //Hook for handling going back from the print screen
+    const handleBack = () => {
+        setDisplayBadge(false);
+    }
 
     //Hook for handling the modal loading (waiting for input)
     const [loading, setLoading] = useState(false);
@@ -49,10 +61,6 @@ function ClientModal({onClose}: modalProps){
         };
         fetchRoles(); 
     }})
-
-    //Hook for displaying Badges after generation
-    const [displayBadge, setDisplayBadge] = useState(false);
-    const [badgeURLs, setBadgeURLs] =  useState<badgeRespone | null>();
 
     //Hooks for name, username, pwd (if administrator). Usestate with string input.
     const [name, setName] = useState('')
@@ -88,14 +96,43 @@ function ClientModal({onClose}: modalProps){
         }
       }
     }
+
+    //Hooks for handling badge displaying
+    const [displayBadge, setDisplayBadge] = useState(false);
+    const [badgeURLs, setBadgeURLs] =  useState<badgeRespone | null>();
+    //Calls the backend to get a user's badge
+    const loadBadge = async () => {
+        //Attempt to generate a badge for the user.
+        const badgeDetails = {
+            method: 'POST',
+            headers: {'Content-Type':'application/json',},
+            body: JSON.stringify({
+                "userID": ID
+        })
+        }
+        try{
+            const badgeResponse = await fetch(`/api/generateBadge`,badgeDetails)
+            if (!badgeResponse.ok) {
+            throw new Error('Error creating User Badge');
+            }
+            const data = await badgeResponse.json();
+            setBadgeURLs(data);
+            setDisplayBadge(true);
+            setLoading(false);
+        } catch(e){
+            console.error("Error creating account", e);
+            setLoading(false)
+      }
+    }
     /*
-     * Account Creation Handler, calls createAccount, then uses the ID to create an administrator and a badge
-     */
-    const createAccount = async () => {
+    * Account Editing Handler, calls editAccount, then uses the ID to edit an administrator if either is updated
+    */
+    const editAccount = async () => {
       //Set Loading to True to disable button
       setLoading(true)
       //Create form data for accountData
       const accountData = new FormData();
+      accountData.append('id',ID);
       accountData.append('name',name);
       accountData.append('roles',JSON.stringify(autoCompleteVal.roleAutoComplete))
       //Check if a file exists, if true append.
@@ -106,114 +143,100 @@ function ClientModal({onClose}: modalProps){
         method: 'POST',
         body: accountData
       }
-      //Attempt to create an Account
-      try {
-        const response = await fetch(`/api/createAccount`, account)
+      try{
+        const response = await fetch(`/api/editAccount`,account);
         if (!response.ok) {
           throw new Error('Error creating account');
         }
-        let userID = await response.text();
-        userID = userID.trim().replace(/^"(.*)"$/, '$1');
-        //If the user account is an administrator, attempt to create an administrator
+        //If the user account is an administrator, attempt to edit the administrator
         if(autoCompleteVal.roleAutoComplete.includes('Administrator')){
           const adminAccount = {
             method: 'POST',
             headers: {'Content-Type':'application/json',},
             body: JSON.stringify({
-              "adminID": userID,
+              "adminID": ID,
               "username": username,
               "password": pwd
             })
           }
-          const adminResponse = await fetch(`http://localhost:5000/api/createAdmin`,adminAccount)
+          const adminResponse = await fetch(`/api/editAdmin`,adminAccount)
           if (!adminResponse.ok) {
             throw new Error('Error creating Administrator Account');
           }
         }
-        //Attempt to generate a badge for the user.
-        const badgeDetails = {
-          method: 'POST',
-          headers: {'Content-Type':'application/json',},
-          body: JSON.stringify({
-            "userID": userID
-          })
-        }
-        const badgeResponse = await fetch(`http://localhost:5000/api/generateBadge`,badgeDetails)
-        if (!badgeResponse.ok) {
-          throw new Error('Error creating User Badge');
-        }
-        const data = await badgeResponse.json();
-        setBadgeURLs(data);
-        setDisplayBadge(true);
         setLoading(false);
       } catch(e){
-        console.error("Error creating account", e);
+        console.error("Error editing account", e);
         setLoading(false)
       }
-    };
+    }
 
     /*
     * Print handler, will create a new window with only the pictures to print.
     */
     const handlePrint = () => {
-      const printWindow = window.open('','_blank');
-      if(printWindow){
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Print</title>
-            </head>
-            <style>
-              @media print {
-                body {
-                  margin: 0;
-                  padding: 0;
+        const printWindow = window.open('','_blank');
+        if(printWindow){
+            printWindow.document.write(`
+            <html>
+                <head>
+                <title>Print</title>
+                </head>
+                <style>
+                @media print {
+                    body {
+                    margin: 0;
+                    padding: 0;
+                    }
+                    .page {
+                    page-break-after: always; /* Ensure each image goes to a new page */
+                    text-align: center;
+                    }
+                    img {
+                    max-width: 100%;
+                    height: 100%;
+                    display: block;
+                    margin: 0 auto;
+                    }
                 }
-                .page {
-                  page-break-after: always; /* Ensure each image goes to a new page */
-                  text-align: center;
-                }
-                img {
-                  max-width: 100%;
-                  height: 100%;
-                  display: block;
-                  margin: 0 auto;
-                }
-              }
-            </style>
-            <body>
-              <div class="page">
-                <img src="http://localhost:5000${badgeURLs?.front}" alt="Output 1" />
-              </div>
-              ${badgeURLs?.back ? (`
-              <div class="page">
-                <img src=http://localhost:5000${badgeURLs.back} alt="Output 2" />
-              </div>
-              `):''}
-            </body>
-          </html>`);
-      printWindow.document.close();
-      printWindow.print();
-      }
+                </style>
+                <body>
+                <div class="page">
+                    <img src="http://localhost:5000${badgeURLs?.front}" alt="Output 1" />
+                </div>
+                ${badgeURLs?.back ? (`
+                <div class="page">
+                    <img src=http://localhost:5000${badgeURLs.back} alt="Output 2" />
+                </div>
+                `):''}
+                </body>
+            </html>`);
+        printWindow.document.close();
+        printWindow.print();
+        }
     }
-
     //Making the output images more viewable
     const scrollableContentStyle: React.CSSProperties = {
-      maxHeight: '400px', // Set a max height for the scrollable area
-      overflowY: 'auto', // Enable vertical scrolling
-      marginBottom: '16px', // Space between images and buttons
-    };
+        maxHeight: '400px', // Set a max height for the scrollable area
+        overflowY: 'auto', // Enable vertical scrolling
+        marginBottom: '16px', // Space between images and buttons
+      };
+  
 
     return(
-    <Fragment>
-        <Button onClick={handleClickOpen} >Create New Account </Button>
-        <Dialog
-            open={open}
-            onClose={handleClose}>
-            <DialogTitle align="center">Create New Account</DialogTitle>
-            {!displayBadge ? //CHeck if displayBadge is ready, then display badge.
-            <Grid2>
-              <Grid2
+        <>
+            <IconButton 
+                onClick={handleClickOpen}
+                aria-label='edit'>
+                <EditIcon/>
+            </IconButton>
+            <Dialog
+                open={open}
+                onClose={handleClose}>
+                <DialogTitle align='center'>Edit Account</DialogTitle>
+            {!displayBadge ? ( 
+            <>
+            <Grid2
                 display="flex" 
                 flexDirection="column" 
                 alignItems="center" 
@@ -280,28 +303,44 @@ function ClientModal({onClose}: modalProps){
                 </>
                 )}
               </Grid2>
-              <Stack 
+            <Grid2>
+                <Grid2
+                display="flex" 
+                flexDirection="column" 
+                alignItems="center" 
+                justifyContent="center"
+                sx={{ minWidth: 300 }}>
+                    
+                </Grid2>
+                <Stack 
                 direction="row"
                 display="flex" 
                 alignItems="center" 
                 justifyContent="center"
                 spacing={4}
                 sx={{mb:'.6rem'}}>
-                <Button 
-                  variant='outlined'
-                  onClick={createAccount}
-                  disabled={loading}>
-                  {!loading ? 'Submit' : 'Loading'}
-                </Button>
-                <Button
-                  variant='contained'
-                  onClick={() => {handleClose(); onClose()}}
-                  disabled={loading}>
-                  Close
-                </Button>
-              </Stack>
-            </Grid2> 
-            : // BEGIN OTHER TERNARY
+                    <Button
+                    variant='contained'
+                    color='success'
+                    disabled={loading}
+                    onClick={loadBadge}>
+                        Regenerate Badge
+                    </Button>
+                    <Button 
+                    variant='outlined'
+                    disabled={loading}
+                    onClick={editAccount}>
+                        {!loading ? 'Submit Edit' : 'Loading'}
+                    </Button>
+                    <Button
+                    variant='contained'
+                    onClick={() => {handleClose(); onClose()}}
+                    disabled={loading}>
+                        Close
+                    </Button>
+                </Stack>
+            </Grid2>
+            </>): 
             <Grid2>
               <div //Image Content
               style={scrollableContentStyle}>
@@ -331,22 +370,27 @@ function ClientModal({onClose}: modalProps){
                 spacing={4}
                 sx={{mb:'.6rem'}}>
                 <Button 
-                  variant='outlined'
-                  onClick={handlePrint}>
+                variant='outlined'
+                onClick={handlePrint}>
                     Print
                 </Button>
                 <Button
-                  variant='contained'
-                  onClick={() => {handleClose(); onClose()}}
-                  disabled={loading}>
+                variant='contained'
+                onClick={handleBack}
+                disabled={loading}>
+                Back
+                </Button>
+                <Button
+                variant='contained'
+                color='error'
+                onClick={() => {handleClose(); onClose()}}
+                disabled={loading}>
                   Close
                 </Button>
               </Stack>
             </Grid2>
-            } 
-
-        </Dialog>
-    </Fragment>
+            }
+            </Dialog>
+        </>
     )
 }
-export default ClientModal

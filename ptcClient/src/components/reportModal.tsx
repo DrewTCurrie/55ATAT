@@ -111,7 +111,7 @@ function ReportModal(){
         );
         if(!response.ok){
           throw new Error(`Error: ${response.statusText}`);
-        }
+        }  
       } catch(e: any){
         console.log(e.message);
       }
