@@ -76,7 +76,7 @@ def NewAttendanceEvent(UserID):
 
     #Take user ID from QR code as function input
     #Generate UUID for the EventID
-    EventID = random.randint(100000000, 999999999)
+    EventID = uuid.uuid4()
 
     #Query Database to get the Attendee Initials for the corresponding UserID
     # Open new session to the database.
@@ -380,10 +380,10 @@ def createEventFromWeb(eventData):
         date = datetime.strptime(eventData.get('date'), "%Y-%m-%dT%H:%M:%S.%fZ")
 
     #Create a UUID for the event
-    EventID = random.randint(100000000, 999999999)
+    EventID = uuid.uuid4()
     #Create attendance event object
     newEvent = api.AttendanceEvent(
-        EventUUID=int(EventID),
+        EventUUID=EventID,
         ID=attendeeID,
         AttendeeInitials=initials,
         Timestamp=date,
