@@ -8,17 +8,18 @@ import os
 import time
 #Scheduling library
 import schedule
+#Need threading for schedules
+from threading import Thread
 app = Flask(__name__)
 CORS(app)
 
 sys.path.append(os.path.join(sys.path[0], '/xlsx'))
 
-#---------Scheduled Processes-----------------------------------------------------------------------------
-
-schedule.every().day.at("17:00").do(reportScheduler.CheckReportsSchedule)
-
-
-
+#--Schedule funciton. Needs to stay in the main flask app ----------------------------------------------
+def ScheduleManager():
+    while 1: 
+        schedule.run_pending()
+        time.sleep(60)
 
 #----------Web Routes ------------------------------------------------------------------------------------
 @app.route('/api/generateReport', methods=['GET', 'POST'])
@@ -63,4 +64,14 @@ def index():
 
 if __name__ == '__main__':
     print("Flask Server started from app.py")
+    #---------Scheduled Processes-----------------------------------------------------------------------------
+    schedule.every().day.at("17:00").do(reportScheduler.CheckReportsSchedule)
+    #schedule.every(60).seconds.do(reportScheduler.CheckReportsSchedule)
+    
+    #This may not be the most effecient way to run this code however I cannot find a more effecient way to run 
+    #python code on a monthly basis. This seems to work but it does require a thread that is running that is basically
+    #just polling the current date/time every 15 minutes to see if it is the correct time to generate a report
+    #It is more effecient than the original polling of like every second
+    ScheduleMangerThread = Thread(target=reportScheduler.ScheduleManager)
+    ScheduleMangerThread.start()
     app.run(host='0.0.0.0', port=5000, debug=False)

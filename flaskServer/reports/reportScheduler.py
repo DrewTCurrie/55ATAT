@@ -9,8 +9,9 @@
 
 
 #Libraries used:
-from datetime import datetime, timedelta, calendar, date
-import sys
+from datetime import datetime, timedelta, date
+import calendar
+import sys, time
 from reports import generateReport
 #Add to system path the directory of the API Functions to access the utilities functions
 sys.path.insert(0, '/home/drew/Documents/capstone/55ATAT/APIFuncs')
@@ -20,7 +21,7 @@ import utils
 
 def CheckReportsSchedule():
     print("Checking if reports need generated today")
-    today = datetime.date.today()
+    today = datetime.today()
     #Check if today is the last day of the month
     #Maps the days of the current month in the current year to an index, with 1 being the last day of the month
     #If today is equal to the last day of the month create a report
@@ -29,7 +30,7 @@ def CheckReportsSchedule():
          monthly_reports()
     #Check if today is friday
     #Maps the days of the week on Monday = 0 through Sunday = 6
-
+    time.sleep(60)
     if date.today().weekday() == 4:
          #If it is Friday create the weekly report
          weekly_reports()
@@ -49,7 +50,9 @@ def weekly_reports():
 
 def monthly_reports():
     print("Montly report generation called.")
+    fileName = generateReport.generate_spreadsheet(start_date=(datetime.now() - timedelta(weeks= 1)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+    print(fileName)
+    
 if __name__ == '__main__':
-        sys.exit(weekly_reports())
-        fileName = generateReport.generate_spreadsheet(start_date=(datetime.now() - timedelta(weeks= 1)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
-        print(fileName)
+        sys.exit(CheckReportsSchedule())
+ 
