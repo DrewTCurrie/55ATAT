@@ -19,7 +19,7 @@ sys.path.append(os.path.join(sys.path[0], '/xlsx'))
 def ScheduleManager():
     while 1: 
         schedule.run_pending()
-        time.sleep(60)
+        time.sleep(5)
 
 #----------Web Routes ------------------------------------------------------------------------------------
 @app.route('/api/generateReport', methods=['GET', 'POST'])
@@ -72,6 +72,6 @@ if __name__ == '__main__':
     #python code on a monthly basis. This seems to work but it does require a thread that is running that is basically
     #just polling the current date/time every 15 minutes to see if it is the correct time to generate a report
     #It is more effecient than the original polling of like every second
-    ScheduleMangerThread = Thread(target=reportScheduler.ScheduleManager)
+    ScheduleMangerThread = Thread(target=ScheduleManager)
     ScheduleMangerThread.start()
     app.run(host='0.0.0.0', port=5000, debug=False)
