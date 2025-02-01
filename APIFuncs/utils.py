@@ -198,6 +198,31 @@ def ClearAttendeeRecords():
         CTSession.commit()
         CTSession.close()
 
+def ArchiveAttedanceRecords():
+    api.Base.metadata.create_all(api.engine)
+    #MTSession = Migrate Table Session
+    CTSession = sqlalchemy.orm.sessionmaker()
+    CTSession.configure(bind=api.engine)
+    CTSession = CTSession()
+    for ID in CTSession.query(api.AttendanceEvent.EventUUID).distinct():
+        Record = CTSession.query(api.AttendanceEvent).get(ID)
+        ArchivalRecord = api.ArchivalEvent(EventUUID = Record.EventUUID,ID=Record.ID, AttendeeInitials=Record.AttendeeInitials, Timestamp=Record.Timestamp, Absent=Record.Absent, TIL_Violation=Record.TIL_Violation, AdminInitials=Record.AdminInitials, Comment=Record.Comment)    
+        CTSession.add(ArchivalRecord)
+    CTSession.commit()
+    CTSession.close()
+
+def ClearArchivalAttendanceRecords():
+    #CTSession = Clear Table Session
+    api.Base.metadata.create_all(api.engine)
+    CTSession = sqlalchemy.orm.sessionmaker()
+    CTSession.configure(bind=api.engine)
+    CTSession = CTSession()
+    for ID in CTSession.query(api.ArchivalEvent.EventUUID).distinct():
+        Record = CTSession.query(api.ArchivalEvent).get(ID)
+        CTSession.delete(Record)
+    CTSession.commit()
+    CTSession.close()
+
 def ClearAttendanceRecords():
         #CTSession = Clear Table Session
         api.Base.metadata.create_all(api.engine)
